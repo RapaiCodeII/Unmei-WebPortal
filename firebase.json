@@ -1,0 +1,79 @@
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "**/*.md"
+    ],
+    "rewrites": [
+      {
+        "source": "/",
+        "destination": "/UNMEIwebsite/index.html"
+      },
+      {
+        "source": "/index.html",
+        "destination": "/UNMEIwebsite/index.html"
+      },
+      {
+        "source": "/register",
+        "destination": "/UNMEIwebsite/register/index.html"
+      },
+      {
+        "source": "/register/**",
+        "destination": "/UNMEIwebsite/register/index.html"
+      },
+      {
+        "source": "/student-login",
+        "destination": "/UNMEIstudentsportal/login.html"
+      },
+      {
+        "source": "/student-login/**",
+        "destination": "/UNMEIstudentsportal/login.html"
+      },
+      {
+        "source": "/admin-login",
+        "destination": "/UNMEIadminportal/admin-login.html"
+      },
+      {
+        "source": "/admin-login/**",
+        "destination": "/UNMEIadminportal/admin-login.html"
+      },
+      {
+        "source": "/instructor-login",
+        "destination": "/UNMEIinstructorportal/instructor-login.html"
+      },
+      {
+        "source": "/instructor-login/**",
+        "destination": "/UNMEIinstructorportal/instructor-login.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(js|css)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=31536000, immutable"
+          }
+        ]
+      },
+      {
+        "source": "**/*.@(html)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      }
+    ]
+  },
+  "database": {
+    "rules": "database.rules.json"
+  }
+}

@@ -1,0 +1,176 @@
+/* === UNMEI Portal CTAs for the website replica === */
+/* Pre-Enroll and Student Login buttons added to the original site header.
+   Design follows the site's own button language: 2px radius, Open Sans
+   button typography (same as the hero buttons), UNMEI red #fd534d. */
+
+li.menu-item-unmei-cta,
+li.menu-item-unmei-login {
+    display: flex;
+    align-items: center;
+}
+
+li.menu-item-unmei-cta {
+    margin-left: 10px;
+}
+
+li.menu-item-unmei-login {
+    margin-left: 6px;
+}
+
+a.menu-link.unmei-nav-cta,
+a.menu-link.unmei-nav-login {
+    /* Astra menu links carry line-height:80px and flex-stretch (full header
+       height) which turns the buttons into full-height boxes — reset to true
+       button metrics with specificity that beats the theme. */
+    line-height: 1.2 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    align-self: center !important;
+    font-family: 'Open Sans', 'Source Sans Pro', sans-serif;
+    font-size: 15px;
+    border-radius: 2px;
+    text-decoration: none;
+    box-shadow: none;
+}
+
+a.menu-link.unmei-nav-cta {
+    background: #fd534d;
+    color: #ffffff !important;
+    padding: 9px 20px;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+a.menu-link.unmei-nav-cta:hover,
+a.menu-link.unmei-nav-cta:focus {
+    background: #e13a34;
+    color: #ffffff !important;
+}
+
+a.menu-link.unmei-nav-login {
+    background: #ffffff;
+    color: #1e3a5f !important;
+    border: 1px solid #1e3a5f;
+    padding: 8px 18px;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+a.menu-link.unmei-nav-login:hover,
+a.menu-link.unmei-nav-login:focus {
+    background: #f3f4f6;
+    color: #1e3a5f !important;
+}
+
+/* Mobile dropdown versions */
+li.menu-item-unmei-cta.ast-mobile-menu-items,
+li.menu-item-unmei-login.ast-mobile-menu-items {
+    display: block;
+    margin-top: 10px;
+}
+
+li.menu-item-unmei-login.ast-mobile-menu-items {
+    margin-top: 6px;
+}
+
+a.menu-link.unmei-mobile-cta,
+a.menu-link.unmei-mobile-login {
+    display: block;
+    line-height: 1.2;
+    height: auto;
+    font-family: 'Open Sans', 'Source Sans Pro', sans-serif;
+    font-size: 15px;
+    border-radius: 2px;
+    text-align: center;
+    text-decoration: none;
+}
+
+#ast-hf-mobile-menu li.menu-item-unmei-cta,
+#ast-hf-mobile-menu li.menu-item-unmei-login {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    width: 100%;
+    margin-left: 0;
+}
+
+#ast-hf-mobile-menu a.menu-link.unmei-mobile-cta,
+#ast-hf-mobile-menu a.menu-link.unmei-mobile-login {
+    box-sizing: border-box;
+    width: calc(100% - 32px);
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+#ast-hf-mobile-menu a.menu-link.unmei-mobile-cta {
+    background: #fd534d;
+    color: #000000 !important;
+    padding: 12px 16px;
+    font-weight: 600;
+    display: block;
+    opacity: 1;
+}
+
+#ast-hf-mobile-menu a.menu-link.unmei-mobile-cta:hover,
+#ast-hf-mobile-menu a.menu-link.unmei-mobile-cta:focus {
+    background: #e13a34 !important;
+    color: #000000 !important;
+}
+
+#ast-hf-mobile-menu a.menu-link.unmei-mobile-login {
+    background: #ffffff;
+    color: #1e3a5f !important;
+    border: 1px solid #1e3a5f;
+    padding: 11px 16px;
+    font-weight: 600;
+    display: block;
+}
+
+@media (max-width: 921.99px) {
+    li.menu-item-unmei-cta,
+    li.menu-item-unmei-login {
+        margin-left: 0;
+    }
+}
+
+/* === In-page Pre-Enroll banner (index after hero, Contact page body) === */
+.unmei-preenroll-band {
+    background: #fdf2f2;
+    border-top: 1px solid #f6d8d7;
+    border-bottom: 1px solid #f6d8d7;
+    padding: 26px 20px;
+    text-align: center;
+    font-family: 'Open Sans', 'Source Sans Pro', sans-serif;
+}
+
+.unmei-preenroll-band .unmei-preenroll-title {
+    margin: 0 0 4px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e3a5f;
+}
+
+.unmei-preenroll-band .unmei-preenroll-sub {
+    margin: 0 0 14px;
+    font-size: 14px;
+    color: #555555;
+}
+
+a.menu-link.unmei-preenroll-btn {
+    display: inline-block;
+    background: #fd534d;
+    color: #ffffff !important;
+    padding: 11px 28px;
+    border-radius: 2px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+a.menu-link.unmei-preenroll-btn:hover,
+a.menu-link.unmei-preenroll-btn:focus {
+    background: #e13a34;
+    color: #ffffff !important;
+}

@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unmei Nihongo Center - Announcements</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="studentportal.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="assets/iconify-icon.min.js"></script>
+<script src="assets/unmei-icons.js"></script>
+</head>
+<body>
+  <script src="session-guard.js"></script>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="brand-logo">
+        <img src="assets/logo.png" alt="UNMEI" style="width:40px;height:40px;object-fit:contain;">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UNMEI</span>
+        <span class="brand-portal">STUDENT PORTAL</span>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <p class="nav-section-label">OVERVIEW</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="dashboard.html" class="nav-link">
+          <iconify-icon icon="mdi:view-dashboard"></iconify-icon>
+          Dashboard</a></li>
+        <li class="nav-item"><a href="profile.html" class="nav-link">
+          <iconify-icon icon="mdi:account-outline"></iconify-icon>
+          My Profile</a></li>
+        <li class="nav-item"><a href="courses.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+          My Courses</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">RECORDS</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="payments.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+          Payments</a></li>
+        <li class="nav-item"><a href="app-download.html" class="nav-link">
+          <iconify-icon icon="mdi:download-outline"></iconify-icon>
+          App Download</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">STUDENT LIFE</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="schedules.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+          Schedules</a></li>
+        <li class="nav-item nav-item--active"><a href="announcements.html" class="nav-link">
+          <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+          Announcements</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">PORTAL SETTINGS</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="settings.html" class="nav-link">
+          <iconify-icon icon="mdi:cog-outline"></iconify-icon>
+          Settings</a></li>
+        <li class="nav-item"><a href="javascript:void(0)" onclick="if(window.__studentSignOut){window.__studentSignOut();}else{location.href='settings.html';}" class="nav-link">
+          <iconify-icon icon="mdi:logout"></iconify-icon>
+          Sign Out</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar__user">
+      <div id="sidebarAvatarText" class="user-avatar user-avatar--dark">--</div>
+      <img id="sidebarAvatarImg" class="user-avatar user-avatar--img" style="display:none;width:36px;height:36px;border-radius:50%;object-fit:cover;" alt="Avatar">
+      <div class="user-meta">
+        <span class="user-name" id="sidebarUserName">Student</span>
+        <span class="user-role">Student</span>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="main-wrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="sidebar-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
+        <div class="topbar__left">
+        <h2 class="topbar__title">Announcements</h2>
+        <nav class="breadcrumb">
+          <a href="dashboard.html" class="breadcrumb__link">Home</a>
+          <span class="breadcrumb__sep">/</span>
+          <a href="dashboard.html" class="breadcrumb__link">Dashboard</a>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current">Announcements</span>
+        </nav>
+      </div>
+      <div class="topbar__center"></div>
+      <div class="topbar__right">
+        <!-- Notification Bell -->
+        <div style="position: relative;">
+          <button class="icon-btn" id="notifBtn" onclick="toggleDropdown('notifDropdown')">
+            <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+            <span class="dropdown-badge" id="notifBadge" style="display: none;">0</span>
+          </button>
+          <div class="header-dropdown" id="notifDropdown">
+            <div class="header-dropdown__header">
+              <span class="header-dropdown__title">Notifications</span>
+              <span class="header-dropdown__link" onclick="markAllRead()">Mark all read</span>
+            </div>
+            <div class="header-dropdown__list" id="notifList">
+              <div class="header-dropdown__empty" id="notifEmpty">
+                <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+                <p>No notifications yet</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div style="position: relative;">
+          <button class="icon-btn" id="msgBtn" onclick="toggleDropdown('msgDropdown')">
+            <iconify-icon icon="mdi:email-outline"></iconify-icon>
+            <span class="dropdown-badge" id="msgBadge" style="display: none;">0</span>
+          </button>
+          <div class="header-dropdown" id="msgDropdown">
+            <div class="header-dropdown__header">
+              <span class="header-dropdown__title">Messages</span>
+              <span class="header-dropdown__link" onclick="viewAllMessages()">View all</span>
+            </div>
+            <div class="header-dropdown__list" id="msgList">
+              <div class="header-dropdown__empty" id="msgEmpty">
+                <iconify-icon icon="mdi:email-outline"></iconify-icon>
+                <p>No messages</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="topbar__user">
+          <div id="headerAvatarText" class="user-avatar user-avatar--red">--</div>
+          <img id="headerAvatarImg" class="user-avatar user-avatar--img" style="display:none;width:36px;height:36px;border-radius:50%;object-fit:cover;" alt="Avatar">
+          <div class="user-meta">
+            <span class="user-name" id="headerUserName">Student</span>
+            <span class="user-role">Student</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content">
+
+      <!-- Search + Filter Bar -->
+      <div class="ann-toolbar">
+        <div class="ann-search">
+          <iconify-icon icon="mdi:magnify"></iconify-icon>
+          <input type="text" id="annSearch" placeholder="Search" oninput="filterAnnouncements()" />
+        </div>
+        <div class="ann-filter">
+          <button class="filter-btn filter-btn--active" data-filter="all" onclick="setFilter('all', this)">All Topics</button>
+          <button class="filter-btn" data-filter="High Priority" onclick="setFilter('High Priority', this)">High Priority</button>
+          <button class="filter-btn" data-filter="Account Notice" onclick="setFilter('Account Notice', this)">Account Notice</button>
+          <button class="filter-btn" data-filter="Academic Update" onclick="setFilter('Academic Update', this)">Academic Update</button>
+        </div>
+      </div>
+
+      <!-- Announcements List -->
+      <div class="ann-list" id="annList">
+      </div>
+
+      <!-- Empty state -->
+      <div class="ann-empty" id="annEmpty" style="display:none;">
+        <iconify-icon icon="mdi:information-outline"></iconify-icon>
+        <p>No announcements found.</p>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    const database = firebase.database();
+    const VALID_TS_MIN = 946684800000; // Jan 1, 2000
+    const ONBOARDING_ID = 'system-onboarding-get-started';
+
+    let activeFilter = 'all';
+    let currentStudentUid = '';
+    let currentEnrollment = {};
+    let currentProfile = {};
+    let announcementItems = [];
+    let announcementStateMap = {};
+    let studentProfileRef = null;
+    let announcementStateRef = null;
+    let announcementsRef = null;
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getInitials(name) {
+      return (name || 'Student').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'ST';
+    }
+
+    function setUserIdentity(profile) {
+      const fullName = (profile && profile.fullName) || 'Student';
+      document.getElementById('sidebarUserName').textContent = fullName;
+      document.getElementById('headerUserName').textContent = fullName;
+      const initials = getInitials(fullName);
+      document.getElementById('sidebarAvatarText').textContent = initials;
+      document.getElementById('headerAvatarText').textContent = initials;
+    }
+
+    function setFilter(tag, btn) {
+      activeFilter = tag;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('filter-btn--active'));
+      btn.classList.add('filter-btn--active');
+      filterAnnouncements();
+    }
+
+    function escapeJsSingle(value) {
+      return String(value || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
+    function toTimestamp(value) {
+      if (typeof value === 'number' && Number.isFinite(value)) return value;
+      if (typeof value === 'string') {
+        const trimmed = value.trim();
+        if (!trimmed) return 0;
+        const numeric = Number(trimmed);
+        if (Number.isFinite(numeric)) return numeric;
+        const parsed = Date.parse(trimmed);
+        return Number.isFinite(parsed) ? parsed : 0;
+      }
+      return 0;
+    }
+
+    function resolveAnnouncementTimestamp(announcement) {
+      const candidates = [
+        announcement.createdAt,
+        announcement.updatedAt,
+        announcement.publishedAt,
+        announcement.postedAt,
+        announcement.timestamp,
+        announcement.date
+      ];
+
+      for (let i = 0; i < candidates.length; i++) {
+        const ts = toTimestamp(candidates[i]);
+        if (ts >= VALID_TS_MIN) {
+          return ts;
+        }
+      }
+
+      return 0;
+    }
+
+    function formatAnnouncementDateParts(timestamp) {
+      if (!timestamp || timestamp < VALID_TS_MIN) {
+        return {
+          month: 'NO DATE',
+          year: '--'
+        };
+      }
+
+      const dateObj = new Date(timestamp);
+      return {
+        month: dateObj.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' }).toUpperCase(),
+        year: String(dateObj.getFullYear())
+      };
+    }
+
+    function resolveAnnouncementPresentation(announcement) {
+      const priority = String(announcement.priority || '').toLowerCase();
+      const category = String(announcement.category || '').toLowerCase();
+      const isHigh = priority === 'high' || priority === 'urgent' || category === 'high';
+
+      if (isHigh) {
+        return {
+          tag: 'High Priority',
+          iconClass: 'ann-icon--red',
+          tagClass: 'ann-tag--red'
+        };
+      }
+
+      if (category === 'general' || category === 'account') {
+        return {
+          tag: 'Account Notice',
+          iconClass: 'ann-icon--blue',
+          tagClass: 'ann-tag--blue'
+        };
+      }
+
+      return {
+        tag: 'Academic Update',
+        iconClass: 'ann-icon--green',
+        tagClass: 'ann-tag--green'
+      };
+    }
+
+    function normalizeAnnouncementRecord(id, announcement, options) {
+      const details = resolveAnnouncementPresentation(announcement || {});
+      const timestamp = resolveAnnouncementTimestamp(announcement || {});
+      const dateParts = formatAnnouncementDateParts(timestamp);
+      const safeOptions = options || {};
+
+      return {
+        id: id,
+        title: String((announcement && announcement.title) || 'Announcement').trim() || 'Announcement',
+        message: String((announcement && announcement.message) || '').trim(),
+        tag: details.tag,
+        iconClass: details.iconClass,
+        tagClass: details.tagClass,
+        monthStr: dateParts.month,
+        yearStr: dateParts.year,
+        timestamp: timestamp,
+        onboarding: !!safeOptions.onboarding,
+        source: safeOptions.source || 'database'
+      };
+    }
+
+    // Demo/sample announcements (announcement_seed_*) are showcase content for the
+    // built-in demo accounts (student_001..student_030). Real registered students
+    // only receive the welcome notice plus announcements genuinely posted by admins.
+    function isDemoStudentAccount() {
+      return /^student_\d+$/.test(String(currentStudentUid || ''));
+    }
+
+    function isSeedAnnouncementKey(key) {
+      return String(key || '').indexOf('announcement_seed_') === 0;
+    }
+
+    function shouldShowForStudent(announcement) {
+      const activeValue = announcement ? announcement.active : true;
+      const inactive = activeValue === false || String(activeValue).toLowerCase() === 'false';
+      if (inactive) return false;
+
+      const audience = String((announcement && announcement.targetAudience) || 'all').trim().toLowerCase();
+      if (!audience || audience === 'all' || audience === 'students' || audience === 'all students' || audience === 'all_registered_students') {
+        return true;
+      }
+
+      if (audience === 'instructors') {
+        return false;
+      }
+
+      if (audience === 'section') {
+        const sectionId = String((announcement && announcement.targetSectionId) || '').trim();
+        if (!sectionId) return true;
+        return String(currentEnrollment.sectionId || '') === sectionId;
+      }
+
+      if (audience === 'course') {
+        const targetCourse = String((announcement && announcement.targetCourse) || '').trim();
+        if (!targetCourse) return true;
+        return String(currentEnrollment.courseId || '') === targetCourse;
+      }
+
+      return true;
+    }
+
+    function buildOnboardingAnnouncement() {
+      const walkthroughDone = localStorage.getItem('unmei_walkthrough_done') === 'true';
+      const profileCreatedAt = toTimestamp(currentProfile.createdAt || currentProfile.registeredAt || currentProfile.dateCreated || currentProfile.updatedAt);
+      const newlyRegistered = profileCreatedAt >= VALID_TS_MIN && (Date.now() - profileCreatedAt) <= (14 * 24 * 60 * 60 * 1000);
+
+      if (!newlyRegistered && walkthroughDone) {
+        return null;
+      }
+
+      return normalizeAnnouncementRecord(
+        ONBOARDING_ID,
+        {
+          title: 'Welcome to Unmei Student Portal',
+          message: 'Get started with your dashboard walkthrough so you can quickly access courses, schedules, profile, payments, and announcements.',
+          category: 'general',
+          priority: 'normal',
+          createdAt: profileCreatedAt || Date.now(),
+          active: true
+        },
+        {
+          onboarding: true,
+          source: 'system'
+        }
+      );
+    }
+
+    function getVisibleAnnouncements() {
+      const visible = announcementItems.filter(function(item) {
+        const state = announcementStateMap[item.id] || {};
+        return state.deleted !== true;
+      });
+
+      const onboardingItem = buildOnboardingAnnouncement();
+      if (onboardingItem) {
+        const onboardingState = announcementStateMap[ONBOARDING_ID] || {};
+        if (onboardingState.deleted !== true) {
+          visible.unshift(onboardingItem);
+        }
+      }
+
+      visible.sort(function(a, b) {
+        if (a.timestamp === b.timestamp) {
+          return b.id.localeCompare(a.id);
+        }
+        return b.timestamp - a.timestamp;
+      });
+
+      return visible;
+    }
+
+    function renderAnnouncements() {
+      const list = document.getElementById('annList');
+      const visibleItems = getVisibleAnnouncements();
+
+      if (!visibleItems.length) {
+        list.innerHTML = '';
+        document.getElementById('annEmpty').style.display = 'flex';
+        return;
+      }
+
+      let html = '';
+      visibleItems.forEach(function(item) {
+        const state = announcementStateMap[item.id] || {};
+        const isRead = state.read === true;
+        const readClass = isRead ? 'ann-card--read' : 'ann-card--unread';
+        const readLabel = isRead ? 'Read' : 'Unread';
+        const readLabelClass = isRead ? 'ann-read-badge--read' : 'ann-read-badge--unread';
+        const readActionLabel = isRead ? 'Mark as Unread' : 'Mark as Read';
+        const safeId = escapeJsSingle(item.id);
+
+        const isNewUserOnboarding = localStorage.getItem('isNewUserOnboarding') === 'true';
+        const showGetStartedBtn = item.onboarding && isNewUserOnboarding;
+
+        html += '<div class="ann-card ' + readClass + '" data-tag="' + escapeHtml(item.tag) + '">'
+          + '<div class="ann-card__aside">'
+          + '<div class="ann-icon ' + item.iconClass + '"><iconify-icon icon="mdi:alert-circle-outline"></iconify-icon></div>'
+          + '</div>'
+          + '<div class="ann-card__body">'
+          + '<div class="ann-card__header">'
+          + '<h3 class="ann-card__title">' + escapeHtml(item.title) + '</h3>'
+          + '<span class="ann-tag ' + item.tagClass + '">' + escapeHtml(item.tag) + '</span>'
+          + '<span class="ann-read-badge ' + readLabelClass + '">' + readLabel + '</span>'
+          + '</div>'
+          + '<p class="ann-card__text">' + escapeHtml(item.message || 'No details available.') + '</p>'
+          + '<div class="ann-card__actions">'
+          + '<button class="ann-action-btn" onclick="toggleAnnouncementRead(\'' + safeId + '\')">' + readActionLabel + '</button>'
+          + (showGetStartedBtn ? '<button class="ann-action-btn ann-action-btn--primary" onclick="openGetStartedGuide()">Open Get Started</button>' : '')
+          + '<button class="ann-action-btn ann-action-btn--danger" onclick="deleteAnnouncementForMe(\'' + safeId + '\')">Delete</button>'
+          + '</div>'
+          + '</div>'
+          + '</div>';
+      });
+
+      list.innerHTML = html;
+      filterAnnouncements();
+    }
+
+    function filterAnnouncements() {
+      const query = document.getElementById('annSearch').value.toLowerCase();
+      const cards = document.querySelectorAll('.ann-card');
+      let visible = 0;
+
+      cards.forEach(card => {
+        const tag = card.dataset.tag;
+        const text = card.textContent.toLowerCase();
+        const tagMatch = activeFilter === 'all' || tag === activeFilter;
+        const searchMatch = text.includes(query);
+        const show = tagMatch && searchMatch;
+        card.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+
+      document.getElementById('annEmpty').style.display = visible === 0 ? 'flex' : 'none';
+    }
+
+    function toggleDropdown(id) {
+      const dropdown = document.getElementById(id);
+      const isActive = dropdown.classList.contains('active');
+      document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('active'));
+      document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--active'));
+      if (!isActive) {
+        dropdown.classList.add('active');
+        document.getElementById(id === 'notifDropdown' ? 'notifBtn' : 'msgBtn').classList.add('icon-btn--active');
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.icon-btn') && !e.target.closest('.header-dropdown')) {
+        document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('active'));
+        document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--active'));
+      }
+    });
+
+    function markAllRead() {
+      document.querySelectorAll('.dropdown-item--unread').forEach(item => item.classList.remove('dropdown-item--unread'));
+      document.querySelector('.dropdown-badge').style.display = 'none';
+    }
+
+    function viewNotif(el) {
+      el.classList.remove('dropdown-item--unread');
+      const unreadCount = document.querySelectorAll('.dropdown-item--unread').length;
+      const badge = document.querySelector('.dropdown-badge');
+      badge.style.display = unreadCount === 0 ? 'none' : 'block';
+      if (unreadCount > 0) badge.textContent = unreadCount;
+    }
+
+    function viewAllMessages() { showAlert('Messages', 'No messages yet', 'info'); }
+    function openMessage(user) { showAlert('Messages', 'No messages yet', 'info'); }
+
+    function toggleAnnouncementRead(announcementId) {
+      if (!currentStudentUid || !announcementId) {
+        return;
+      }
+
+      const currentState = announcementStateMap[announcementId] || {};
+      const nextRead = currentState.read !== true;
+      const patch = {
+        read: nextRead,
+        readAt: nextRead ? Date.now() : null,
+        deleted: false,
+        updatedAt: Date.now()
+      };
+
+      database.ref('students/' + currentStudentUid + '/announcementState/' + announcementId).update(patch).then(function() {
+        showToast(nextRead ? 'Announcement marked as read.' : 'Announcement marked as unread.');
+      }).catch(function() {
+        showAlert('Action Failed', 'Unable to update read status right now. Please try again.', 'warning');
+      });
+    }
+
+    function deleteAnnouncementForMe(announcementId) {
+      if (!currentStudentUid || !announcementId) {
+        return;
+      }
+
+      showConfirm('Delete Announcement', 'Remove this announcement from your list?', function() {
+        const patch = {
+          deleted: true,
+          deletedAt: Date.now(),
+          updatedAt: Date.now()
+        };
+
+        database.ref('students/' + currentStudentUid + '/announcementState/' + announcementId).update(patch).then(function() {
+          showToast('Announcement removed from your list.');
+        }).catch(function() {
+          showAlert('Delete Failed', 'Unable to remove announcement right now. Please try again.', 'warning');
+        });
+      });
+    }
+
+    function openGetStartedGuide() {
+      localStorage.setItem('firstDashboardVisit', 'true');
+      localStorage.removeItem('unmei_walkthrough_done');
+      window.location.href = 'dashboard.html?guide=1';
+    }
+
+    window.toggleAnnouncementRead = toggleAnnouncementRead;
+    window.deleteAnnouncementForMe = deleteAnnouncementForMe;
+    window.openGetStartedGuide = openGetStartedGuide;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      currentStudentUid = localStorage.getItem('studentUid') || '';
+      if (!currentStudentUid) return;
+
+      setUserIdentity({
+        fullName: localStorage.getItem('studentEmail') ? localStorage.getItem('studentEmail').split('@')[0] : 'Student'
+      });
+
+      studentProfileRef = database.ref('students/' + currentStudentUid);
+      studentProfileRef.on('value', function(snapshot) {
+        const studentData = snapshot.val() || {};
+        currentProfile = studentData.profile || {};
+        currentEnrollment = studentData.enrollment || {};
+        setUserIdentity(currentProfile);
+        if (currentProfile.avatarUrl) {
+          applyAvatar(currentProfile.avatarUrl);
+        }
+        renderAnnouncements();
+      }, function() {
+        currentProfile = {};
+        currentEnrollment = {};
+        renderAnnouncements();
+      });
+
+      announcementStateRef = database.ref('students/' + currentStudentUid + '/announcementState');
+      announcementStateRef.on('value', function(snapshot) {
+        announcementStateMap = snapshot.val() || {};
+        renderAnnouncements();
+      }, function() {
+        announcementStateMap = {};
+        renderAnnouncements();
+      });
+
+      announcementsRef = database.ref('announcements').limitToLast(300);
+      announcementsRef.on('value', function(snapshot) {
+        announcementItems = [];
+        if (snapshot.exists()) {
+          snapshot.forEach(function(child) {
+            const announcement = child.val() || {};
+            const hasTitle = String(announcement.title || '').trim() !== '';
+            const hasMessage = String(announcement.message || '').trim() !== '';
+            if (!hasTitle && !hasMessage) {
+              return;
+            }
+            if (isSeedAnnouncementKey(child.key) && !isDemoStudentAccount()) {
+              return;
+            }
+            if (!shouldShowForStudent(announcement)) {
+              return;
+            }
+            announcementItems.push(normalizeAnnouncementRecord(child.key, announcement, { source: 'database' }));
+          });
+        }
+        renderAnnouncements();
+      }, function() {
+        announcementItems = [];
+        renderAnnouncements();
+      });
+    });
+
+    window.addEventListener('beforeunload', function() {
+      if (studentProfileRef) studentProfileRef.off('value');
+      if (announcementStateRef) announcementStateRef.off('value');
+      if (announcementsRef) announcementsRef.off('value');
+    });
+
+    function applyAvatar(avatarData) {
+      document.getElementById('headerAvatarImg').src = avatarData;
+      document.getElementById('headerAvatarImg').style.display = 'block';
+      document.getElementById('headerAvatarText').style.display = 'none';
+      document.getElementById('sidebarAvatarImg').src = avatarData;
+      document.getElementById('sidebarAvatarImg').style.display = 'block';
+      document.getElementById('sidebarAvatarText').style.display = 'none';
+    }
+
+    function showAlert(title, message, type) {
+      const existing = document.querySelector('.custom-alert');
+      if (existing) existing.remove();
+      const alertEl = document.createElement('div');
+      alertEl.className = 'custom-alert custom-alert--' + type;
+      let iconSvg;
+      if (type === 'danger' || type === 'warning') {
+        iconSvg = '<iconify-icon icon="mdi:information-outline"></iconify-icon>';
+      } else if (type === 'success') {
+        iconSvg = '<iconify-icon icon="mdi:check-circle-outline"></iconify-icon>';
+      } else {
+        iconSvg = '<iconify-icon icon="mdi:information-outline"></iconify-icon>';
+      }
+      alertEl.innerHTML = '<div class="custom-alert__icon">' + iconSvg + '</div><div class="custom-alert__body"><strong class="custom-alert__title">' + title + '</strong><p class="custom-alert__message">' + message + '</p></div><button class="custom-alert__close" onclick="this.parentElement.remove()"><iconify-icon icon="mdi:close"></iconify-icon></button>';
+      document.body.appendChild(alertEl);
+      setTimeout(() => alertEl.classList.add('custom-alert--show'), 10);
+      setTimeout(() => { alertEl.classList.remove('custom-alert--show'); setTimeout(() => alertEl.remove(), 300); }, 5000);
+    }
+
+    let toastTimer;
+    function showToast(msg) {
+      const t = document.getElementById('studentToast');
+      if (t) {
+        t.textContent = msg;
+        t.classList.add('settings-toast--show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(()=>t.classList.remove('settings-toast--show'), 2800);
+      }
+    }
+
+    function showConfirm(t,m,cb){var o=document.getElementById('confirmOverlay');o.querySelector('.confirm-title').textContent=t;o.querySelector('.confirm-message').textContent=m;o.classList.add('active');o.querySelector('.confirm-btn--cancel').onclick=function(){o.classList.remove('active');};o.querySelector('.confirm-btn--confirm').onclick=function(){o.classList.remove('active');cb();};}
+  </script>
+  <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><div class="confirm-icon confirm-icon--warning"><iconify-icon icon="mdi:alert-outline"></iconify-icon></div><div class="confirm-title"></div><div class="confirm-message"></div><div class="confirm-actions"><button class="confirm-btn confirm-btn--cancel">Cancel</button><button class="confirm-btn confirm-btn--confirm">Confirm</button></div></div></div>
+  <div class="settings-toast" id="studentToast"></div>
+<script>
+function toggleMobileSidebar(){var s=document.querySelector('.sidebar'),b=document.getElementById('sidebarBackdrop');if(s.classList.contains('sidebar--mobile-open')){closeMobileSidebar();}else{s.classList.add('sidebar--mobile-open');b.classList.add('active');document.body.style.overflow='hidden';}}
+function closeMobileSidebar(){var s=document.querySelector('.sidebar');var b=document.getElementById('sidebarBackdrop');s.classList.remove('sidebar--mobile-open');b.classList.remove('active');document.body.style.overflow='';}
+window.addEventListener('resize',function(){if(window.innerWidth>700)closeMobileSidebar();});
+</script>
+<script src="student-header-sync.js"></script>
+<script src="assets/global-search.js"></script>
+</body>
+</html>
+
+
+
+
+

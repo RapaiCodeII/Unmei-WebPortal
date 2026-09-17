@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unmei – Admin Payments</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="adminportal.css" />
+  <script src="assets/iconify-icon.min.js"></script>
+<script src="assets/unmei-icons.js"></script>
+</head>
+<body>
+  <script src="session-guard.js"></script>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="brand-logo">
+        <img src="assets/logo.png" alt="UNMEI" style="width:40px;height:40px;object-fit:contain;">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UNMEI</span>
+        <span class="brand-portal">ADMIN PORTAL</span>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <p class="nav-section-label">OVERVIEW</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-dashboard.html" class="nav-link">
+          <iconify-icon icon="mdi:view-dashboard"></iconify-icon>
+          Dashboard</a></li>
+        <li class="nav-item"><a href="admin-students.html" class="nav-link">
+          <iconify-icon icon="mdi:account-outline"></iconify-icon>
+          Students</a></li>
+        <li class="nav-item"><a href="admin-enrollments.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+          Recent Enrollments</a></li>
+        <li class="nav-item nav-item--active"><a href="admin-payments.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+          Payments</a></li>
+      </ul>
+
+      <p class="nav-section-label" style="margin-top:20px;">COURSES</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-courses.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+          Course List</a></li>
+        <li class="nav-item"><a href="admin-build-course.html" class="nav-link">
+          <iconify-icon icon="mdi:plus-circle-outline"></iconify-icon>
+          Build New Course</a></li>
+      </ul>
+
+      <p class="nav-section-label" style="margin-top:20px;">QUICK ACTIONS</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-add-student.html" class="nav-link">
+          <iconify-icon icon="mdi:account-plus-outline"></iconify-icon>
+          Add Student</a></li>
+        <li class="nav-item"><a href="admin-new-enrollment.html" class="nav-link">
+          <iconify-icon icon="mdi:plus-circle-outline"></iconify-icon>
+          New Enrollment</a></li>
+        <li class="nav-item"><a href="admin-post-notice.html" class="nav-link">
+          <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+          Post Notice</a></li>
+      </ul>
+
+      <p class="nav-section-label" style="margin-top:20px;">SYSTEM</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-portal-settings.html" class="nav-link">
+          <iconify-icon icon="mdi:cog-outline"></iconify-icon>
+          Portal Settings</a></li>
+        <li class="nav-item"><a href="javascript:void(0)" onclick="if(window.__adminSignOut){window.__adminSignOut();}else{location.href='admin-portal-settings.html';}" class="nav-link">
+          <iconify-icon icon="mdi:logout"></iconify-icon>
+          Sign Out</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar__user">
+      <div class="user-avatar user-avatar--dark" id="sidebarAvatar">AD</div>
+      <div class="user-meta">
+        <span class="user-name" id="sidebarUserName">Admin</span>
+        <span class="user-role">Administrator</span>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <!-- MAIN -->
+  <div class="main-wrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="sidebar-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
+        <div class="topbar__left">
+        <h2 class="topbar__title">Payments</h2>
+        <nav class="breadcrumb">
+          <a href="admin-dashboard.html" class="breadcrumb__link">Home</a>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current">Payments</span>
+        </nav>
+      </div>
+      <div class="topbar__center" style="position:relative;"></div>
+      <div class="topbar__right">
+        <!-- Notification Bell -->
+        <div style="position: relative;">
+          <button class="icon-btn" id="notifBtn" onclick="toggleDropdown('notifDropdown')">
+            <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+            <span class="dropdown-badge" id="notifBadge" style="display: none;">0</span>
+          </button>
+          <div class="header-dropdown" id="notifDropdown">
+            <div class="header-dropdown__header">
+              <span class="header-dropdown__title">Notifications</span>
+              <span class="header-dropdown__link" onclick="markAllRead()">Mark all read</span>
+            </div>
+            <div class="header-dropdown__list" id="notifList">
+              <div class="header-dropdown__empty" id="notifEmpty">
+                <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+                <p>No notifications</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div style="position: relative;">
+          <button class="icon-btn" id="msgBtn" onclick="toggleDropdown('msgDropdown')">
+            <iconify-icon icon="mdi:email-outline"></iconify-icon>
+            <span class="dropdown-badge" id="msgBadge" style="display: none;">0</span>
+          </button>
+          <div class="header-dropdown" id="msgDropdown">
+            <div class="header-dropdown__header">
+              <span class="header-dropdown__title">Messages</span>
+              <span class="header-dropdown__link" onclick="viewAllMessages()">View all</span>
+            </div>
+            <div class="header-dropdown__list" id="msgList">
+              <div class="header-dropdown__empty" id="msgEmpty">
+                <iconify-icon icon="mdi:email-outline"></iconify-icon>
+                <p>No messages</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="topbar__user">
+          <div class="user-avatar user-avatar--red" id="headerAvatar">AD</div>
+          <div class="user-meta">
+            <span class="user-name" id="headerUserName">Admin</span>
+            <span class="user-role">Administrator</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- Summary cards -->
+      <div class="summary-row">
+        <div class="sum-card">
+          <div class="sum-card__icon sum-card__icon--green">
+            <iconify-icon icon="mdi:check-circle-outline"></iconify-icon>
+          </div>
+          <div>
+            <p class="sum-card__label">TOTAL REVENUE (APRIL)</p>
+            <p class="sum-card__value" id="statRevenue">--</p>
+          </div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-card__icon sum-card__icon--yellow">
+            <iconify-icon icon="mdi:alert-circle-outline"></iconify-icon>
+          </div>
+          <div>
+            <p class="sum-card__label">PENDING PAYMENTS</p>
+            <p class="sum-card__value" id="statPending">--</p>
+          </div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-card__icon sum-card__icon--red">
+            <iconify-icon icon="mdi:alert-outline"></iconify-icon>
+          </div>
+          <div>
+            <p class="sum-card__label">REJECTED</p>
+            <p class="sum-card__value" id="statOverdue">--</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="students-toolbar">
+        <div class="stu-search">
+          <iconify-icon icon="mdi:magnify"></iconify-icon>
+          <input type="text" id="paymentSearch" placeholder="Search" oninput="filterPayments()" />
+        </div>
+        <div class="filter-tabs" id="filterTabs">
+          <button class="ftab ftab--active" data-filter="All" onclick="setFilter('All', this)">All</button>
+          <button class="ftab" data-filter="Paid" onclick="setFilter('Paid', this)">Paid</button>
+          <button class="ftab" data-filter="Pending" onclick="setFilter('Pending', this)">Pending</button>
+          <button class="ftab" data-filter="Rejected" onclick="setFilter('Rejected', this)">Rejected</button>
+        </div>
+        <button class="btn-add-student" onclick="showToast('Send payment reminder to all pending submissions')">Send Reminders</button>
+        <button class="btn-add-student btn-add-student--secondary" onclick="recordCashPayment()">Record Cash Payment</button>
+      </div>
+
+      <!-- Payments Table -->
+      <div class="students-table-wrap">
+        <table class="students-table">
+          <thead>
+            <tr>
+              <th>STUDENT</th>
+              <th>COURSE</th>
+              <th>AMOUNT</th>
+              <th>DATE</th>
+              <th>STATUS</th>
+              <th>METHOD</th>
+              <th>RECEIPT</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="paymentsTbody"></tbody>
+        </table>
+        <div class="table-empty" id="tableEmpty" style="display:none;">
+          <iconify-icon icon="mdi:information-outline"></iconify-icon>
+          <p>No payments found.</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="receiptVerifyModal">
+    <div class="modal-box modal-box--wide receipt-verify-modal">
+      <div class="modal-topbar">
+        <div class="modal-topbar__title">
+          <h2 class="modal-page-title">Payment Verification</h2>
+        </div>
+        <div class="modal-topbar__right">
+          <button class="modal-close-btn" onclick="closeVerifyModal()">
+            <iconify-icon icon="mdi:close"></iconify-icon>
+          </button>
+        </div>
+      </div>
+      <div class="modal-body verify-modal-body">
+        <div class="verify-student-info">
+          <div class="verify-avatar" id="verifyAvatar">--</div>
+          <div>
+            <p class="verify-name" id="verifyStudentName">--</p>
+            <p class="verify-email" id="verifyStudentEmail">--</p>
+          </div>
+        </div>
+        <div class="verify-details-grid">
+          <div class="verify-detail"><span class="verify-label">Course</span><span class="verify-value" id="verifyCourse">--</span></div>
+          <div class="verify-detail"><span class="verify-label">Amount</span><span class="verify-value verify-value--amount" id="verifyAmount">--</span></div>
+          <div class="verify-detail"><span class="verify-label">Remaining Balance</span><span class="verify-value" id="verifyRemaining">--</span></div>
+          <div class="verify-detail"><span class="verify-label">Date Uploaded</span><span class="verify-value" id="verifyDate">--</span></div>
+          <div class="verify-detail"><span class="verify-label">Payment Method</span><span class="verify-value" id="verifyMethod">--</span></div>
+          <div class="verify-detail"><span class="verify-label">Receipt File</span><span class="verify-value" id="verifyFile">--</span></div>
+        </div>
+        <div class="verify-receipt-preview" id="verifyReceiptPreview" style="display:none;">
+          <p class="verify-receipt-label">Uploaded Receipt</p>
+          <img id="verifyReceiptImage" src="" alt="Receipt" style="max-width:100%;max-height:300px;border-radius:8px;object-fit:contain;border:1px solid var(--gray-200);">
+          <a id="verifyReceiptLink" href="#" target="_blank" class="verify-receipt-link">Open in new tab</a>
+        </div>
+        <div class="verify-note-section">
+          <label class="fp-label">Admin Note (optional)</label>
+          <textarea class="fp-input verify-note-textarea" id="verifyNote" placeholder="Add a note about this payment verification..."></textarea>
+        </div>
+      </div>
+      <div class="verify-actions">
+        <button class="fp-btn fp-btn--ghost" onclick="closeVerifyModal()">Cancel</button>
+        <button class="fp-btn fp-btn--danger" id="verifyRejectBtn" onclick="rejectPayment(currentVerifyId)">Reject</button>
+        <button class="fp-btn fp-btn--primary" id="verifyApproveBtn" onclick="approvePayment(currentVerifyId)">Approve</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="adm-toast" id="admToast"></div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <script>
+  const database = firebase.database();
+
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function getAdminInitials(name) {
+    return (name || '').trim().split(/\s+/).filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'AD';
+  }
+
+  function applyAdminIdentity(name) {
+    const resolvedName = name || 'Admin';
+    const initials = getAdminInitials(resolvedName);
+    document.getElementById('sidebarUserName').textContent = resolvedName;
+    document.getElementById('headerUserName').textContent = resolvedName;
+    document.getElementById('sidebarAvatar').textContent = initials;
+    document.getElementById('headerAvatar').textContent = initials;
+  }
+
+  // Load admin info
+  function loadAdminInfo() {
+    const adminId = sessionStorage.getItem('adminId');
+    const adminEmail = sessionStorage.getItem('adminEmail') || '';
+    const storedDisplayName = sessionStorage.getItem('adminDisplayName') || '';
+    const fallbackName = storedDisplayName || (adminEmail ? adminEmail.split('@')[0].replace(/\./g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Admin');
+
+    applyAdminIdentity(fallbackName);
+
+    if (!adminId) {
+      return;
+    }
+
+    database.ref('admins/' + adminId).on('value', (snapshot) => {
+      const adminData = snapshot.val() || {};
+      const resolvedName = adminData.name || adminData.fullName || adminData.profile?.fullName || adminData.profile?.name || fallbackName;
+      applyAdminIdentity(resolvedName);
+      sessionStorage.setItem('adminDisplayName', resolvedName);
+    });
+  }
+
+  window.addEventListener('beforeunload', function() {
+    const adminId = sessionStorage.getItem('adminId');
+    if (adminId) {
+      database.ref('admins/' + adminId).off('value');
+    }
+  });
+
+  // Sample payment data
+  const ADMIN_PAYMENT_METHOD_CASH = 'cash';
+  const ADMIN_PAYMENT_METHOD_BANK_OR_ONLINE = 'bank_or_online';
+  const COURSE_NAME_FALLBACK = {
+    jlpt_n5: 'JLPT N5 (Beginner)',
+    jlpt_n4: 'JLPT N4 (Elementary)',
+    jlpt_n3: 'JLPT N3 (Intermediate)',
+    jlpt_n2: 'JLPT N2 (Advanced)',
+    bundle_n5_n4: 'Bundle N5-N4',
+    bundle_n5_n3: 'Bundle N5-N3'
+  };
+  let payments = [];
+  let activeFilter = 'All';
+  let currentVerifyId = '';
+  let courseNameById = {};
+  let coursePriceById = {};
+
+  function normalizeCourseId(value) {
+    return String(value || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[\s-]+/g, '_')
+      .replace(/[^a-z0-9_]/g, '');
+  }
+
+  function resolveCourseLabel(courseId, rawCourse, courseLookup) {
+    const direct = String(rawCourse || '').trim();
+    if (direct) return direct;
+    const normalizedId = normalizeCourseId(courseId);
+    if (!normalizedId) return '';
+    return courseLookup[normalizedId] || COURSE_NAME_FALLBACK[normalizedId] || '';
+  }
+
+  function sanitizeAvatarColor(colorValue, fallbackColor) {
+    const value = String(colorValue || '').trim();
+    return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(value) ? value : fallbackColor;
+  }
+
+  function buildStudentLookup(studentSnapshot) {
+    const byUid = {};
+    const byEmail = {};
+    const byName = {};
+
+    if (!studentSnapshot.exists()) {
+      return { byUid, byEmail, byName };
+    }
+
+    let idx = 0;
+    studentSnapshot.forEach((child) => {
+      const data = child.val() || {};
+      const profile = data.profile || {};
+      const enrollment = data.enrollment || {};
+      const name = String(profile.fullName || data.fullName || data.name || '').trim();
+      const email = String(profile.email || data.email || '').trim().toLowerCase();
+      const fallbackColor = getColor(child.key || idx);
+      const entry = {
+        uid: child.key,
+        name: name,
+        email: email,
+        avatarUrl: profile.avatarUrl || data.avatarUrl || '',
+        initials: String(profile.avatarInitials || getInitials(name)).toUpperCase(),
+        color: sanitizeAvatarColor(profile.avatarColor || data.avatarColor, fallbackColor),
+        courseId: normalizeCourseId(enrollment.courseId || ''),
+        course: String(enrollment.course || '').trim(),
+        courseFee: Number(enrollment.courseFee || enrollment.totalFee || enrollment.totalTuition || 0)
+      };
+      idx++;
+
+      byUid[child.key] = entry;
+      if (email) byEmail[email] = entry;
+      if (name) byName[name.toLowerCase()] = entry;
+    });
+
+    return { byUid, byEmail, byName };
+  }
+
+  function normalizeApprovalState(rawRecord) {
+    const record = rawRecord || {};
+    const rawApproval = String(record.adminApprovalStatus || record.verificationStatus || '').toLowerCase();
+    const rawStatus = String(record.status || '').toLowerCase();
+    if (rawApproval === 'approved' || rawStatus === 'approved' || rawStatus === 'paid') return 'approved';
+    if (rawApproval === 'rejected' || rawStatus === 'rejected') return 'rejected';
+    return 'pending';
+  }
+
+  function matchesIdentityRecord(record, key, identity) {
+    const row = record || {};
+    const rowUid = String(row.studentUid || row.uid || row.studentId || row.enrollmentId || (String(key || '').charAt(0) !== '-' ? key : '')).trim();
+    const rowEmail = String(row.studentEmail || row.email || '').trim().toLowerCase();
+    const rowName = String(row.studentName || row.fullName || row.name || '').trim().toLowerCase();
+
+    if (identity.uid && rowUid && rowUid === identity.uid) return true;
+    if (identity.email && rowEmail && rowEmail === identity.email) return true;
+    if (identity.name && rowName && rowName === identity.name) return true;
+    return false;
+  }
+
+  function resolveStudentUidFromPayment(paymentEntry) {
+    const directUid = String(paymentEntry.studentUid || '').trim();
+    if (directUid) {
+      return Promise.resolve(directUid);
+    }
+
+    const email = String(paymentEntry.studentEmail || '').trim().toLowerCase();
+    const name = String(paymentEntry.student || '').trim().toLowerCase();
+    if (!email && !name) {
+      return Promise.resolve('');
+    }
+
+    return database.ref('students').once('value').then((snapshot) => {
+      if (!snapshot.exists()) return '';
+      let matchedUid = '';
+      snapshot.forEach((child) => {
+        if (matchedUid) return;
+        const data = child.val() || {};
+        const profile = data.profile || {};
+        const rowEmail = String(profile.email || data.email || '').trim().toLowerCase();
+        const rowName = String(profile.fullName || data.fullName || data.name || '').trim().toLowerCase();
+        if ((email && rowEmail === email) || (name && rowName === name)) {
+          matchedUid = child.key;
+        }
+      });
+      return matchedUid;
+    }).catch(() => '');
+  }
+
+  function reconcileStudentBalance(paymentEntry) {
+    const identity = {
+      uid: String(paymentEntry.studentUid || '').trim(),
+      email: String(paymentEntry.studentEmail || '').trim().toLowerCase(),
+      name: String(paymentEntry.student || '').trim().toLowerCase()
+    };
+
+    return Promise.all([
+      database.ref('payments').once('value'),
+      database.ref('students').once('value'),
+      database.ref('enrollments').once('value'),
+      resolveStudentUidFromPayment(paymentEntry)
+    ]).then(([paymentSnapshot, studentsSnapshot, enrollmentSnapshot, resolvedUid]) => {
+      if (!identity.uid && resolvedUid) {
+        identity.uid = resolvedUid;
+      }
+
+      let approvedTotal = 0;
+      let pendingTotal = 0;
+      let tuitionTotal = Number(paymentEntry.tuitionTotal || 0);
+
+      paymentSnapshot.forEach((child) => {
+        const row = child.val() || {};
+        if (!matchesIdentityRecord(row, child.key, identity)) {
+          return;
+        }
+
+        const amount = Number(row.amount || row.totalAmount || row.paymentAmount || 0);
+        const state = normalizeApprovalState(row);
+        if (state === 'approved') {
+          approvedTotal += amount;
+        } else if (state === 'pending') {
+          pendingTotal += amount;
+        }
+
+        const rowTuition = Number(row.totalTuition || row.totalAmountDue || row.courseFee || row.expectedTuition || 0);
+        if (rowTuition > tuitionTotal) {
+          tuitionTotal = rowTuition;
+        }
+
+        const courseId = normalizeCourseId(row.courseId || paymentEntry.courseId || '');
+        const coursePrice = Number(coursePriceById[courseId] || 0);
+        if (coursePrice > tuitionTotal) {
+          tuitionTotal = coursePrice;
+        }
+      });
+
+      if (identity.uid && studentsSnapshot.exists()) {
+        const studentNode = studentsSnapshot.child(identity.uid);
+        if (studentNode.exists()) {
+          const studentData = studentNode.val() || {};
+          const enrollment = studentData.enrollment || {};
+          const studentTuition = Number(enrollment.courseFee || enrollment.totalFee || enrollment.totalTuition || enrollment.expectedTuition || 0);
+          if (studentTuition > tuitionTotal) {
+            tuitionTotal = studentTuition;
+          }
+          const studentCourseId = normalizeCourseId(enrollment.courseId || paymentEntry.courseId || '');
+          const studentCoursePrice = Number(coursePriceById[studentCourseId] || 0);
+          if (studentCoursePrice > tuitionTotal) {
+            tuitionTotal = studentCoursePrice;
+          }
+        }
+      }
+
+      const remaining = Math.max(0, tuitionTotal - approvedTotal);
+      const paymentProgress = tuitionTotal > 0
+        ? (remaining === 0 ? 'settled' : (approvedTotal > 0 ? 'partial' : (pendingTotal > 0 ? 'pending' : 'unpaid')))
+        : (approvedTotal > 0 ? 'partial' : (pendingTotal > 0 ? 'pending' : 'unpaid'));
+
+      const now = Date.now();
+      const updates = {};
+
+      if (identity.uid) {
+        updates['students/' + identity.uid + '/enrollment/totalTuition'] = tuitionTotal;
+        updates['students/' + identity.uid + '/enrollment/totalPaidApproved'] = approvedTotal;
+        updates['students/' + identity.uid + '/enrollment/pendingPaymentTotal'] = pendingTotal;
+        updates['students/' + identity.uid + '/enrollment/miscellaneousBalance'] = remaining;
+        updates['students/' + identity.uid + '/enrollment/paymentProgress'] = paymentProgress;
+        updates['students/' + identity.uid + '/enrollment/updatedAt'] = now;
+      }
+
+      if (enrollmentSnapshot.exists()) {
+        enrollmentSnapshot.forEach((child) => {
+          const row = child.val() || {};
+          if (!matchesIdentityRecord(row, child.key, identity)) {
+            return;
+          }
+          updates['enrollments/' + child.key + '/totalTuition'] = tuitionTotal;
+          updates['enrollments/' + child.key + '/totalPaidApproved'] = approvedTotal;
+          updates['enrollments/' + child.key + '/pendingPaymentTotal'] = pendingTotal;
+          updates['enrollments/' + child.key + '/miscellaneousBalance'] = remaining;
+          updates['enrollments/' + child.key + '/paymentProgress'] = paymentProgress;
+          updates['enrollments/' + child.key + '/updatedAt'] = now;
+        });
+      }
+
+      if (!Object.keys(updates).length) {
+        return null;
+      }
+      return database.ref().update(updates);
+    });
+  }
+
+  function avatarMarkup(entry, className) {
+    const avatarUrl = String(entry.avatarUrl || '').trim();
+    if (avatarUrl) {
+      return `<div class="${className}" style="background:#f5f5f5;overflow:hidden;"><img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(entry.student || entry.name || 'Student')}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"></div>`;
+    }
+    return `<div class="${className}" style="background:${escapeHtml(entry.color || '#C0392B')}">${escapeHtml(entry.initials || '??')}</div>`;
+  }
+
+  function renderAvatarIntoElement(element, entry) {
+    const avatarUrl = String(entry.avatarUrl || '').trim();
+    if (avatarUrl) {
+      element.style.background = '#f5f5f5';
+      element.style.overflow = 'hidden';
+      element.innerHTML = `<img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(entry.student || 'Student')}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">`;
+      return;
+    }
+    element.style.background = entry.color || '#C0392B';
+    element.style.overflow = '';
+    element.textContent = entry.initials || '??';
+  }
+
+  function isSameStudentPayment(a, b) {
+    const aUid = String(a.studentUid || '').trim();
+    const bUid = String(b.studentUid || '').trim();
+    if (aUid && bUid && aUid === bUid) return true;
+
+    const aEmail = String(a.studentEmail || '').trim().toLowerCase();
+    const bEmail = String(b.studentEmail || '').trim().toLowerCase();
+    if (aEmail && bEmail && aEmail === bEmail) return true;
+
+    const aName = String(a.student || '').trim().toLowerCase();
+    const bName = String(b.student || '').trim().toLowerCase();
+    if (aName && bName && aName === bName) return true;
+
+    return false;
+  }
+
+  function getStudentPaymentSummary(paymentEntry) {
+    const group = payments.filter((p) => isSameStudentPayment(p, paymentEntry));
+    const approvedTotal = group
+      .filter((p) => p.status === 'Paid' || p.status === 'Approved')
+      .reduce((sum, p) => sum + Number(p.amountNum || 0), 0);
+    const tuitionTotal = Math.max(Number(paymentEntry.tuitionTotal || 0), 0);
+    const remaining = tuitionTotal > 0 ? Math.max(0, tuitionTotal - approvedTotal) : 0;
+    return { approvedTotal, tuitionTotal, remaining };
+  }
+
+  function resolvePaymentMethod(rawPayment, receiptImageUrl) {
+    const payment = rawPayment || {};
+    const rawMethod = String(payment.paymentMethod || payment.paymentChannel || payment.paymentType || '').toLowerCase();
+    if (rawMethod === ADMIN_PAYMENT_METHOD_CASH) {
+      return ADMIN_PAYMENT_METHOD_CASH;
+    }
+    if (rawMethod.includes('bank') || rawMethod.includes('online') || rawMethod.includes('gcash') || rawMethod.includes('transfer')) {
+      return ADMIN_PAYMENT_METHOD_BANK_OR_ONLINE;
+    }
+    return receiptImageUrl ? ADMIN_PAYMENT_METHOD_BANK_OR_ONLINE : ADMIN_PAYMENT_METHOD_CASH;
+  }
+
+  function loadPayments() {
+    Promise.all([
+      database.ref('payments').once('value'),
+      database.ref('students').once('value'),
+      database.ref('courses').once('value')
+    ]).then(([snapshot, studentSnapshot, coursesSnapshot]) => {
+      payments = [];
+      const studentLookup = buildStudentLookup(studentSnapshot);
+      const courseLookup = {};
+      courseNameById = {};
+      coursePriceById = {};
+      if (coursesSnapshot.exists()) {
+        coursesSnapshot.forEach((child) => {
+          const courseData = child.val() || {};
+          const normalizedId = normalizeCourseId(child.key || courseData.courseId || '');
+          const courseName = String(courseData.name || courseData.course || '').trim();
+          if (normalizedId && courseName) {
+            courseLookup[normalizedId] = courseName;
+            courseNameById[normalizedId] = courseName;
+          }
+          if (normalizedId) {
+            const coursePrice = Number(courseData.price || 0);
+            if (coursePrice > 0) {
+              coursePriceById[normalizedId] = coursePrice;
+            }
+          }
+        });
+      }
+
+      if (snapshot.exists()) {
+        snapshot.forEach((child) => {
+          const data = child.val() || {};
+          const uploadedAt = data.receiptUploadedAt || data.uploadedAt || data.createdAt || data.updatedAt || 0;
+          const dateValue = uploadedAt || data.dueDate || 0;
+          const submittedDate = dateValue ? new Date(dateValue).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}) : 'N/A';
+          const rawApproval = String(data.adminApprovalStatus || data.verificationStatus || '').toLowerCase();
+          const rawStatus = String(data.status || '').toLowerCase();
+          let status = 'Pending';
+          if (rawApproval === 'approved' || rawStatus === 'approved' || rawStatus === 'paid') {
+            status = rawStatus === 'paid' ? 'Paid' : 'Approved';
+          } else if (rawApproval === 'rejected' || rawStatus === 'rejected') {
+            status = 'Rejected';
+          }
+
+          const amountNum = Number(data.amount || data.totalAmount || data.paymentAmount || 0);
+          const receiptImageUrl = data.receiptImageUrl || data.receiptUrl || data.proofUrl || '';
+          const receiptFileName = data.receiptFileName || data.fileName || data.proofFileName || '';
+          const receiptFileType = data.receiptFileType || (receiptFileName.includes('.') ? receiptFileName.split('.').pop() : '');
+          const paymentMethod = resolvePaymentMethod(data, receiptImageUrl);
+          const methodLabel = paymentMethod === ADMIN_PAYMENT_METHOD_CASH ? 'Cash' : 'Bank/Online';
+          const resolvedEmail = String(data.studentEmail || data.email || '').trim().toLowerCase();
+          const resolvedStudentName = String(data.studentName || data.fullName || data.name || (resolvedEmail ? resolvedEmail.split('@')[0] : 'Unassigned')).trim();
+          const normalizedName = resolvedStudentName.toLowerCase();
+
+          let studentMatch = null;
+          const studentUid = String(data.studentUid || '').trim();
+          if (studentUid) {
+            studentMatch = studentLookup.byUid[studentUid] || null;
+          }
+          if (!studentMatch && resolvedEmail) {
+            studentMatch = studentLookup.byEmail[resolvedEmail] || null;
+          }
+          if (!studentMatch && normalizedName) {
+            studentMatch = studentLookup.byName[normalizedName] || null;
+          }
+
+          const resolvedCourse = resolveCourseLabel(data.courseId, data.course, courseLookup) || 'N/A';
+          const resolvedCourseId = normalizeCourseId(data.courseId || (studentMatch ? studentMatch.courseId : ''));
+          const tuitionFromRecord = Number(data.totalTuition || data.totalAmountDue || data.courseFee || data.expectedTuition || 0);
+          const tuitionFromStudent = Number(studentMatch ? studentMatch.courseFee : 0);
+          const tuitionFromCatalog = Number(coursePriceById[resolvedCourseId] || 0);
+          const avatarFallbackColor = sanitizeAvatarColor(data.avatarColor, getColor(child.key));
+          const avatarColor = studentMatch ? studentMatch.color : avatarFallbackColor;
+          const avatarInitials = studentMatch ? studentMatch.initials : getInitials(resolvedStudentName);
+          const avatarUrl = studentMatch ? studentMatch.avatarUrl : (data.avatarUrl || '');
+
+          payments.push({
+            id: child.key,
+            student: studentMatch?.name || resolvedStudentName,
+            studentUid: studentUid,
+            studentEmail: studentMatch?.email || resolvedEmail,
+            course: resolvedCourse,
+            courseId: resolvedCourseId,
+            tuitionTotal: Math.max(tuitionFromRecord, tuitionFromStudent, tuitionFromCatalog, 0),
+            amount: '₱' + amountNum.toLocaleString(),
+            amountNum: amountNum,
+            submittedDate: submittedDate,
+            status: status,
+            initials: avatarInitials,
+            color: avatarColor,
+            avatarUrl: avatarUrl,
+            method: methodLabel,
+            paymentMethod: paymentMethod,
+            receiptImageUrl: receiptImageUrl,
+            receiptFileName: receiptFileName,
+            receiptFileType: receiptFileType,
+            approvalNote: data.adminApprovalNote || '',
+            uploadedAt: uploadedAt
+          });
+        });
+      }
+      filterPayments();
+    }).catch(() => {
+      payments = [];
+      filterPayments();
+      showToast('Unable to load payments right now.');
+    });
+  }
+
+  function statusBadge(s) {
+    const cls = { Paid: 'stu-badge--active', Approved: 'stu-badge--active', Pending: 'stu-badge--pending', Overdue: 'stu-badge--inactive', Rejected: 'stu-badge--inactive' };
+    return `<span class="stu-badge ${cls[s] || ''}">${s}</span>`;
+  }
+
+  function renderPayments(list) {
+    const tbody = document.getElementById('paymentsTbody');
+    const empty = document.getElementById('tableEmpty');
+    if (!list.length) {
+      tbody.innerHTML = '';
+      empty.style.display = 'flex';
+      return;
+    }
+    empty.style.display = 'none';
+    tbody.innerHTML = list.map(p => `
+      <tr>
+        <td><div class="stu-cell">${avatarMarkup(p, 'stu-avatar')}<p class="stu-name">${escapeHtml(p.student)}</p></div></td>
+        <td>${escapeHtml(p.course)}</td>
+        <td style="font-family:var(--font-currency);font-weight:700;">${escapeHtml(p.amount)}</td>
+        <td>${escapeHtml(p.submittedDate)}</td>
+        <td>${statusBadge(p.status)}</td>
+        <td style="font-size:0.75rem;">${escapeHtml(p.method)}</td>
+        <td style="font-size:0.75rem;">${escapeHtml(p.receiptFileName || (p.paymentMethod === ADMIN_PAYMENT_METHOD_CASH ? 'No receipt required' : (p.receiptImageUrl ? 'Uploaded' : 'Missing')))}</td>
+        <td>
+          <div class="action-group">
+            <button type="button" class="action-btn action-btn--view" onclick="viewPayment('${p.id}')">${p.status === 'Pending' ? 'Verify Payment' : 'View Details'}</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function getColor(id) {
+    const colors = ['#C0392B', '#22c55e', '#3b82f6', '#f97316', '#8b5cf6', '#0d9488', '#e11d48'];
+    let hash = 0;
+    const str = String(id);
+    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    return colors[Math.abs(hash) % colors.length];
+  }
+
+  function getInitials(name) {
+    return (name || 'Admin').trim().split(/\s+/).filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'AD';
+  }
+
+  function filterPayments() {
+    const q = document.getElementById('paymentSearch').value.toLowerCase();
+    let list = payments;
+    if (activeFilter === 'Paid') {
+      list = list.filter(p => p.status === 'Paid' || p.status === 'Approved');
+    } else if (activeFilter !== 'All') {
+      list = list.filter(p => p.status === activeFilter);
+    }
+    if (q) list = list.filter(p => p.student.toLowerCase().includes(q) || p.course.toLowerCase().includes(q));
+    renderPayments(list);
+    updateStats();
+  }
+
+  function setFilter(val, btn) {
+    activeFilter = val;
+    document.querySelectorAll('.ftab').forEach(b => b.classList.remove('ftab--active'));
+    btn.classList.add('ftab--active');
+    filterPayments();
+  }
+
+  function updateStats() {
+    const paid = payments.filter(p => p.status === 'Paid' || p.status === 'Approved');
+    const pending = payments.filter(p => p.status === 'Pending').length;
+    const rejected = payments.filter(p => p.status === 'Rejected').length;
+    const totalRevenue = paid.reduce((sum, p) => sum + (p.amountNum || 0), 0);
+    document.getElementById('statRevenue').textContent = '₱' + totalRevenue.toLocaleString();
+    document.getElementById('statPending').textContent = pending;
+    document.getElementById('statOverdue').textContent = rejected;
+  }
+
+  function viewPayment(id) {
+    const p = payments.find(x => x.id === id);
+    if (!p) return;
+    currentVerifyId = id;
+    renderAvatarIntoElement(document.getElementById('verifyAvatar'), p);
+    document.getElementById('verifyStudentName').textContent = p.student;
+    document.getElementById('verifyStudentEmail').textContent = p.studentEmail || p.studentUid || 'N/A';
+    document.getElementById('verifyCourse').textContent = p.course;
+    document.getElementById('verifyAmount').textContent = p.amount;
+    const paymentSummary = getStudentPaymentSummary(p);
+    document.getElementById('verifyRemaining').textContent = paymentSummary.tuitionTotal > 0
+      ? ('₱' + paymentSummary.remaining.toLocaleString())
+      : 'Contact admin';
+    const uploadDate = p.uploadedAt ? new Date(p.uploadedAt).toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A';
+    document.getElementById('verifyDate').textContent = uploadDate;
+    document.getElementById('verifyMethod').textContent = p.method;
+    document.getElementById('verifyFile').textContent = p.receiptFileName || (p.paymentMethod === ADMIN_PAYMENT_METHOD_CASH ? 'Not required for cash' : 'Missing receipt');
+    const preview = document.getElementById('verifyReceiptPreview');
+    const img = document.getElementById('verifyReceiptImage');
+    const link = document.getElementById('verifyReceiptLink');
+    if (p.receiptImageUrl) {
+      preview.style.display = 'block';
+      if (p.receiptFileType && ['jpg','jpeg','png'].includes(p.receiptFileType.toLowerCase())) {
+        img.src = p.receiptImageUrl;
+        img.style.display = 'block';
+      } else {
+        img.style.display = 'none';
+      }
+      link.href = p.receiptImageUrl;
+    } else {
+      preview.style.display = 'none';
+      link.href = '#';
+    }
+    const noteField = document.getElementById('verifyNote');
+    noteField.value = p.approvalNote || '';
+    const approveBtn = document.getElementById('verifyApproveBtn');
+    const rejectBtn = document.getElementById('verifyRejectBtn');
+    const isPendingReview = p.status === 'Pending';
+    approveBtn.style.display = isPendingReview ? 'inline-flex' : 'none';
+    rejectBtn.style.display = isPendingReview ? 'inline-flex' : 'none';
+    noteField.readOnly = !isPendingReview;
+    noteField.disabled = !isPendingReview;
+    noteField.title = isPendingReview ? '' : 'Decision already finalized. Wait for next student payment/resubmission.';
+    document.getElementById('receiptVerifyModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeVerifyModal() {
+    document.getElementById('receiptVerifyModal').classList.remove('active');
+    document.body.style.overflow = '';
+    currentVerifyId = '';
+  }
+
+  function approvePayment(id) {
+    const p = payments.find(x => x.id === id);
+    if (!p) return;
+    if (p.status !== 'Pending') {
+      showToast('Decision finalized already. Wait for next student payment/resubmission.');
+      return;
+    }
+    const adminEmail = sessionStorage.getItem('adminEmail');
+    if (!adminEmail) {
+      showToast('Admin session invalid. Please log in again.');
+      return;
+    }
+    if (p.paymentMethod !== ADMIN_PAYMENT_METHOD_CASH && !p.receiptImageUrl) {
+      showToast('Cannot approve bank/online payment without receipt.');
+      return;
+    }
+    const note = document.getElementById('verifyNote').value.trim();
+    showConfirm('Approve Payment','Approve payment from ' + p.student + ' for ' + p.amount + '?',function(){
+      database.ref('payments/' + id).update({
+        adminApprovalStatus: 'approved',
+        adminApprovedBy: adminEmail,
+        adminApprovedAt: Date.now(),
+        adminApprovalNote: note,
+        paymentMethod: p.paymentMethod || ADMIN_PAYMENT_METHOD_BANK_OR_ONLINE,
+        status: 'approved',
+        updatedAt: Date.now()
+      }).then(() => {
+        if (p.studentUid) {
+          database.ref('notifications').push({
+            recipientUid: p.studentUid,
+            title: 'Payment Approved',
+            message: 'Your payment of ' + p.amount + ' for ' + p.course + ' has been approved.',
+            type: 'payment',
+            read: false,
+            createdAt: Date.now()
+          });
+        }
+        return reconcileStudentBalance(p);
+      }).then(() => {
+        closeVerifyModal();
+        loadPayments();
+        showToast(p.student + ' payment approved');
+      }).catch(() => {
+        closeVerifyModal();
+        loadPayments();
+        showToast('Payment updated, but balance sync needs retry.');
+      });
+    });
+  }
+
+  function rejectPayment(id) {
+    const p = payments.find(x => x.id === id);
+    if (!p) return;
+    if (p.status !== 'Pending') {
+      showToast('Decision finalized already. Wait for next student payment/resubmission.');
+      return;
+    }
+    const adminEmail = sessionStorage.getItem('adminEmail');
+    if (!adminEmail) {
+      showToast('Admin session invalid. Please log in again.');
+      return;
+    }
+    const note = document.getElementById('verifyNote').value.trim();
+    showConfirm('Reject Payment','Reject payment from ' + p.student + '?',function(){
+      database.ref('payments/' + id).update({
+        adminApprovalStatus: 'rejected',
+        adminApprovedBy: adminEmail,
+        adminApprovedAt: Date.now(),
+        adminApprovalNote: note,
+        status: 'rejected',
+        updatedAt: Date.now()
+      }).then(() => {
+        if (p.studentUid) {
+          database.ref('notifications').push({
+            recipientUid: p.studentUid,
+            title: 'Payment Rejected',
+            message: 'Your payment of ' + p.amount + ' for ' + p.course + ' has been rejected. Note: ' + (note || 'Please contact admin for details.'),
+            type: 'payment',
+            read: false,
+            createdAt: Date.now()
+          });
+        }
+        return reconcileStudentBalance(p);
+      }).then(() => {
+        closeVerifyModal();
+        loadPayments();
+        showToast(p.student + ' payment rejected');
+      }).catch(() => {
+        closeVerifyModal();
+        loadPayments();
+        showToast('Payment updated, but balance sync needs retry.');
+      });
+    });
+  }
+
+  function recordCashPayment() {
+    const adminEmail = sessionStorage.getItem('adminEmail');
+    if (!adminEmail) {
+      showToast('Admin session invalid. Please log in again.');
+      return;
+    }
+    openCashPaymentModal();
+  }
+
+  function openCashPaymentModal() {
+    var overlay = document.getElementById('cashPayOverlay');
+    if (!overlay) return;
+    document.getElementById('cashPayUid').value = '';
+    document.getElementById('cashPayAmount').value = '';
+    document.getElementById('cashPayNote').value = 'Cash received by admin';
+    overlay.classList.add('active');
+    setTimeout(function() { document.getElementById('cashPayUid').focus(); }, 50);
+  }
+
+  function closeCashPaymentModal() {
+    var overlay = document.getElementById('cashPayOverlay');
+    if (overlay) overlay.classList.remove('active');
+  }
+
+  function submitCashPayment() {
+    const adminEmail = sessionStorage.getItem('adminEmail');
+    if (!adminEmail) {
+      showToast('Admin session invalid. Please log in again.');
+      closeCashPaymentModal();
+      return;
+    }
+
+    var studentUid = String(document.getElementById('cashPayUid').value || '').trim();
+    if (!studentUid) {
+      showToast('Student UID is required.');
+      return;
+    }
+    var amountValue = Number(String(document.getElementById('cashPayAmount').value || '').replace(/,/g, '').trim());
+    if (!Number.isFinite(amountValue) || amountValue <= 0) {
+      showToast('Enter a valid cash amount.');
+      return;
+    }
+    var noteInput = String(document.getElementById('cashPayNote').value || '').trim();
+
+    closeCashPaymentModal();
+
+    database.ref('students/' + studentUid).once('value').then((studentSnap) => {
+      if (!studentSnap.exists()) {
+        throw new Error('STUDENT_NOT_FOUND');
+      }
+
+      const studentData = studentSnap.val() || {};
+      const profile = studentData.profile || {};
+      const enrollment = studentData.enrollment || {};
+      const paymentData = {
+        studentUid: studentUid,
+        studentName: profile.fullName || profile.name || 'Unknown Student',
+        studentEmail: profile.email || '',
+        enrollmentId: enrollment.enrollmentId || '',
+        course: enrollment.course || 'Tuition Payment',
+        courseId: enrollment.courseId || '',
+        type: 'tuition',
+        amount: amountValue,
+        totalTuition: Number(enrollment.courseFee || enrollment.totalFee || enrollment.totalTuition || 0),
+        currency: 'PHP',
+        paymentMode: enrollment.paymentPlan || 'full',
+        paymentMethod: ADMIN_PAYMENT_METHOD_CASH,
+        paymentChannel: ADMIN_PAYMENT_METHOD_CASH,
+        verificationWindowDays: 3,
+        status: 'pending',
+        dueDate: 0,
+        dueDateEnabled: false,
+        receiptImageUrl: '',
+        receiptFileName: '',
+        receiptFileType: '',
+        receiptUploadedAt: Date.now(),
+        adminApprovalStatus: 'pending',
+        adminApprovalNote: noteInput,
+        adminApprovedBy: '',
+        adminApprovedAt: null,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      };
+      return database.ref('payments').push(paymentData);
+    }).then(() => {
+      loadPayments();
+      showToast('Cash payment recorded. Verify and approve to reflect balance.');
+    }).catch((error) => {
+      if (error && error.message === 'STUDENT_NOT_FOUND') {
+        showToast('Student UID not found.');
+        return;
+      }
+      showToast('Failed to record cash payment.');
+    });
+  }
+
+  // Search functionality
+  function handleSearch(query) {
+    const results = document.getElementById('searchResults');
+    const items = results.querySelectorAll('.search-result-item');
+    const lowerQuery = query.toLowerCase();
+    
+    items.forEach(item => {
+      const title = item.querySelector('.search-result-title').textContent.toLowerCase();
+      const desc = item.querySelector('.search-result-desc').textContent.toLowerCase();
+      if (title.includes(lowerQuery) || desc.includes(lowerQuery)) {
+        item.style.display = 'flex';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+    
+    results.classList.add('active');
+  }
+
+  function showSearchResults() {
+    document.getElementById('searchResults').classList.add('active');
+  }
+
+  function navigateTo(url) {
+    window.location.href = url;
+  }
+
+  // Close search when clicking outside the search box/results
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.search-bar') || e.target.closest('.search-results')) {
+      return;
+    }
+    const searchResults = document.getElementById('searchResults');
+    if (searchResults) {
+      searchResults.classList.remove('active');
+    }
+  });
+
+  // Dropdown functions
+  function toggleDropdown(id) {
+    const dropdown = document.getElementById(id);
+    const isActive = dropdown.classList.contains('active');
+    document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('active'));
+    document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--active'));
+    if (!isActive) {
+      dropdown.classList.add('active');
+      document.getElementById(id === 'notifDropdown' ? 'notifBtn' : 'msgBtn').classList.add('icon-btn--active');
+    }
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.icon-btn') && !e.target.closest('.header-dropdown')) {
+      document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('active'));
+      document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--active'));
+    }
+  });
+
+  function markAllRead() {
+    document.querySelectorAll('.dropdown-item--unread').forEach(item => item.classList.remove('dropdown-item--unread'));
+    document.getElementById('notifBadge').style.display = 'none';
+    showToast('All notifications marked as read');
+  }
+
+  function viewNotif(el) {
+    el.classList.remove('dropdown-item--unread');
+    const unreadCount = document.querySelectorAll('.dropdown-item--unread').length;
+    const badge = document.getElementById('notifBadge');
+    if (unreadCount === 0) {
+      badge.style.display = 'none';
+    } else {
+      badge.textContent = unreadCount;
+    }
+  }
+
+  function viewAllMessages() {
+    showToast('No messages');
+  }
+
+  function openMessage(user) {
+    showToast(`Open message from ${user}`);
+  }
+
+  let tt;
+  function showToast(msg) {
+    const t = document.getElementById('admToast');
+    t.textContent = msg;
+    t.classList.add('adm-toast--show');
+    clearTimeout(tt);
+    tt = setTimeout(() => t.classList.remove('adm-toast--show'), 2800);
+  }
+
+  function showConfirm(t,m,cb){var o=document.getElementById('confirmOverlay');o.querySelector('.confirm-title').textContent=t;o.querySelector('.confirm-message').textContent=m;o.classList.add('active');o.querySelector('.confirm-btn--cancel').onclick=function(){o.classList.remove('active');};o.querySelector('.confirm-btn--confirm').onclick=function(){o.classList.remove('active');cb();};}
+
+  // Init
+  loadAdminInfo();
+  loadPayments();
+  </script>
+  <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><div class="confirm-icon confirm-icon--warning"><iconify-icon icon="mdi:alert-outline"></iconify-icon></div><div class="confirm-title"></div><div class="confirm-message"></div><div class="confirm-actions"><button class="confirm-btn confirm-btn--cancel">Cancel</button><button class="confirm-btn confirm-btn--confirm">Confirm</button></div></div></div>
+  <div class="confirm-overlay" id="cashPayOverlay">
+    <div class="confirm-box" style="text-align:left;max-width:400px;">
+      <div class="confirm-title" style="text-align:center;">Record Cash Payment</div>
+      <div class="confirm-message" style="text-align:center;">Enter the student and the cash amount received. The record is saved as pending until verified.</div>
+      <label style="display:block;font-size:0.78rem;font-weight:600;color:var(--gray-700,#374151);margin-top:12px;">Student UID</label>
+      <input type="text" id="cashPayUid" style="width:100%;margin-top:4px;padding:10px 12px;border:1px solid var(--gray-300,#d1d5db);border-radius:8px;font-size:0.88rem;" autocomplete="off" placeholder="e.g. student_001"/>
+      <label style="display:block;font-size:0.78rem;font-weight:600;color:var(--gray-700,#374151);margin-top:10px;">Amount Paid (PHP)</label>
+      <input type="number" min="1" step="0.01" id="cashPayAmount" style="width:100%;margin-top:4px;padding:10px 12px;border:1px solid var(--gray-300,#d1d5db);border-radius:8px;font-size:0.88rem;" autocomplete="off" placeholder="0.00"/>
+      <label style="display:block;font-size:0.78rem;font-weight:600;color:var(--gray-700,#374151);margin-top:10px;">Note (optional)</label>
+      <input type="text" id="cashPayNote" maxlength="200" style="width:100%;margin-top:4px;padding:10px 12px;border:1px solid var(--gray-300,#d1d5db);border-radius:8px;font-size:0.88rem;" autocomplete="off"/>
+      <div class="confirm-actions" style="margin-top:16px;">
+        <button class="confirm-btn confirm-btn--cancel" onclick="closeCashPaymentModal()">Cancel</button>
+        <button class="confirm-btn confirm-btn--confirm" onclick="submitCashPayment()">Record Payment</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+function toggleMobileSidebar(){var s=document.querySelector('.sidebar'),b=document.getElementById('sidebarBackdrop');if(s.classList.contains('sidebar--mobile-open')){closeMobileSidebar();}else{s.classList.add('sidebar--mobile-open');b.classList.add('active');document.body.style.overflow='hidden';}}
+function closeMobileSidebar(){var s=document.querySelector('.sidebar');var b=document.getElementById('sidebarBackdrop');s.classList.remove('sidebar--mobile-open');b.classList.remove('active');document.body.style.overflow='';}
+window.addEventListener('resize',function(){if(window.innerWidth>700)closeMobileSidebar();});
+</script>
+<script src="admin-header-sync.js"></script>
+<script src="assets/global-search.js"></script>
+</body>
+</html>
+
+
+

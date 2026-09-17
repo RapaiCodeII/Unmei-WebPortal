@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unmei Nihongo Center - My Courses</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="studentportal.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="assets/iconify-icon.min.js"></script>
+<script src="assets/unmei-icons.js"></script>
+<script src="assets/d3.v7.min.js"></script>
+<script src="assets/unmei-charts.js"></script>
+</head>
+<body>
+  <script src="session-guard.js"></script>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="brand-logo">
+        <img src="assets/logo.png" alt="UNMEI" style="width:40px;height:40px;object-fit:contain;">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UNMEI</span>
+        <span class="brand-portal">STUDENT PORTAL</span>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <p class="nav-section-label">OVERVIEW</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="dashboard.html" class="nav-link">
+          <iconify-icon icon="mdi:view-dashboard"></iconify-icon>
+          Dashboard</a></li>
+        <li class="nav-item"><a href="profile.html" class="nav-link">
+          <iconify-icon icon="mdi:account-outline"></iconify-icon>
+          My Profile</a></li>
+        <li class="nav-item nav-item--active"><a href="courses.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+          My Courses</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">RECORDS</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="payments.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+          Payments</a></li>
+        <li class="nav-item"><a href="app-download.html" class="nav-link">
+          <iconify-icon icon="mdi:download-outline"></iconify-icon>
+          App Download</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">STUDENT LIFE</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="schedules.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+          Schedules</a></li>
+        <li class="nav-item"><a href="announcements.html" class="nav-link">
+          <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+          Announcements</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">PORTAL SETTINGS</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="settings.html" class="nav-link">
+          <iconify-icon icon="mdi:cog-outline"></iconify-icon>
+          Settings</a></li>
+        <li class="nav-item"><a href="javascript:void(0)" onclick="if(window.__studentSignOut){window.__studentSignOut();}else{location.href='settings.html';}" class="nav-link">
+          <iconify-icon icon="mdi:logout"></iconify-icon>
+          Sign Out</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar__user">
+      <div id="sidebarAvatarText" class="user-avatar user-avatar--dark">--</div>
+      <img id="sidebarAvatarImg" class="user-avatar user-avatar--img" style="display:none;width:36px;height:36px;border-radius:50%;object-fit:cover;" alt="Avatar">
+      <div class="user-meta">
+        <span class="user-name" id="sidebarUserName">Student</span>
+        <span class="user-role">Student</span>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="main-wrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="sidebar-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
+        <div class="topbar__left">
+        <h2 class="topbar__title">My Courses</h2>
+        <nav class="breadcrumb">
+          <a href="dashboard.html" class="breadcrumb__link">Home</a>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current">My Courses</span>
+        </nav>
+      </div>
+      <div class="topbar__right">
+        <!-- Notification Bell -->
+        <div style="position: relative;">
+          <button class="icon-btn" id="notifBtn" onclick="toggleDropdown('notifDropdown')"><iconify-icon icon="mdi:bell-outline"></iconify-icon><span class="dropdown-badge" id="notifBadge" style="display: none;">0</span></button><div class="header-dropdown" id="notifDropdown"><div class="header-dropdown__header"><span class="header-dropdown__title">Notifications</span><span class="header-dropdown__link" onclick="markAllRead()">Mark all read</span></div><div class="header-dropdown__list" id="notifList"><div class="header-dropdown__empty" id="notifEmpty"><iconify-icon icon="mdi:bell-outline"></iconify-icon><p>No notifications yet</p></div></div></div>
+        </div>
+
+        <!-- Messages -->
+        <div style="position: relative;">
+          <button class="icon-btn" id="msgBtn" onclick="toggleDropdown('msgDropdown')">
+            <iconify-icon icon="mdi:email-outline"></iconify-icon>
+            <span class="dropdown-badge" style="display: none;">0</span>
+          </button>
+          <div class="header-dropdown" id="msgDropdown">
+            <div class="header-dropdown__header">
+              <span class="header-dropdown__title">Messages</span>
+              <span class="header-dropdown__link" onclick="viewAllMessages()">View all</span>
+            </div>
+            <div class="header-dropdown__list"></div>
+          </div>
+        </div>
+
+        <div class="topbar__user">
+          <div id="headerAvatarText" class="user-avatar user-avatar--red">--</div>
+          <img id="headerAvatarImg" class="user-avatar user-avatar--img" style="display:none;width:36px;height:36px;border-radius:50%;object-fit:cover;" alt="Avatar">
+          <div class="user-meta">
+            <span class="user-name" id="headerUserName">Student</span>
+            <span class="user-role">Student</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content">
+
+      <!-- Course Header Banner -->
+      <div class="course-banner">
+        <div class="course-banner__icon">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+        </div>
+        <div class="course-banner__info">
+          <h2 class="course-banner__title">No active course</h2>
+          <p class="course-banner__desc">Course details will appear once your enrollment is confirmed.</p>
+          <div class="course-banner__progress">
+            <!-- Linear progress bar: adaptive color from red to green -->
+            <div class="course-progress-line">
+              <div class="course-progress-line__head">
+                <span class="course-progress-line__label">Course Completion</span>
+                <span class="course-progress-line__pct" id="progressLinePct">0%</span>
+              </div>
+              <div class="course-progress-line__track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressLineTrack">
+                <div class="course-progress-line__fill" id="progressLineFill"></div>
+              </div>
+            </div>
+            <div class="course-progress-details">
+              <div class="course-progress__stat">
+                <span class="course-progress__stat-num" id="progressModulesDone">0</span>
+                <span class="course-progress__stat-lbl">Completed</span>
+              </div>
+              <div class="course-progress__stat">
+                <span class="course-progress__stat-num" id="progressModulesTotal">0</span>
+                <span class="course-progress__stat-lbl">Total Modules</span>
+              </div>
+              <div class="course-progress__stat">
+                <span class="course-progress__stat-num" id="progressModulesLeft">0</span>
+                <span class="course-progress__stat-lbl">Remaining</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two Column -->
+      <div class="courses-layout">
+
+        <!-- LEFT: Course Modules -->
+        <div class="left-col">
+          <div class="panel">
+          <div class="panel__header">
+            <div class="panel__title">
+              <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+              Course Modules
+            </div>
+            <span class="badge-inprogress">In Progress</span>
+          </div>
+
+          <!-- Payment gate wall — shown when no approved payment -->
+          <div id="modulePaywall" style="display:none;padding:40px 24px;text-align:center;">
+            <div style="width:56px;height:56px;border-radius:16px;background:var(--red-soft);color:var(--red);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+              <iconify-icon icon="mdi:lock-outline" style="width:26px;height:26px;"></iconify-icon>
+            </div>
+            <p style="font-size:0.95rem;font-weight:700;color:var(--gray-900);margin-bottom:8px;">Payment Required</p>
+            <p style="font-size:0.82rem;color:var(--gray-500);line-height:1.55;max-width:300px;margin:0 auto 20px;">Course modules are locked until your tuition payment is verified by the admin. Please submit your payment to unlock access.</p>
+            <a href="payments.html" style="display:inline-flex;align-items:center;gap:8px;background:var(--red);color:#fff;font-size:0.82rem;font-weight:600;padding:10px 22px;border-radius:10px;text-decoration:none;box-shadow:0 4px 14px rgba(192,57,43,0.28);">
+              <iconify-icon icon="mdi:credit-card-outline" style="width:15px;height:15px;"></iconify-icon>
+              Go to Payments
+            </a>
+          </div>
+
+          <div class="module-list" id="moduleList">
+          </div>
+          </div>
+
+          <!-- Grades & Assessment Results -->
+          <div class="panel">
+            <div class="panel__header">
+              <div class="panel__title">
+                <iconify-icon icon="mdi:chart-areaspline"></iconify-icon>
+                Grades &amp; Assessment Results
+              </div>
+              <span class="panel__hint" id="gradesAvgBadge">--</span>
+            </div>
+            <div id="gradesSummaryRow" style="display:flex;flex-wrap:wrap;gap:10px;padding:14px 20px 6px;"></div>
+            <div class="chart-container" style="position:relative;height:300px;width:100%;">
+              <canvas id="gradesTrendChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Details + Activity + Scores + Rating -->
+        <div class="right-col">
+
+          <!-- Course Details -->
+          <div class="panel">
+            <div class="panel__header">
+              <div class="panel__title">
+                <iconify-icon icon="mdi:information-outline"></iconify-icon>
+                Course Details
+              </div>
+            </div>
+            <div class="details-table">
+              <div class="details-row">
+                <span class="details-label">Course</span>
+                <span class="details-value" id="courseDetailName">--</span>
+              </div>
+              <div class="details-row">
+                <span class="details-label">Level</span>
+                <span class="details-value" id="courseDetailLevel">--</span>
+              </div>
+              <div class="details-row">
+                <span class="details-label">Duration</span>
+                <span class="details-value" id="courseDetailDuration">--</span>
+              </div>
+              <div class="details-row">
+                <span class="details-label">Instructor</span>
+                <span class="details-value" id="courseDetailInstructor">--</span>
+              </div>
+              <div class="details-row">
+                <span class="details-label">Schedule</span>
+                <span class="details-value" id="courseSchedule">--</span>
+              </div>
+              <div class="details-row">
+                <span class="details-label">Class Setup</span>
+                <span class="details-value" id="courseDetailSetup">--</span>
+              </div>
+              <div class="details-row">
+                <span class="details-label">Total Modules</span>
+                <span class="details-value" id="courseDetailModules">--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kanji Reference (PHASE 3: live from kanji/{courseLevel}) -->
+          <div class="panel">
+            <div class="panel__header">
+              <div class="panel__title">
+                <iconify-icon icon="mdi:ideogram-cjk"></iconify-icon>
+                Kanji Reference
+              </div>
+              <span class="panel__hint" id="kanjiCountBadge">0 kanji</span>
+            </div>
+            <div style="padding:14px 20px 4px;">
+              <input type="text" id="kanjiSearch" class="form-control" placeholder="Search kanji, meaning or reading (e.g. water, みず)…" style="width:100%;padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:10px;font-family:inherit;font-size:0.85rem;outline:none;" oninput="renderKanjiGrid()" />
+            </div>
+            <div id="kanjiGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:14px 20px 20px;max-height:430px;overflow-y:auto;">
+              <p style="grid-column:1/-1;text-align:center;color:var(--gray-400);font-size:0.82rem;padding:20px 0;">Loading kanji dictionary…</p>
+            </div>
+          </div>
+
+          <!-- My Scores & Performance -->
+          <div class="panel">
+            <div class="panel__header">
+              <div class="panel__title">
+                <iconify-icon icon="mdi:star-outline"></iconify-icon>
+                My Scores &amp; Performance
+              </div>
+            </div>
+            <div style="padding: 16px 20px 8px;">
+              <div style="display:flex;gap:12px;margin-bottom:16px;">
+                <div style="flex:1;text-align:center;background:var(--gray-50);border-radius:10px;padding:10px;border:1px solid var(--gray-100);">
+                  <p style="font-size:0.65rem;color:var(--gray-500);font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">Attendance</p>
+                  <p style="font-size:1.05rem;font-weight:700;color:var(--gray-800);margin-top:2px;" id="attendanceDisplay">100%</p>
+                </div>
+                <div style="flex:1;text-align:center;background:var(--gray-50);border-radius:10px;padding:10px;border:1px solid var(--gray-100);">
+                  <p style="font-size:0.65rem;color:var(--gray-500);font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">Performance Trend</p>
+                  <p style="font-size:0.9rem;font-weight:700;margin-top:2px;" id="trendBadge">Good Progress</p>
+                </div>
+              </div>
+            </div>
+            <div class="scores-grid" id="scoresGrid">
+              <div class="score-item"><span class="score-label">Grammar</span><div class="score-bar-wrap"><div class="score-bar-fill" id="scoreGrammar" style="width:0%"></div></div><span class="score-value" id="scoreGrammarVal">--</span></div>
+              <div class="score-item"><span class="score-label">Kanji</span><div class="score-bar-wrap"><div class="score-bar-fill" id="scoreKanji" style="width:0%"></div></div><span class="score-value" id="scoreKanjiVal">--</span></div>
+              <div class="score-item"><span class="score-label">Listening</span><div class="score-bar-wrap"><div class="score-bar-fill" id="scoreListening" style="width:0%"></div></div><span class="score-value" id="scoreListeningVal">--</span></div>
+              <div class="score-item"><span class="score-label">Reading</span><div class="score-bar-wrap"><div class="score-bar-fill" id="scoreReading" style="width:0%"></div></div><span class="score-value" id="scoreReadingVal">--</span></div>
+              <div class="score-item"><span class="score-label">Speaking</span><div class="score-bar-wrap"><div class="score-bar-fill" id="scoreSpeaking" style="width:0%"></div></div><span class="score-value" id="scoreSpeakingVal">--</span></div>
+              <div class="score-item"><span class="score-label">Vocabulary</span><div class="score-bar-wrap"><div class="score-bar-fill" id="scoreVocab" style="width:0%"></div></div><span class="score-value" id="scoreVocabVal">--</span></div>
+            </div>
+            <div id="scoresDisplay" style="display:none;"></div>
+          </div>
+<!-- Instructor Rating -->
+          <div class="panel">
+            <div class="panel__header">
+              <div class="panel__title">
+                <iconify-icon icon="mdi:star-outline"></iconify-icon>
+                Rate Your Instructor
+              </div>
+            </div>
+            <div class="rating-section" id="ratingSection">
+              <p class="rating-instructor" id="ratingInstructorName">--</p>
+              <p class="rating-panel-desc">Your feedback helps us keep UNMEI's teaching at its best. The evaluation covers eight categories and may be submitted anonymously.</p>
+              <p class="rating-pending-note" id="ratingPendingNote">Loading instructor assignment...</p>
+              <button class="rating-open-btn" id="openRatingModalBtn" onclick="openEvaluationModal()" style="display:none;">
+                <iconify-icon icon="mdi:pencil-outline"></iconify-icon>
+                Open Evaluation Form
+              </button>
+              <div class="rating-done-note" id="ratingDoneNote" style="display:none;">
+                <iconify-icon icon="mdi:check-circle-outline"></iconify-icon>
+                You have already submitted an evaluation for this instructor.
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div class="panel">
+            <div class="panel__header">
+              <div class="panel__title">
+                <iconify-icon icon="mdi:clock-outline"></iconify-icon>
+                Recent Activity
+              </div>
+            </div>
+            <div class="activity-list" id="activityList">
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    let database;
+
+    // ---- Dropdown Functions ----
+    function toggleDropdown(id) {
+      const dropdown = document.getElementById(id);
+      const isActive = dropdown.classList.contains('active');
+      document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('active'));
+      document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--active'));
+      if (!isActive) {
+        dropdown.classList.add('active');
+        document.getElementById(id === 'notifDropdown' ? 'notifBtn' : 'msgBtn').classList.add('icon-btn--active');
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.icon-btn') && !e.target.closest('.header-dropdown')) {
+        document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('active'));
+        document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--active'));
+      }
+    });
+
+    function markAllRead() {
+      document.querySelectorAll('.dropdown-item--unread').forEach(item => item.classList.remove('dropdown-item--unread'));
+      document.querySelector('.dropdown-badge').style.display = 'none';
+    }
+
+    function viewNotif(el) {
+      el.classList.remove('dropdown-item--unread');
+      const unreadCount = document.querySelectorAll('.dropdown-item--unread').length;
+      const badge = document.querySelector('.dropdown-badge');
+      badge.style.display = unreadCount === 0 ? 'none' : 'block';
+      if (unreadCount > 0) badge.textContent = unreadCount;
+    }
+
+    function viewAllMessages() { showAlert('Messages', 'No messages yet', 'info'); }
+    function openMessage(user) { showAlert('Messages', 'No messages yet', 'info'); }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getInitials(name) {
+      return (name || 'Student').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'ST';
+    }
+
+    function setUserIdentity(profile) {
+      const fullName = (profile && profile.fullName) || 'Student';
+      document.getElementById('sidebarUserName').textContent = fullName;
+      document.getElementById('headerUserName').textContent = fullName;
+      const initials = getInitials(fullName);
+      document.getElementById('sidebarAvatarText').textContent = initials;
+      document.getElementById('headerAvatarText').textContent = initials;
+    }
+
+    function inferLevelLabel(courseId, courseName, rawLevel) {
+      const source = String(rawLevel || courseId || courseName || '').toLowerCase();
+      if (source.includes('n5')) return 'Beginner';
+      if (source.includes('n4')) return 'Elementary';
+      if (source.includes('n3')) return 'Intermediate';
+      if (source.includes('n2')) return 'Advanced';
+      return 'Not available';
+    }
+
+    function normalizeDuration(value) {
+      if (value === undefined || value === null) return 'Not available';
+      if (typeof value === 'number' && value > 0) {
+        return value + (value === 1 ? ' month' : ' months');
+      }
+      const text = String(value).trim();
+      return text || 'Not available';
+    }
+
+    function setCourseProgress(completedCount, totalCount) {
+      const safeCompleted = Math.max(0, Number(completedCount) || 0);
+      const safeTotal = Math.max(0, Number(totalCount) || 0);
+      const pct = safeTotal > 0 ? Math.round((safeCompleted / safeTotal) * 100) : 0;
+      const remaining = Math.max(0, safeTotal - safeCompleted);
+
+      document.getElementById('courseDetailModules').textContent = String(safeTotal);
+
+      // Update linear progress bar (adaptive color: red at low progress, green when complete)
+      const lineFill = document.getElementById('progressLineFill');
+      const lineTrack = document.getElementById('progressLineTrack');
+      const linePct = document.getElementById('progressLinePct');
+      const doneEl = document.getElementById('progressModulesDone');
+      const totalEl = document.getElementById('progressModulesTotal');
+      const leftEl = document.getElementById('progressModulesLeft');
+
+      if (lineFill) {
+        lineFill.style.width = pct + '%';
+        if (pct <= 0) {
+          lineFill.style.background = '#e5e7eb';
+        } else {
+          // Hue interpolation: 4 (red) -> 140 (green), linear with completion
+          const hue = Math.round(4 + (140 - 4) * (pct / 100));
+          lineFill.style.background = 'hsl(' + hue + ', 72%, 44%)';
+        }
+      }
+      if (lineTrack) lineTrack.setAttribute('aria-valuenow', String(pct));
+      if (linePct) linePct.textContent = pct + '%';
+      if (doneEl) doneEl.textContent = safeCompleted;
+      if (totalEl) totalEl.textContent = safeTotal;
+      if (leftEl) leftEl.textContent = remaining;
+    }
+
+    function resetCourseDetails() {
+      document.querySelector('.course-banner__title').textContent = 'No active course';
+      document.querySelector('.course-banner__desc').textContent = 'Course details will appear once your enrollment is confirmed.';
+      document.getElementById('courseDetailName').textContent = 'Not available';
+      document.getElementById('courseDetailLevel').textContent = 'Not available';
+      document.getElementById('courseDetailDuration').textContent = 'Not available';
+      document.getElementById('courseDetailInstructor').textContent = 'Not available';
+      document.getElementById('courseSchedule').textContent = 'Not available';
+      document.getElementById('courseDetailSetup').textContent = 'Not yet available';
+      document.getElementById('ratingInstructorName').textContent = 'Not assigned';
+      setCourseProgress(0, 0);
+    }
+
+    function renderScoresSummary(scores) {
+      const scoreMap = scores || {};
+      const scoreRows = [];
+      const skills = [
+        { key: 'grammar', label: 'Grammar' },
+        { key: 'kanji', label: 'Kanji' },
+        { key: 'listening', label: 'Listening' },
+        { key: 'reading', label: 'Reading' },
+        { key: 'speaking', label: 'Speaking' },
+        { key: 'vocabulary', label: 'Vocabulary' }
+      ];
+
+      let total = 0;
+      let count = 0;
+      skills.forEach((item) => {
+        const raw = Number(scoreMap[item.key] || 0);
+        const value = Number.isFinite(raw) ? Math.max(0, Math.min(100, Math.round(raw))) : 0;
+        if (value <= 0) return;
+        total += value;
+        count += 1;
+        scoreRows.push('<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gray-100);"><span style="font-size:0.78rem;color:var(--gray-600);">' + escapeHtml(item.label) + '</span><span style="font-size:0.78rem;font-weight:700;color:var(--gray-700);">' + value + '%</span></div>');
+      });
+
+      const avg = count > 0 ? Math.round(total / count) : 0;
+      const attendanceRaw = Number(scoreMap.attendance || scoreMap.attendanceRate || scoreMap.attendancePercent || 0);
+      const attendance = Number.isFinite(attendanceRaw) && attendanceRaw > 0
+        ? Math.max(0, Math.min(100, Math.round(attendanceRaw))) + '%'
+        : 'Not available';
+
+      document.getElementById('attendanceDisplay').textContent = attendance;
+
+      let trendLabel = 'Stable';
+      let trendColor = 'var(--gray-500)';
+      const trendRaw = String(scoreMap.trend || '').trim().toLowerCase();
+      if (trendRaw === 'up' || trendRaw === 'improving' || trendRaw === 'increase' || trendRaw === 'improved') {
+        trendLabel = 'Improving';
+        trendColor = '#16a34a';
+      } else if (trendRaw === 'down' || trendRaw === 'declining' || trendRaw === 'decrease') {
+        trendLabel = 'Needs Attention';
+        trendColor = '#c0392b';
+      } else if (avg >= 85) {
+        trendLabel = 'Excellent';
+        trendColor = '#16a34a';
+      } else if (avg >= 70) {
+        trendLabel = 'Steady';
+        trendColor = '#2563eb';
+      } else if (avg > 0) {
+        trendLabel = 'Needs Attention';
+        trendColor = '#c0392b';
+      }
+
+      const trendEl = document.getElementById('trendBadge');
+      trendEl.textContent = trendLabel;
+      trendEl.style.color = trendColor;
+
+      const summaryEl = document.getElementById('scoresDisplay');
+      if (!count) {
+        summaryEl.innerHTML = '<p style="color:var(--gray-400);font-size:0.82rem;padding:8px 0;">No score records uploaded yet.</p>';
+        return;
+      }
+
+      summaryEl.innerHTML = '<p style="font-size:0.75rem;color:var(--gray-500);margin-bottom:8px;">Average score: <strong style="color:var(--gray-700);">' + avg + '%</strong></p>' + scoreRows.join('');
+    }
+
+    let activeSectionId = '';
+    let paymentApproved = false; // payment gate flag
+
+    // Demo accounts are read-only: never write completedModules or progress for them.
+    function isDemoAccount(uid) {
+      if (!uid) return false;
+      const u = String(uid).trim();
+      if (/^student_\d+$/.test(u)) return true;
+      if (u === 'qanbtz8j0onpqaysgtU67jfclfp1') return true;
+      return false;
+    }
+
+    // Build a completedModules map from multiple Firebase sources:
+    // 1. studentData.completedModules (direct toggle map from portal)
+    // 2. studentData.appSyncData.modulesCompleted (Unity app sync array)
+    function getCompletedModulesMap(studentData) {
+      if (!studentData) return {};
+      if (studentData.completedModules && typeof studentData.completedModules === 'object') {
+        return studentData.completedModules;
+      }
+      if (studentData.appSyncData && Array.isArray(studentData.appSyncData.modulesCompleted)) {
+        const map = {};
+        studentData.appSyncData.modulesCompleted.forEach(function(modId) {
+          if (modId) map[modId] = true;
+        });
+        return map;
+      }
+      return {};
+    }
+
+    function getCourseProgressCounts(studentData) {
+      const appSyncData = (studentData && studentData.appSyncData) || {};
+      const completedMap = getCompletedModulesMap(studentData);
+      const completedCount = Array.isArray(appSyncData.modulesCompleted)
+        ? appSyncData.modulesCompleted.length
+        : Object.keys(completedMap).filter(function (key) { return completedMap[key] === true; }).length;
+      const totalModules = Number(appSyncData.totalModules || 0);
+      return {
+        completed: completedCount,
+        total: totalModules
+      };
+    }
+
+    // Renders real activity items; empty list shows a placeholder
+    function renderActivity(items) {
+      const list = document.getElementById('activityList');
+      if (!list) return;
+      if (!items || !items.length) {
+        list.innerHTML = '<div style="padding:24px 20px;text-align:center;color:var(--gray-400);font-size:0.8rem;">No activity yet.</div>';
+        return;
+      }
+      list.innerHTML = items.map(item =>
+        '<div class="activity-item">' +
+          '<span class="activity-dot ' + escapeHtml(item.dot || 'activity-dot--blue') + '"></span>' +
+          '<div class="activity-body">' +
+            '<p class="activity-title">' + escapeHtml(item.title) + '</p>' +
+            '<p class="activity-sub">' + escapeHtml(item.sub) + '</p>' +
+            '<span class="activity-time">' + escapeHtml(item.time) + '</span>' +
+          '</div>' +
+        '</div>'
+      ).join('');
+    }
+
+    // Load saved avatar from Firebase or localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      database = firebase.database();
+      const studentUid = localStorage.getItem('studentUid');
+      if (!studentUid) return;
+
+      resetCourseDetails();
+      renderScoresSummary({});
+
+      setUserIdentity({
+        fullName: localStorage.getItem('studentEmail') ? localStorage.getItem('studentEmail').split('@')[0] : 'Student'
+      });
+
+      database.ref('students/' + studentUid).once('value').then((snapshot) => {
+        const studentData = snapshot.val() || {};
+        const profile = studentData.profile || {};
+        const enrollment = studentData.enrollment || {};
+
+        setUserIdentity(profile);
+        if (profile.avatarUrl) {
+          applyAvatar(profile.avatarUrl);
+        }
+
+        activeSectionId = enrollment.sectionId || '';
+        const courseId = enrollment.courseId || 'jlpt_n5';
+        const enrollmentCourseName = String(enrollment.course || 'JLPT N5 Regular Class').trim();
+
+        const levelText = inferLevelLabel(courseId, enrollmentCourseName, enrollment.level);
+        const durationText = normalizeDuration(enrollment.duration || '6 Months (72 Hours)');
+        const scheduleText = (enrollment.scheduleDays && enrollment.scheduleTimeSlot)
+          ? (enrollment.scheduleDays + ' - ' + enrollment.scheduleTimeSlot)
+          : 'Mon / Wed - 6:00 PM - 7:30 PM';
+        const setupText = enrollment.classSetup || 'Hybrid / Online';
+        const instructorText = String(enrollment.instructor || '').trim() || 'Not assigned';
+
+        document.querySelector('.course-banner__title').textContent = enrollmentCourseName;
+        document.querySelector('.course-banner__desc').textContent = 'Course content and modules are synced from your assigned class.';
+        document.getElementById('courseDetailName').textContent = enrollmentCourseName;
+        document.getElementById('courseDetailLevel').textContent = levelText;
+        document.getElementById('courseDetailDuration').textContent = durationText;
+        document.getElementById('courseSchedule').textContent = scheduleText;
+        document.getElementById('courseDetailSetup').textContent = setupText;
+        document.getElementById('courseDetailInstructor').textContent = instructorText;
+        document.getElementById('ratingInstructorName').textContent = instructorText;
+
+        if (courseId) {
+          database.ref('courses/' + courseId).once('value').then((courseSnap) => {
+            const course = courseSnap.val();
+            if (course) {
+              const courseName = String(course.name || enrollmentCourseName).trim();
+              const courseDesc = String(course.description || '').trim();
+              const levelLbl = inferLevelLabel(courseId, courseName, course.level || course.levelLabel || course.track);
+              const durLbl = normalizeDuration(course.duration || course.estimatedDuration || course.months);
+
+              if (courseName) {
+                document.querySelector('.course-banner__title').textContent = courseName;
+                document.getElementById('courseDetailName').textContent = courseName;
+              }
+              if (courseDesc) {
+                document.querySelector('.course-banner__desc').textContent = courseDesc;
+              }
+              if (levelLbl !== 'Not available') document.getElementById('courseDetailLevel').textContent = levelLbl;
+              if (durLbl !== 'Not available') document.getElementById('courseDetailDuration').textContent = durLbl;
+            }
+          });
+        }
+
+        if (activeSectionId) {
+          firebase.database().ref('sections/' + activeSectionId).once('value').then((sectionSnap) => {
+            const section = sectionSnap.val();
+            if (section) {
+              const inst = String(section.instructor || '').trim() || instructorText;
+              document.getElementById('courseDetailInstructor').textContent = inst;
+              document.getElementById('ratingInstructorName').textContent = inst;
+              if (section.schedule && section.schedule.classSetup) {
+                document.getElementById('courseDetailSetup').textContent = section.schedule.classSetup;
+              }
+            }
+          });
+        }
+
+        loadScores(studentUid);
+        initInstructorEvaluation(studentUid, courseId, enrollment.sectionId || '');
+        loadKanjiReference(courseId);
+        loadGradeTrend(studentUid, courseId);
+        const progressCounts = getCourseProgressCounts(studentData);
+        setCourseProgress(progressCounts.completed, progressCounts.total);
+
+        // ===== PAYMENT GATE =====
+        // Check for at least one approved payment before unlocking modules.
+        database.ref('payments').orderByChild('studentUid').equalTo(studentUid).once('value').then((paymentsSnap) => {
+          let hasApproved = false;
+          if (paymentsSnap.exists()) {
+            paymentsSnap.forEach((child) => {
+              const p = child.val() || {};
+              const st = String(p.adminApprovalStatus || p.verificationStatus || p.status || '').toLowerCase();
+              if (st === 'approved' || st === 'paid') hasApproved = true;
+            });
+          }
+          paymentApproved = hasApproved;
+
+          const paywall = document.getElementById('modulePaywall');
+          const moduleList = document.getElementById('moduleList');
+          const inProgressBadge = document.querySelector('.badge-inprogress');
+
+          if (!hasApproved) {
+            // Show paywall, hide module list, lock progress
+            if (paywall) paywall.style.display = 'block';
+            if (moduleList) moduleList.style.display = 'none';
+            if (inProgressBadge) {
+              inProgressBadge.textContent = 'Locked';
+              inProgressBadge.style.background = 'var(--gray-100)';
+              inProgressBadge.style.color = 'var(--gray-500)';
+            }
+            renderActivity([{
+              dot: 'activity-dot--yellow',
+              title: 'Payment pending',
+              sub: 'Submit your payment receipt to unlock course modules.',
+              time: 'Action required'
+            }]);
+          } else {
+            // Payment approved — unlock modules
+            if (paywall) paywall.style.display = 'none';
+            if (moduleList) moduleList.style.display = 'block';
+            loadCourseModules(courseId, studentUid, studentData);
+          }
+        }).catch(() => {
+          // On error, default to locked for safety
+          const paywall = document.getElementById('modulePaywall');
+          const moduleList = document.getElementById('moduleList');
+          if (paywall) paywall.style.display = 'block';
+          if (moduleList) moduleList.style.display = 'none';
+          renderActivity([{
+            dot: 'activity-dot--yellow',
+            title: 'Payment pending',
+            sub: 'Submit your payment receipt to unlock course modules.',
+            time: 'Action required'
+          }]);
+        });
+      }).catch(() => {
+        // Student data load failed — show locked/empty state safely
+        const paywall = document.getElementById('modulePaywall');
+        const moduleList = document.getElementById('moduleList');
+        if (paywall) paywall.style.display = 'block';
+        if (moduleList) moduleList.style.display = 'none';
+        renderActivity([{
+          dot: 'activity-dot--yellow',
+          title: 'Payment pending',
+          sub: 'Submit your payment receipt to unlock course modules.',
+          time: 'Action required'
+        }]);
+      });
+    });
+
+    function loadCourseModules(courseId, studentUid, studentData) {
+      const moduleList = document.querySelector('.module-list');
+      if (!moduleList) return;
+
+      const defaultN5Modules = [
+        { id: 'mod-1', title: 'Module 1: Writing Systems (Hiragana & Katakana)', description: 'Master foundational Japanese scripts, pronunciation rules, and stroke order.' },
+        { id: 'mod-2', title: 'Module 2: Daily Greetings & Numbers', description: 'Learn essential greetings, self-introductions, numbers, and basic time expressions.' },
+        { id: 'mod-3', title: 'Module 3: N5 Kanji & Essential Vocabulary', description: 'Study the 80 core N5 Kanji characters, vocabulary words, and readings.' },
+        { id: 'mod-4', title: 'Module 4: Grammar & Sentence Structure', description: 'Master polite verb forms (-masu), basic particles (wa, ga, ni, de, wo), and sentence patterns.' },
+        { id: 'mod-5', title: 'Module 5: Listening Comprehension & Conversation', description: 'Practice listening exercises, short dialogues, and everyday scenario responses.' }
+      ];
+
+      firebase.database().ref('courses/' + (courseId || 'jlpt_n5') + '/modules').once('value').then((snapshot) => {
+        let modules = [];
+        if (snapshot.exists()) {
+          snapshot.forEach(c => {
+            const m = c.val();
+            // Strip any status baked into the DB module — status is always
+            // derived from the student's own completedModules map (and only
+            // when payment has been approved).
+            if (m && typeof m === 'object') delete m.status;
+            if (m) modules.push(m);
+          });
+        } else {
+          modules = defaultN5Modules;
+        }
+
+        // PAYMENT GATE: completely ignore any stored progress when unpaid.
+        // This prevents leftover DB data (e.g. from old imports) from
+        // showing progress to students who haven't paid yet.
+        const completedMap = paymentApproved && studentData
+          ? getCompletedModulesMap(studentData)
+          : {};
+        const storedPct = paymentApproved && studentData && studentData.enrollment &&
+          studentData.enrollment.progress !== undefined
+          ? studentData.enrollment.progress
+          : null;
+
+        let completedCount = 0;
+        let totalCount = modules.length;
+
+        let html = '';
+        modules.forEach((mod, idx) => {
+          const modId = mod.id || ('mod-' + idx);
+          // Status is ONLY derived from the student's own completedModules map.
+          // Never read status from the DB module object — it may have stale data.
+          let status = 'locked';
+          if (completedMap[modId] === true) {
+            status = 'completed';
+          } else if (storedPct === 100) {
+            status = 'completed';
+          }
+
+          if (status === 'completed') completedCount++;
+
+          const statusClass = status === 'completed' ? 'module-item--completed' : (status === 'inprogress' ? 'module-item--inprogress' : 'module-item--locked');
+          const iconClass = status === 'completed' ? 'module-icon--completed' : (status === 'inprogress' ? 'module-icon--inprogress' : 'module-icon--locked');
+          const badgeClass = status === 'completed' ? 'module-badge--completed' : (status === 'inprogress' ? 'module-badge--inprogress' : 'module-badge--locked');
+          const badgeText = status === 'completed' ? 'Completed' : (status === 'inprogress' ? 'In Progress' : 'Locked');
+          const iconSvg = status === 'completed' 
+            ? '<iconify-icon icon="mdi:check"></iconify-icon>' 
+            : (status === 'inprogress' ? '<iconify-icon icon="mdi:circle"></iconify-icon>' : '<iconify-icon icon="mdi:lock-outline"></iconify-icon>');
+
+          html += '<div class="module-item ' + statusClass + '" onclick="toggleModuleCompletion(\'' + modId + '\', \'' + studentUid + '\', ' + idx + ')"><div class="module-icon ' + iconClass + '">' + iconSvg + '</div><div class="module-info"><p class="module-title' + (status === 'locked' ? ' module-title--locked' : '') + '">' + escapeHtml(mod.title) + '</p><p class="module-desc">' + escapeHtml(mod.description || '') + '</p></div><span class="module-badge ' + badgeClass + '">' + escapeHtml(badgeText) + '</span></div>';
+        });
+
+        moduleList.innerHTML = html;
+        setCourseProgress(completedCount, totalCount);
+
+        // Sync progress to Realtime DB (only when paid AND not a demo account)
+        if (studentUid && paymentApproved && !isDemoAccount(studentUid)) {
+          const calcPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+          firebase.database().ref('students/' + studentUid + '/enrollment').update({ progress: calcPct });
+          firebase.database().ref('students/' + studentUid).update({ progress: calcPct });
+        }
+
+        // Render real activity from completedModules
+        if (completedCount > 0) {
+          renderActivity([{
+            dot: 'activity-dot--green',
+            title: completedCount + ' module' + (completedCount > 1 ? 's' : '') + ' completed',
+            sub: 'Keep going — you\'re making progress!',
+            time: 'This session'
+          }]);
+        } else {
+          renderActivity([{
+            dot: 'activity-dot--blue',
+            title: 'Course unlocked',
+            sub: 'Your payment was approved. Start your first module!',
+            time: 'Just now'
+          }]);
+        }
+      }).catch(() => {
+        if (moduleList) moduleList.innerHTML = '<div style="padding:32px 20px;text-align:center;color:var(--gray-400);font-size:0.82rem;">Unable to load modules right now.</div>';
+      });
+    }
+
+    function toggleModuleCompletion(modId, studentUid, idx) {
+      if (!studentUid) return;
+      if (!paymentApproved) {
+        showAlert('Payment Required', 'Complete your payment to unlock and track course modules.', 'warning');
+        return;
+      }
+      if (isDemoAccount(studentUid)) {
+        showAlert('Demo Account', 'Module completion is view-only for demo accounts.', 'info');
+        return;
+      }
+      const db = firebase.database();
+      const modRef = db.ref('students/' + studentUid + '/completedModules/' + modId);
+      modRef.once('value').then((snap) => {
+        if (snap.exists() && snap.val() === true) {
+          modRef.remove();
+        } else {
+          modRef.set(true);
+        }
+        db.ref('students/' + studentUid).once('value').then((sSnap) => {
+          const sData = sSnap.val() || {};
+          loadCourseModules(sData.enrollment?.courseId || 'jlpt_n5', studentUid, sData);
+        });
+      });
+    }
+
+    function loadScores(studentUid) {
+      const db = firebase.database();
+      return Promise.all([
+        db.ref('students/' + studentUid + '/scores').once('value'),
+        db.ref('students/' + studentUid + '/progressHistory').once('value')
+      ]).then(([scoreSnapshot, historySnapshot]) => {
+        const storedScores = scoreSnapshot.val() || {};
+        const history = historySnapshot.val() || {};
+        const historyRows = Object.values(history)
+          .filter((row) => row && typeof row === 'object')
+          .sort((a, b) => Number(a.timestamp || 0) - Number(b.timestamp || 0));
+        const latest = historyRows.length ? historyRows[historyRows.length - 1] : {};
+        const scores = Object.assign({}, latest);
+        Object.keys(storedScores).forEach((key) => {
+          const value = Number(storedScores[key]);
+          if (key === 'updatedAt' || !Number.isFinite(value) || value > 0) scores[key] = storedScores[key];
+        });
+        const skills = ['grammar','kanji','listening','reading','speaking','vocabulary'];
+        skills.forEach(skill => {
+          const raw = Number(scores[skill]);
+          const val = Number.isFinite(raw) ? Math.max(0, Math.min(100, Math.round(raw))) : 0;
+          const domName = skill === 'vocabulary' ? 'Vocab' : skill.charAt(0).toUpperCase() + skill.slice(1);
+          const fillEl = document.getElementById('score' + domName);
+          const valEl = document.getElementById('score' + domName + 'Val');
+          if (fillEl) fillEl.style.width = val + '%';
+          if (valEl) valEl.textContent = val > 0 ? val + '%' : 'Not available';
+        });
+        renderScoresSummary(scores);
+      }).catch(() => {
+        renderScoresSummary({});
+      });
+    }
+
+    // =====================
+    //   INSTRUCTOR EVALUATION (faculty-style, 8 categories)
+    // =====================
+    const EVAL_CATEGORIES = [
+      { key: 'teachingEffectiveness', label: 'Teaching Effectiveness', statement: 'The instructor explains lessons clearly and effectively.' },
+      { key: 'communicationSkills', label: 'Communication Skills', statement: 'The instructor communicates in a way that is easy to understand.' },
+      { key: 'subjectMastery', label: 'Subject Mastery', statement: 'The instructor demonstrates deep knowledge of the subject matter.' },
+      { key: 'classroomManagement', label: 'Classroom Management', statement: 'The instructor maintains an organized and productive learning environment.' },
+      { key: 'professionalism', label: 'Professionalism', statement: 'The instructor is professional in conduct and appearance.' },
+      { key: 'supportiveness', label: 'Supportiveness', statement: 'The instructor is approachable and willing to help students.' },
+      { key: 'punctuality', label: 'Punctuality', statement: 'The instructor starts and ends classes on time.' },
+      { key: 'overallSatisfaction', label: 'Overall Satisfaction', statement: 'Overall, I am satisfied with this instructor.' }
+    ];
+
+    let evalInstructorId = '';
+    let evalCourseId = '';
+    let evalSelections = {};
+    let evalSubmitting = false;
+
+    function normalizeEvalCourseId(value) {
+      return String(value || '').trim().toLowerCase().replace(/-/g, '_').replace(/\s+/g, '_');
+    }
+
+    // Resolve the instructor to evaluate, then gate the Rate button on whether
+    // this student already submitted an evaluation for this instructor + course.
+    function initInstructorEvaluation(studentUid, courseId, sectionId) {
+      evalCourseId = normalizeEvalCourseId(courseId);
+      const database = firebase.database();
+      const pendingNote = document.getElementById('ratingPendingNote');
+
+      Promise.all([
+        database.ref('courses').once('value'),
+        sectionId ? database.ref('sections/' + sectionId).once('value') : Promise.resolve(null),
+        database.ref('professors').once('value')
+      ]).then(([coursesSnap, sectionSnap, professorsSnap]) => {
+        const courseNode = (coursesSnap.exists() && coursesSnap.child(evalCourseId).val()) || {};
+        const sectionNode = sectionSnap && sectionSnap.exists() ? (sectionSnap.val() || {}) : {};
+        const professors = professorsSnap && professorsSnap.exists() ? (professorsSnap.val() || {}) : {};
+        let instructorId = '';
+        if (courseNode.instructorId) instructorId = String(courseNode.instructorId);
+        if (!instructorId) {
+          const ids = [];
+          if (Array.isArray(courseNode.instructorIds)) {
+            courseNode.instructorIds.forEach((v) => { if (v) ids.push(String(v)); });
+          } else if (courseNode.instructorIds && typeof courseNode.instructorIds === 'object') {
+            Object.values(courseNode.instructorIds).forEach((v) => { if (v) ids.push(String(v)); });
+          }
+          if (ids.length) instructorId = ids[0];
+        }
+
+        const assignedName = String(sectionNode.instructor || '').trim().toLowerCase();
+        if (!instructorId && assignedName) {
+          Object.keys(professors).some((id) => {
+            const professor = professors[id] || {};
+            if (String(professor.fullName || '').trim().toLowerCase() === assignedName) {
+              instructorId = id;
+              return true;
+            }
+            return false;
+          });
+        }
+
+        if (!instructorId) {
+          Object.keys(professors).some((id) => {
+            const professor = professors[id] || {};
+            const assignedCourses = Array.isArray(professor.coursesAssigned)
+              ? professor.coursesAssigned
+              : Object.values(professor.coursesAssigned || {});
+            if (assignedCourses.map(normalizeEvalCourseId).indexOf(evalCourseId) !== -1) {
+              instructorId = id;
+              return true;
+            }
+            return false;
+          });
+        }
+
+        if (!instructorId) {
+          if (pendingNote) pendingNote.textContent = 'No registered instructor is assigned to this course yet.';
+          return null;
+        }
+
+        evalInstructorId = instructorId;
+        return Promise.resolve(professors[instructorId] || {}).then((instructor) => {
+          const instructorName = String(instructor.fullName || '').trim()
+            || String(document.getElementById('ratingInstructorName').textContent || '').trim()
+            || 'Instructor assignment unavailable';
+          document.getElementById('ratingInstructorName').textContent = instructorName;
+          document.getElementById('evalInstructorTitle').textContent = 'Evaluate ' + instructorName;
+          document.getElementById('evalCourseLabel').textContent = String(courseNode.name || '').trim();
+
+          // One evaluation per student per instructor per course.
+          return database.ref('professorRatings').orderByChild('studentUid').equalTo(studentUid).once('value').then((ratingsSnap) => {
+            let alreadyRated = false;
+            if (ratingsSnap.exists()) {
+              ratingsSnap.forEach((child) => {
+                const existing = child.val() || {};
+                if (String(existing.instructorId || '') === evalInstructorId &&
+                    normalizeEvalCourseId(existing.courseId) === evalCourseId) {
+                  alreadyRated = true;
+                }
+              });
+            }
+            if (pendingNote) pendingNote.style.display = 'none';
+            if (alreadyRated) {
+              document.getElementById('ratingDoneNote').style.display = 'flex';
+            } else {
+              document.getElementById('openRatingModalBtn').style.display = 'inline-flex';
+            }
+          });
+        });
+      }).catch(() => {
+        if (pendingNote) pendingNote.textContent = 'Unable to load instructor assignment.';
+      });
+    }
+
+    function renderEvalCategories() {
+      const wrap = document.getElementById('evalCategories');
+      wrap.innerHTML = EVAL_CATEGORIES.map((cat, idx) => {
+        const buttons = [1, 2, 3, 4, 5].map((v) =>
+          '<button type="button" class="eval-scale__opt" data-key="' + cat.key + '" data-value="' + v + '" onclick="setEvalScore(\'' + cat.key + '\',' + v + ')">' + v + '</button>'
+        ).join('');
+        return (
+          '<div class="eval-cat" id="evalCat_' + cat.key + '">' +
+            '<div class="eval-cat__head">' +
+              '<span class="eval-cat__num">' + String(idx + 1).padStart(2, '0') + '</span>' +
+              '<div>' +
+                '<p class="eval-cat__label">' + cat.label + '</p>' +
+                '<p class="eval-cat__statement">' + cat.statement + '</p>' +
+              '</div>' +
+            '</div>' +
+            '<div class="eval-scale">' + buttons + '</div>' +
+            '<div class="eval-scale__ends"><span>1 = Poor</span><span>5 = Excellent</span></div>' +
+          '</div>'
+        );
+      }).join('');
+    }
+
+    function setEvalScore(key, value) {
+      evalSelections[key] = value;
+      const row = document.getElementById('evalCat_' + key);
+      if (!row) return;
+      row.classList.add('eval-cat--answered');
+      row.querySelectorAll('.eval-scale__opt').forEach((btn) => {
+        btn.classList.toggle('eval-scale__opt--selected', parseInt(btn.dataset.value, 10) === value);
+      });
+    }
+
+    function openEvaluationModal() {
+      if (!evalInstructorId) {
+        showAlert('Not Available', 'No instructor is assigned to this course yet.', 'warning');
+        return;
+      }
+      evalSelections = {};
+      renderEvalCategories();
+      document.getElementById('evalComment').value = '';
+      document.getElementById('evalAnonymous').checked = false;
+      updateEvalCounter();
+      document.getElementById('evalOverlay').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeEvaluationModal() {
+      document.getElementById('evalOverlay').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function updateEvalCounter() {
+      const value = document.getElementById('evalComment').value || '';
+      document.getElementById('evalCounter').textContent = value.length + ' / 500';
+    }
+
+    function recalcInstructorRollup(database, instructorId) {
+      return database.ref('professorRatings').once('value').then((allSnap) => {
+        const entries = [];
+        if (allSnap.exists()) {
+          allSnap.forEach((child) => {
+            const rating = child.val() || {};
+            if (String(rating.instructorId || '') === instructorId) entries.push(rating);
+          });
+        }
+        const scores = [];
+        entries.forEach((rating) => {
+          const catScores = rating.ratings || {};
+          EVAL_CATEGORIES.forEach((cat) => {
+            const v = Number(catScores[cat.key] || rating[cat.key] || 0);
+            if (v > 0) scores.push(v);
+          });
+        });
+        const avg = scores.length
+          ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10
+          : 0;
+        return database.ref('professors/' + instructorId).update({
+          averageRating: avg,
+          totalRatings: entries.length
+        });
+      });
+    }
+
+    function submitEvaluation() {
+      if (evalSubmitting) return;
+      const studentUid = localStorage.getItem('studentUid');
+      if (!studentUid) {
+        showAlert('Session Expired', 'Please sign in again to submit your evaluation.', 'danger');
+        return;
+      }
+      if (!evalInstructorId || !evalCourseId) {
+        showAlert('Not Available', 'No instructor is assigned to this course yet.', 'warning');
+        return;
+      }
+
+      const answered = EVAL_CATEGORIES.filter((cat) => evalSelections[cat.key] > 0).length;
+      if (answered < EVAL_CATEGORIES.length) {
+        const remaining = EVAL_CATEGORIES.length - answered;
+        showAlert('Incomplete Evaluation', 'Please rate all eight categories. ' + remaining + ' categor' + (remaining === 1 ? 'y is' : 'ies are') + ' still unanswered.', 'warning');
+        return;
+      }
+
+      const comment = (document.getElementById('evalComment').value || '').trim().slice(0, 500);
+      const isAnonymous = document.getElementById('evalAnonymous').checked;
+
+      const ratingsPayload = {};
+      EVAL_CATEGORIES.forEach((cat) => { ratingsPayload[cat.key] = evalSelections[cat.key]; });
+
+      evalSubmitting = true;
+      document.getElementById('evalSubmitBtn').disabled = true;
+      const database = firebase.database();
+
+      database.ref('professorRatings').push({
+        instructorId: evalInstructorId,
+        studentUid: studentUid,
+        courseId: evalCourseId,
+        ratings: ratingsPayload,
+        comment: comment,
+        isAnonymous: isAnonymous,
+        createdAt: Date.now()
+      }).then(() => {
+        return recalcInstructorRollup(database, evalInstructorId);
+      }).then(() => {
+        closeEvaluationModal();
+        document.getElementById('openRatingModalBtn').style.display = 'none';
+        document.getElementById('ratingDoneNote').style.display = 'flex';
+        showAlert('Evaluation Submitted', 'Thank you for evaluating your instructor.', 'success');
+      }).catch(() => {
+        showAlert('Submission Failed', 'Unable to submit your evaluation right now. Please try again.', 'danger');
+      }).finally(() => {
+        evalSubmitting = false;
+        document.getElementById('evalSubmitBtn').disabled = false;
+      });
+    }
+
+    function applyAvatar(avatarData) {
+      document.getElementById('headerAvatarImg').src = avatarData;
+      document.getElementById('headerAvatarImg').style.display = 'block';
+      document.getElementById('headerAvatarText').style.display = 'none';
+      document.getElementById('sidebarAvatarImg').src = avatarData;
+      document.getElementById('sidebarAvatarImg').style.display = 'block';
+      document.getElementById('sidebarAvatarText').style.display = 'none';
+    }
+
+    function showAlert(title, message, type) {
+      const existing = document.querySelector('.custom-alert');
+      if (existing) existing.remove();
+      const alertEl = document.createElement('div');
+      alertEl.className = 'custom-alert custom-alert--' + type;
+      let iconSvg;
+      if (type === 'danger' || type === 'warning') {
+        iconSvg = '<iconify-icon icon="mdi:information-outline"></iconify-icon>';
+      } else if (type === 'success') {
+        iconSvg = '<iconify-icon icon="mdi:check-circle-outline"></iconify-icon>';
+      } else {
+        iconSvg = '<iconify-icon icon="mdi:information-outline"></iconify-icon>';
+      }
+      alertEl.innerHTML = '<div class="custom-alert__icon">' + iconSvg + '</div><div class="custom-alert__body"><strong class="custom-alert__title">' + title + '</strong><p class="custom-alert__message">' + message + '</p></div><button class="custom-alert__close" onclick="this.parentElement.remove()"><iconify-icon icon="mdi:close"></iconify-icon></button>';
+      document.body.appendChild(alertEl);
+      setTimeout(() => alertEl.classList.add('custom-alert--show'), 10);
+      setTimeout(() => { alertEl.classList.remove('custom-alert--show'); setTimeout(() => alertEl.remove(), 300); }, 5000);
+    }
+
+    let toastTimer;
+    function showToast(msg) {
+      const t = document.getElementById('studentToast');
+      if (t) {
+        t.textContent = msg;
+        t.classList.add('settings-toast--show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(()=>t.classList.remove('settings-toast--show'), 2800);
+      }
+    }
+
+    // ===== PHASE 3: Kanji Reference (live from kanji/{courseLevel}) =====
+    let kanjiDataCache = {};
+    function loadKanjiReference(courseId) {
+      const grid = document.getElementById('kanjiGrid');
+      if (!grid) return Promise.resolve();
+      const isLevel = /^jlpt_n\d$/.test(String(courseId || ''));
+      const level = isLevel ? String(courseId).toLowerCase() : 'jlpt_n5';
+      return database.ref('kanji/' + level).once('value').then(function (snap) {
+        kanjiDataCache = snap.exists() ? snap.val() : {};
+        const badge = document.getElementById('kanjiCountBadge');
+        if (badge) badge.textContent = Object.keys(kanjiDataCache).length + ' kanji';
+        renderKanjiGrid();
+      }).catch(function () {
+        grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--gray-400);font-size:0.82rem;padding:16px 0;">Kanji dictionary unavailable right now.</p>';
+      });
+    }
+
+    function renderKanjiGrid() {
+      const grid = document.getElementById('kanjiGrid');
+      if (!grid) return;
+      const searchEl = document.getElementById('kanjiSearch');
+      const q = String(searchEl ? searchEl.value : '').trim().toLowerCase();
+      const keys = Object.keys(kanjiDataCache);
+      const rows = keys.filter(function (k) {
+        if (!q) return true;
+        const d = kanjiDataCache[k] || {};
+        if (k === q) return true;
+        const meanings = (d.meanings || []).join(' ').toLowerCase();
+        const kun = (d.readings_kun || []).join(' ').toLowerCase();
+        const on = (d.readings_on || []).join(' ').toLowerCase();
+        return meanings.indexOf(q) !== -1 || kun.indexOf(q) !== -1 || on.indexOf(q) !== -1;
+      });
+      if (!rows.length) {
+        grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--gray-400);font-size:0.82rem;padding:16px 0;">No kanji matched your search.</p>';
+        return;
+      }
+      const shown = rows.slice(0, 60);
+      grid.innerHTML = shown.map(function (k) {
+        const d = kanjiDataCache[k] || {};
+        const meaning = (d.meanings && d.meanings[0]) || '';
+        const on = (d.readings_on || []).slice(0, 1).join(' ');
+        const kun = (d.readings_kun || []).slice(0, 1).join(' ');
+        return '<div style="background:var(--gray-50);border:1px solid var(--gray-100);border-radius:12px;padding:10px;text-align:center;">' +
+          '<div style="font-size:1.9rem;line-height:1.15;color:var(--gray-900);font-weight:600;">' + k + '</div>' +
+          '<div style="font-size:0.66rem;color:var(--gray-400);margin-top:2px;">' + (d.strokes || '?') + ' strokes · JLPT N' + (d.jlpt_new || '?') + '</div>' +
+          '<div style="font-size:0.72rem;color:var(--gray-700);margin-top:4px;font-weight:600;">' + meaning + '</div>' +
+          '<div style="font-size:0.68rem;color:var(--gray-400);margin-top:2px;">' + on + (on && kun ? ' · ' : '') + kun + '</div>' +
+          '</div>';
+      }).join('') + (rows.length > shown.length
+        ? '<p style="grid-column:1/-1;text-align:center;color:var(--gray-400);font-size:0.72rem;">Showing 60 of ' + rows.length + ' — refine your search to narrow down.</p>'
+        : '');
+    }
+
+    // ===== PHASE 3: Grades & Assessment Results (grades/{course}/{uid}) =====
+    function loadGradeTrend(studentUid, courseId) {
+      const chartEl = document.getElementById('gradesTrendChart');
+      const avgBadge = document.getElementById('gradesAvgBadge');
+      const sumRow = document.getElementById('gradesSummaryRow');
+      if (!chartEl) return Promise.resolve();
+
+      if (!courseId) {
+        if (avgBadge) avgBadge.textContent = 'No course';
+        if (sumRow) sumRow.innerHTML = '<p style="color:var(--gray-400);font-size:0.8rem;margin:0;">Enroll in a course to see grades.</p>';
+        return Promise.resolve();
+      }
+
+      return firebase.database().ref('grades/' + courseId + '/' + studentUid).once('value').then(function (snap) {
+        if (!snap.exists()) {
+          if (avgBadge) avgBadge.textContent = 'No grades yet';
+          if (sumRow) sumRow.innerHTML = '<p style="color:var(--gray-400);font-size:0.8rem;margin:0;">No instructor grades recorded yet.</p>';
+          chartEl.innerHTML = '<p style="text-align:center;padding:30px 10px;color:var(--gray-400);font-size:0.82rem;">Your weekly grade trend will appear once your instructor records scores.</p>';
+          return null;
+        }
+
+        const g = snap.val() || {};
+        const historyRows = Object.values(g.history || {})
+          .filter(function (row) { return row && typeof row === 'object'; })
+          .sort(function (a, b) { return Number(a.recordedAt || 0) - Number(b.recordedAt || 0); });
+        const latest = historyRows.length ? historyRows[historyRows.length - 1] : {};
+        const gradeValue = function (key) {
+          const direct = Number(g[key]);
+          const historical = Number(latest[key] || 0);
+          return direct > 0 ? direct : historical;
+        };
+        if (avgBadge) avgBadge.textContent = 'Average: ' + (g.average || 0) + '%';
+
+        const skills = [
+          ['listening', '#2563EB'],
+          ['reading', '#C0392B'],
+          ['speaking', '#16A34A'],
+          ['writing', '#F59E0B']
+        ];
+        if (sumRow) {
+          sumRow.innerHTML = skills.map(function (s) {
+            return '<div style="flex:1;text-align:center;background:var(--gray-50);border-radius:10px;padding:10px;border:1px solid var(--gray-100);">' +
+              '<p style="font-size:0.62rem;color:var(--gray-500);font-weight:700;text-transform:uppercase;margin:0;">' + s[0] + '</p>' +
+              '<p style="font-size:1.05rem;font-weight:700;color:var(--gray-800);margin-top:2px;">' + gradeValue(s[0]) + '</p></div>';
+          }).join('');
+        }
+
+        const hist = g.history || {};
+        const weeks = Object.keys(hist).sort();
+        if (!weeks.length || !window.UnmeiCharts) return null;
+
+        UnmeiCharts.multiLine('gradesTrendChart', {
+          labels: weeks.map(function (w) { return w.replace('week_', 'W'); }),
+          height: 260,
+          yMax: 100,
+          series: skills.map(function (s) {
+            return {
+              name: s[0].charAt(0).toUpperCase() + s[0].slice(1),
+              data: weeks.map(function (w) {
+                const row = hist[w] || {};
+                return row[s[0]] == null ? gradeValue(s[0]) : row[s[0]];
+              }),
+              color: s[1]
+            };
+          })
+        });
+        return null;
+      }).catch(function () {
+        if (avgBadge) avgBadge.textContent = '—';
+      });
+    }
+
+    function showConfirm(t,m,cb){var o=document.getElementById('confirmOverlay');o.querySelector('.confirm-title').textContent=t;o.querySelector('.confirm-message').textContent=m;o.classList.add('active');o.querySelector('.confirm-btn--cancel').onclick=function(){o.classList.remove('active');};o.querySelector('.confirm-btn--confirm').onclick=function(){o.classList.remove('active');cb();};}
+
+  </script>
+
+  <!-- Instructor Evaluation Modal (faculty-style, 8 categories) -->
+  <div class="eval-overlay" id="evalOverlay">
+    <div class="eval-modal" role="dialog" aria-modal="true" aria-labelledby="evalInstructorTitle">
+      <button class="modal-close-btn eval-close" type="button" onclick="closeEvaluationModal()" aria-label="Close"><iconify-icon icon="mdi:close"></iconify-icon></button>
+      <div class="eval-modal__head">
+        <p class="eval-modal__kicker">Instructor Evaluation</p>
+        <h2 class="eval-modal__title" id="evalInstructorTitle">Evaluate Your Instructor</h2>
+        <p class="eval-modal__sub" id="evalCourseLabel"></p>
+        <p class="eval-modal__note">Rate each category from 1 (Poor) to 5 (Excellent). All eight categories are required.</p>
+      </div>
+      <div class="eval-modal__body" id="evalCategories"></div>
+      <div class="eval-modal__extra">
+        <label class="eval-field-label" for="evalComment">Comments (optional, up to 500 characters)</label>
+        <textarea id="evalComment" maxlength="500" placeholder="Share specific experiences that stood out..." oninput="updateEvalCounter()"></textarea>
+        <div class="eval-comment-row">
+          <label class="eval-anon-toggle">
+            <span class="eval-switch">
+              <input type="checkbox" id="evalAnonymous">
+              <span class="eval-switch__track"></span>
+            </span>
+            Submit anonymously
+          </label>
+          <span class="eval-counter" id="evalCounter">0 / 500</span>
+        </div>
+      </div>
+      <div class="eval-modal__footer">
+        <button class="eval-btn eval-btn--ghost" type="button" onclick="closeEvaluationModal()">Cancel</button>
+        <button class="eval-btn eval-btn--primary" type="button" id="evalSubmitBtn" onclick="submitEvaluation()">Submit Evaluation</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><div class="confirm-icon confirm-icon--warning"><iconify-icon icon="mdi:alert-outline"></iconify-icon></div><div class="confirm-title"></div><div class="confirm-message"></div><div class="confirm-actions"><button class="confirm-btn confirm-btn--cancel">Cancel</button><button class="confirm-btn confirm-btn--confirm">Confirm</button></div></div></div>
+  <div class="settings-toast" id="studentToast"></div>
+<script>
+function toggleMobileSidebar(){var s=document.querySelector('.sidebar'),b=document.getElementById('sidebarBackdrop');if(s.classList.contains('sidebar--mobile-open')){closeMobileSidebar();}else{s.classList.add('sidebar--mobile-open');b.classList.add('active');document.body.style.overflow='hidden';}}
+function closeMobileSidebar(){var s=document.querySelector('.sidebar');var b=document.getElementById('sidebarBackdrop');s.classList.remove('sidebar--mobile-open');b.classList.remove('active');document.body.style.overflow='';}
+window.addEventListener('resize',function(){if(window.innerWidth>700)closeMobileSidebar();});
+</script>
+<script src="student-header-sync.js"></script>
+<script src="assets/global-search.js"></script>
+</body>
+</html>

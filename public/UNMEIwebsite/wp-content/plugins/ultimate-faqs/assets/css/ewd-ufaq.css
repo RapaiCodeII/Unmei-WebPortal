@@ -1,0 +1,832 @@
+.ewd-ufaq-hidden {
+  display:none;
+}
+
+.ewd-ufaq-faq-category-title-toggle {
+  cursor: pointer;
+}
+
+.ewd-ufaq-faq-category-body-hidden {
+  display: none;
+}
+
+.ewd-ufaq-clear {
+  clear:both;
+}
+
+.ewd-ufaq-permalink {
+  margin: 24px 0;
+}
+.ewd-ufaq-permalink-image {
+	background: url("../img/insert_link.png");
+	height: 21px;
+	width: 30px;
+	margin-top: -32px;
+	margin-left: 112px;
+}
+
+
+.ewd-ufaq-author {
+  font-weight: 600;
+}
+.ewd-ufaq-date {
+  font-weight: 600;
+}
+
+.ewd-ufaq-faq-category-title {
+  width: 100%;
+  clear: both;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ewd-ufaq-faq-category{
+  margin-bottom: 20px;
+}
+
+.ewd-ufaq-faq-category-inner {
+  margin-bottom: 48px;
+}
+
+.ewd-ufaq-faq-body {
+  padding:10px 25px;
+  padding-left: 55px;
+}
+.ewd-ufaq-faq-search{
+  margin:5px 0 !important;
+}
+.ewd-ufaq-highlight-search-term {
+  background: #f7ff00;
+}
+.ewd-ufaq-no-results-found {
+  margin-top: 16px;
+}
+
+.ewd-otp-field-label{
+width: auto !important;
+}
+.ewd-ufaq-text-input {
+  border-radius: 0 !important;
+  margin:15px !important;
+}
+.ewd-ufaq-submit{
+border-radius: 0 !important;
+}
+.ewd-ufaq-faq-header{
+  margin:10px;
+}
+.ewd-ufaq-faq-header a:hover{
+  text-decoration: none;
+}
+div.ewd-ufaq-faq-title div.ewd-ufaq-post-margin{
+  text-decoration: none;
+}
+div.ewd-ufaq-faq-title div.ewd-ufaq-post-margin-symbol{
+  text-decoration: none;
+  float: left;
+  text-align: center;
+ /* width:35px;
+  height: 35px;*/
+  width: auto;
+  height: auto;
+  margin-right: 15px;
+  padding: 2px 0px 0px 2px;
+  line-height: 1;
+  border-style: solid;
+  border-width: 0;
+}
+.ewd-ufaq-faq-title .ewd-ufaq-post-margin-symbol span{
+display: inline-block;
+font-size: 30px;
+margin: 0 auto;
+}
+.ewd-ufaq-faq-title-text {
+  float: left;
+  width: 85%;
+}
+.ewd-ufaq-faq-title h1,
+.ewd-ufaq-faq-title h2,
+.ewd-ufaq-faq-title h3,
+.ewd-ufaq-faq-title h4,
+.ewd-ufaq-faq-title h5,
+.ewd-ufaq-faq-title h6 {
+  display:inline-block;
+  margin:5px !important;
+}
+
+
+
+
+.ewd-ufaq-custom-field-label, .ewd-ufaq-custom-field-value {
+  position: relative;
+  float: left;
+  margin-top: 14px;
+}
+.ewd-ufaq-custom-field-label {
+  font-weight: normal;
+}
+
+.ewd-ufaq-faq-body .comment-respond {
+  margin-top: 24px;
+}
+.ewd-ufaq-faq-body li.comment {
+  list-style-type: none;
+}
+.ewd-ufaq-faq-body textarea {
+  clear: both;
+  display: block;
+  position: relative;
+  width: 35%;
+  height: 100px;
+}
+.ewd-ufaq-faq-body .comment-form-comment label {
+  clear: both;
+  display: block;
+  position: relative;
+  width: 100%;
+}
+.ewd-ufaq-faq-body .submit {
+  width: auto;
+  background: transparent;
+  cursor: pointer;
+  color: #111;
+  margin-bottom: 20px;
+}
+.ewd-ufaq-faq-body .submit:hover {
+  background: #111;
+  color: #fff;
+}
+.ewd-ufaq-faq-body .comment-author img {
+  margin-right: 8px;
+}
+.ewd-ufaq-faq-body .comment-body p {
+  margin: 10px 0;
+  margin-top: 10px !important;
+}
+.ewd-ufaq-faq-body .reply {
+  text-transform: uppercase;
+}
+
+.ewd-ufaq-faq-body .ewd-ufaq-back-to-top-link {
+  cursor: pointer;
+}
+
+.ewd-ufaq-ratings {
+  padding: 14px 0 0;
+  display: inline-block;
+  width: 100%;
+  margin-bottom: 20px;
+}
+.ewd-ufaq-down-vote {
+  background-position: 0px 8px !important;
+  height: 50px !important;
+}
+
+
+/***********************
+* Pagination
+***********************/
+.ewd-ufaq-bottom {
+  clear: both;
+}
+.ewd-ufaq-previous-faqs h4 {
+  float: left;
+  padding-left: 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.ewd-ufaq-next-faqs h4 {
+  float: right;
+  padding-right: 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.ewd-ufaq-load-more h4 {
+  text-align: center;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+
+/***********************
+* Columns
+***********************/
+.ewd-ufaq-faq-div.ewd-ufaq-faq-column-count-two {
+  width: 48%;
+  margin-right: 2%;
+  float: left;
+  clear: none;
+}
+.ewd-ufaq-faq-div.ewd-ufaq-faq-column-count-three {
+  width: 31%;
+  margin-right: 2%;
+  float: left;
+  clear: none;
+}
+.ewd-ufaq-faq-div.ewd-ufaq-faq-column-count-four {
+  width: 23%;
+  margin-right: 2%;
+  float: left;
+  clear: none;
+}
+
+@media only screen and (max-width: 960px) {
+  .ewd-ufaq-faq-div.ewd-ufaq-faq-column-count-three.ewd-ufaq-faq-responsive-columns-1,
+  .ewd-ufaq-faq-div.ewd-ufaq-faq-column-count-four.ewd-ufaq-faq-responsive-columns-1 {
+    width: 48%;
+    margin-right: 2%;
+  }
+}
+@media only screen and (max-width: 520px) {
+  .ewd-ufaq-faq-div.ewd-ufaq-faq-column-count-two.ewd-ufaq-faq-responsive-columns-1,
+  .ewd-ufaq-faq-div.ewd-ufaq-faq-column-count-three.ewd-ufaq-faq-responsive-columns-1,
+  .ewd-ufaq-faq-div.ewd-ufaq-faq-column-count-four.ewd-ufaq-faq-responsive-columns-1 {
+    width: 100%;
+    margin-right: none;
+  }
+}
+
+/***********************
+Color Block Style
+***********************/
+.ewd-ufaq-faq-display-style-color_block .ewd-ufaq-post-margin-symbol {
+  background-color: #1188cc;
+  color: #ffffff;
+}
+
+.ewd-ufaq-Circle {
+  border-radius: 18px;
+}
+
+.ewd-ufaq-Square {
+  border-radius: 0px;
+}
+
+
+/***********************
+Block Style
+***********************/
+.ewd-ufaq-faq-div {
+  margin: 2px 0;
+  padding:2px 0;
+  clear: both;
+}
+.ewd-ufaq-faq-toggle:hover, .ewd-ufaq-faq-toggle a:hover{
+  cursor: pointer;
+  cursor: hand;
+  text-decoration: none;
+}
+.ewd-ufaq-faq-display-style-block a, .ewd-ufaq-faq-display-style-block a:visited, .ewd-ufaq-faq-display-style-block a:active{
+  text-decoration: none;
+}
+.ewd-ufaq-faq-display-style-block:hover,
+.ewd-ufaq-faq-display-style-block:hover a,
+.ewd-ufaq-faq-display-style-block:hover h1,
+.ewd-ufaq-faq-display-style-block:hover h2,
+.ewd-ufaq-faq-display-style-block:hover h3,
+.ewd-ufaq-faq-display-style-block:hover h4,
+.ewd-ufaq-faq-display-style-block:hover h5,
+.ewd-ufaq-faq-display-style-block:hover h6 {
+  text-decoration: none !important;
+  color:#fff;
+  background: #1188cc;
+}
+.ewd-ufaq-faq-display-style-block.ewd-ufaq-post-active, .ewd-ufaq-faq-display-style-block.ewd-ufaq-post-active a{
+  color:#fff;
+  background: #1188cc;
+}
+
+
+/***********************
+List Style
+***********************/
+.ewd-ufaq-faq-header-title a {
+  display: inline-block;
+}
+
+
+/***********************
+Border Block Style
+***********************/
+.ewd-ufaq-faq-div {
+  margin: 2px 0;
+  padding:2px 0;
+  clear: both;
+}
+.ewd-ufaq-faq-toggle:hover, .ewd-ufaq-faq-toggle a:hover{
+  cursor: pointer;
+  cursor: hand;
+  text-decoration: none;
+}
+.ewd-ufaq-faq-display-style-border_block a, .ewd-ufaq-faq-display-style-border_block a:visited, .ewd-ufaq-faq-display-style-border_block a:active{
+  text-decoration: none;
+}
+.ewd-ufaq-faq-display-style-border_block:hover,
+.ewd-ufaq-faq-display-style-border_block:hover a,
+.ewd-ufaq-faq-display-style-border_block:hover h1,
+.ewd-ufaq-faq-display-style-border_block:hover h2,
+.ewd-ufaq-faq-display-style-border_block:hover h3,
+.ewd-ufaq-faq-display-style-border_block:hover h4,
+.ewd-ufaq-faq-display-style-border_block:hover h5,
+.ewd-ufaq-faq-display-style-border_block:hover h6 {
+  text-decoration: none !important;
+  color:#fff;
+  background: #1188cc;
+}
+.ewd-ufaq-faq-display-style-border_block.ewd-ufaq-post-active, .ewd-ufaq-faq-display-style-border_block.ewd-ufaq-post-active a{
+  color:#fff !important;
+  background: #1188cc;
+}
+.ewd-ufaq-faq-display-style-border_block .ewd-ufaq-faq-body {
+  color:#555 !important;
+  background: #fff;
+  border: 3px solid #1188cc;
+  border-bottom: 2px solid #1188cc;
+}
+.ewd-ufaq-faq-display-style-border_block .ewd-ufaq-faq-body a {
+  color:#000 !important;
+  background: transparent;
+}
+
+.ewd-ufaq-faq-display-style-border_block .ewd-ufaq-faq-tags, .ewd-ufaq-faq-display-style-border_block .ewd-ufaq-social-links {
+margin-top: 4px;
+}
+.ewd-ufaq-faq-display-style-border_block .ewd-ufaq-social-links ul {
+float: left;
+margin-bottom: 14px;
+position: relative;
+width: auto;
+}
+.ewd-ufaq-faq-display-style-border_block .ewd-ufaq-permalink {
+margin: 24px 0;
+}
+.ewd-ufaq-faq-display-style-border_block .ewd-ufaq-permalink-image {
+margin-top: -32px;
+margin-left: 112px;
+}
+
+.ewd-ufaq-faq-display-style-border_block .ewd-ufaq-author-date {
+  margin-bottom: 14px;
+}
+
+.ewd-ufaq-faq-display-style-border_block .ewd-ufaq-faq-categories {
+  margin: 14px 0;
+}
+
+.ewd-ufaq-faq-display-style-border_block.ewd-ufaq-post-active .ewd-ufaq-faq-title-text {
+  color: #fff !important;
+}
+
+.ewd-ufaq-faq-display-style-border_block .comment-reply-title {
+  background: transparent !important;
+  color: #000 !important;
+}
+.ewd-ufaq-faq-display-style-border_block:hover .comment-reply-title {
+  color: #000 !important;
+}
+
+
+
+/***********************
+Contemporary Style
+***********************/
+.ewd-ufaq-faq-display-style-contemporary {
+border-bottom: 1px solid #ccc;
+padding: 0;
+margin: 0;
+}
+.ewd-ufaq-faq-display-style-contemporary:first-of-type {
+border-top: 1px solid #ccc;
+}
+.ewd-ufaq-faq-display-style-contemporary .ewd-ufaq-faq-title {
+background: #f7f7f7;
+padding: 8px 0 8px 4px;
+}
+.ewd-ufaq-faq-display-style-contemporary .ewd-ufaq-post-margin-symbol {
+float: right;
+height: auto;
+}
+.ewd-ufaq-faq-display-style-contemporary .ewd-ufaq-faq-body {
+padding: 20px 25px 10px;
+padding-left: 40px;
+}
+.ewd-ufaq-faq-display-style-contemporary .ewd-ufaq-faq-tags, .ewd-ufaq-faq-display-style-contemporary .ewd-ufaq-social-links {
+margin-top: 4px;
+}
+.ewd-ufaq-faq-display-style-contemporary .ewd-ufaq-social-links ul {
+float: left;
+margin-bottom: 14px;
+position: relative;
+width: auto;
+}
+.ewd-ufaq-faq-display-style-contemporary .ewd-ufaq-permalink {
+margin-left: 0;
+margin-bottom: 10px;
+}
+.ewd-ufaq-faq-display-style-contemporary .ewd-ufaq-back-to-top {
+  margin-bottom: 14px;
+}
+
+.ewd-ufaq-social-links-label {
+  float: left;
+  margin-right: 8px;
+  position: relative;
+  top: 3px;
+}
+
+
+
+
+/***********************
+Ratings
+***********************/
+.ewd-ufaq-rating-button {
+  position: relative;
+  float: left;
+  width: 60px;
+  height: 48px;
+  margin-right: 12px;
+  line-height: 48px;
+  font-weight: 600;
+  cursor: pointer;
+
+}
+.ewd-ufaq-rating-button img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 75%;
+  height: auto;
+}
+.ewd-ufaq-rating-button span {
+  text-align: right;
+  width: 100%;
+  display: block;
+}
+.ewd-ufaq-up-vote {
+  background: transparent;
+  background-repeat: no-repeat;
+}
+.ewd-ufaq-down-vote {
+  background: transparent;
+  background-repeat: no-repeat;
+}
+.ewd-ufaq-ratings-custom-image {
+  background: transparent;
+}
+.ewd-ufaq-rating-button.ewd-ufaq-rating-button-custom-up-image,
+.ewd-ufaq-rating-button.ewd-ufaq-rating-button-custom-down-image {
+  background: none;
+  padding-left: 0;
+}
+.ewd-ufaq-rating-button.ewd-ufaq-rating-button-custom-up-image img,
+.ewd-ufaq-rating-button.ewd-ufaq-rating-button-custom-down-image img {
+  position: relative;
+  float: left;
+  width: 48px;
+  height: auto;
+  margin-right: 4px;
+}
+
+
+/************************
+* Expand/Collapse
+************************/
+.ewd-ufaq-expand-all,
+.ewd-ufaq-collapse-all {
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+/*
+==============================================
+Toggle Font
+==============================================
+*/
+
+@font-face { /* declare fonts */
+  font-family: 'ewd-toggle-icon';
+  src: url("../fonts/ewd-toggle-icon.eot");
+    src: url('../fonts/ewd-toggle-icon.woff2') format('woff2'),
+         url('../fonts/ewd-toggle-icon.woff') format('woff'),
+         url("../fonts/ewd-toggle-icon.ttf") format("truetype"),
+    url("../fonts/ewd-toggle-icon.svg#ewd-toggle-icon") format("svg");
+    font-weight: normal;
+    font-style: normal;
+}
+
+.ewd-ufaq-faq-title .ewd-ufaq-post-margin-symbol,
+.ewd-ufaq-faq-category-title .ewd-ufaq-category-post-margin-symbol,
+.ewd-ufaq-toggle-all-symbol {
+  font-family: 'ewd-toggle-icon';
+}
+
+
+/*
+==============================================
+PChanges
+==============================================
+*/
+
+.ewd-ufaq-question-update{
+font-size: 1.2em;
+margin-bottom: 20px;
+}
+.ewd-ufaq-question-form .form-field {
+  margin-bottom: 20px;
+}
+
+.rrssb-buttons li a .rrssb-text {
+color: #fff;
+margin-left: 5px;
+}
+
+.ewd-ufaq-social-links .rrssb-buttons li {
+margin-bottom: 5px;
+}
+
+.ewd-ufaq-permalink{
+clear: both;
+}
+@media only screen and (max-width: 810px) {
+
+.ewd-ufaq-faq-title-text {
+width: 80%;
+}
+
+}
+
+
+
+/*
+==============================================
+Pagination
+==============================================
+*/
+.ewd-ufaq-previous-faqs, .ewd-ufaq-next-faqs {
+    margin-top: 16px;
+}
+.ewd-ufaq-previous-faqs {
+    float: left;
+}
+.ewd-ufaq-next-faqs {
+    float: right;
+}
+
+/* clears the 'X' from Internet Explorer */
+#ewd-ufaq-jquery-ajax-search input[type=search]::-ms-clear {
+  display: none; width : 0; height: 0;
+}
+#ewd-ufaq-jquery-ajax-search input[type=search]::-ms-reveal {
+  display: none; width : 0; height: 0;
+}
+
+/* clears the 'X' from Chrome */
+#ewd-ufaq-jquery-ajax-search input[type="search"]::-webkit-search-decoration,
+#ewd-ufaq-jquery-ajax-search input[type="search"]::-webkit-search-cancel-button,
+#ewd-ufaq-jquery-ajax-search input[type="search"]::-webkit-search-results-button,
+#ewd-ufaq-jquery-ajax-search input[type="search"]::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+}
+
+#ewd-ufaq-jquery-ajax-search * {
+  vertical-align: middle;
+}
+#ewd-ufaq-jquery-ajax-search .search-field {
+  display:  inline-block;
+  margin:  15px;
+  position: relative;
+}
+#ewd-ufaq-jquery-ajax-search .search-field .ewd-ufaq-text-input {
+  margin: 0 !important;
+  padding: 8px 30px 8px 12px !important;
+}
+#ewd-ufaq-jquery-ajax-search .clear-field {
+  display: inline;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  background: transparent;
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: black;
+  transition: width 0.35s, opacity 0.25s;
+  transform: translateX(15px);
+  opacity: 0;
+  width: 0;
+}
+#ewd-ufaq-jquery-ajax-search .clear-field.slide-in {
+  opacity: 1;
+  width: 30px;
+  animation: slide-in-right 0.5s forwards;
+  -webkit-animation: slide-in-right 0.5s forwards;
+}
+#ewd-ufaq-jquery-ajax-search .clear-field.slide-out {
+  opacity: 0;
+  width: 0;
+  animation: slide-out-right 0.5s forwards;
+  -webkit-animation: slide-out-right 0.5s forwards;
+}
+#ewd-ufaq-jquery-ajax-search .clear-field:hover,
+#ewd-ufaq-jquery-ajax-search .clear-field:focus {
+  border-radius: 0;
+}
+@keyframes slide-in-right {
+  100% {
+    transform: translateX(0px);
+  }
+}
+@keyframes slide-out-right {
+  0% {
+    transform: translateX(0px);
+  }
+  100% {
+    transform: translateX(15px);
+  }
+}
+
+
+/***************
+BLOCK PATTERNS
+***************/
+.ewd-ufaq-pattern-faqs,
+.ewd-ufaq-pattern-featured-faqs,
+.ewd-ufaq-pattern-search,
+.ewd-ufaq-pattern-submit {
+	width: 100%;
+}
+
+/***************
+CATEGORY TABS
+***************/
+.ewd-ufaq-category-tabs-1 .ewd-ufaq-faqs {
+  display: flex;
+  width: 100%;
+  position: relative;
+}
+.ewd-ufaq-category-tabs-1 .ewd-ufaq-faq-category {
+  display: flex;
+  flex-direction: column;
+  margin-right: 40px;
+}
+.ewd-ufaq-category-tabs-1 .ewd-ufaq-category-tab-selected h3 {
+  font-weight: bold;
+  text-decoration: underline;
+}
+.ewd-ufaq-category-tabs-1 .ewd-ufaq-faq-category-inner {
+  position: absolute;
+  left: 0;
+  top: 72px;
+  width: 100%;
+}
+.ewd-ufaq-category-tabs-1 .ewd-ufaq-faq-category .ewd-ufaq-faq-category {
+  position: relative;
+  margin-right: 0;
+  margin-top: 24px;
+  width: 100%;
+  clear: both;
+  display: flex;
+  flex-direction: column;
+}
+
+.ewd-ufaq-faq-category-body-hidden {
+  display: none;
+}
+
+
+/**********************/
+/** NEW META BUBBLES **/
+/**********************/
+
+.ewd-ufaq-faq-categories,
+.ewd-ufaq-faq-tags {
+	margin: 14px 0;
+	display: flex;
+	align-items: center;
+	width: 100%;
+	gap: 12px;
+	color: #212427;
+}
+.ewd-ufaq-faq-categories a,
+.ewd-ufaq-faq-tags a {
+	text-decoration: none;
+	padding: 4px 12px;
+	color: #212427;
+	border: 1px solid #b1b1b1;
+	border-radius: 100px;
+}
+.ewd-ufaq-faq-custom-fields {
+  margin-bottom: 14px;
+}
+.ewd-ufaq-custom-field-label {
+  color: #212427;
+}
+
+/**********************/
+/**** COMPACT META ****/
+/**********************/
+
+.ewd-ufaq-compact-faq-meta {
+	display: flex;
+	width: 100%;
+	flex-wrap: wrap;
+	justify-content: right;
+	align-items: center;
+	gap: 0;
+}
+.ewd-ufaq-compact-faq-meta > div {
+	width: 100%;
+}
+.ewd-ufaq-compact-faq-meta .ewd-ufaq-permalink {
+	width: auto;
+	order: 25;
+}
+.ewd-ufaq-compact-faq-meta .ewd-ufaq-permalink a {
+	font-size: 16px;
+	color: #7a7a7a;
+	font-weight: normal;
+	text-decoration: none;
+}
+.ewd-ufaq-compact-faq-meta .ewd-ufaq-permalink-image {
+	display: none;
+}
+.ewd-ufaq-compact-faq-meta .ewd-ufaq-social-links {
+	width: auto;
+	order: 26;
+}
+.ewd-ufaq-compact-faq-meta .ewd-ufaq-social-links-label {
+	display: none;
+}
+.ewd-ufaq-compact-faq-meta .rrssb-buttons {
+	height: auto;
+	display: flex;
+	align-items: center;
+	margin: 0;
+	float: none;
+	gap: 4px;
+}
+.ewd-ufaq-compact-faq-meta .rrssb-buttons li {
+	float: none;
+	height: auto;
+	line-height: initial;
+	padding: 0;
+	margin: 0;
+}
+.ewd-ufaq-compact-faq-meta .rrssb-buttons li a {
+	height: auto;
+	padding: 0;
+	font-weight: normal;
+	font-size: 16px;
+	text-align: left;
+	width: auto;
+	border-radius: 0;
+}
+.ewd-ufaq-compact-faq-meta .rrssb-buttons li.rrssb-facebook a,
+.ewd-ufaq-compact-faq-meta .rrssb-buttons li.rrssb-twitter a,
+.ewd-ufaq-compact-faq-meta .rrssb-buttons li.rrssb-linkedin a,
+.ewd-ufaq-compact-faq-meta .rrssb-buttons li.rrssb-pinterest a,
+.ewd-ufaq-compact-faq-meta .rrssb-buttons li.rrssb-email a {
+	background-color: transparent;
+}
+.ewd-ufaq-compact-faq-meta .rrssb-buttons li a .rrssb-icon,
+.ewd-ufaq-compact-faq-meta .rrssb-buttons li a .rrssb-text {
+	display: none;
+}
+.ewd-ufaq-compact-faq-meta .ewd-ufaq-ratings {
+	width: auto;
+	order: 27;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	align-items: center;
+}
+.ewd-ufaq-compact-faq-meta .ewd-ufaq-rating-button {
+	float: none;
+	width: auto;
+	height: auto;
+	margin: 0;
+	line-height: initial;
+	font-weight: normal;
+  display: flex;
+}
+.ewd-ufaq-compact-faq-meta .ewd-ufaq-rating-button img {
+	display: none !important;
+}
+.ewd-ufaq-compact-faq-meta .ewd-ufaq-rating-button span {
+	width: auto;
+  margin-left: 2px;
+}
+.ewd-ufaq-compact-faq-meta .ewd-ufaq-down-vote {
+	height: auto !important;
+	margin-left: 4px;
+}
+.ewd-ufaq-compact-faq-meta .ewd-ufaq-ratings-label {
+	display: none;
+}
+
+.ewd-ufaq-hidden {
+  display: none;
+}

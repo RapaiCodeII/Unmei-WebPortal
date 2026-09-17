@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unmei – Post Notice</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="adminportal.css" />
+  <script src="assets/iconify-icon.min.js"></script>
+<script src="assets/unmei-icons.js"></script>
+</head>
+<body>
+  <script src="session-guard.js"></script>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="brand-logo">
+        <img src="assets/logo.png" alt="UNMEI" style="width:40px;height:40px;object-fit:contain;">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UNMEI</span>
+        <span class="brand-portal">ADMIN PORTAL</span>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <p class="nav-section-label">OVERVIEW</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-dashboard.html" class="nav-link">
+          <iconify-icon icon="mdi:view-dashboard"></iconify-icon>Dashboard</a></li>
+        <li class="nav-item"><a href="admin-students.html" class="nav-link">
+          <iconify-icon icon="mdi:account-outline"></iconify-icon>Students<span class="nav-badge" id="studentBadge">0</span></a></li>
+        <li class="nav-item"><a href="admin-enrollments.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>Recent Enrollments</a></li>
+        <li class="nav-item"><a href="admin-payments.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>Payments</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">COURSES</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-courses.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>Course List</a></li>
+        <li class="nav-item"><a href="admin-build-course.html" class="nav-link">
+          <iconify-icon icon="mdi:plus-circle-outline"></iconify-icon>Build New Course</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">QUICK ACTIONS</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-add-student.html" class="nav-link">
+          <iconify-icon icon="mdi:account-plus-outline"></iconify-icon>Add Student</a></li>
+        <li class="nav-item"><a href="admin-new-enrollment.html" class="nav-link">
+          <iconify-icon icon="mdi:plus-circle-outline"></iconify-icon>New Enrollment</a></li>
+        <li class="nav-item nav-item--active"><a href="admin-post-notice.html" class="nav-link">
+          <iconify-icon icon="mdi:bell-outline"></iconify-icon>Post Notice</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">SYSTEM</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-portal-settings.html" class="nav-link">
+          <iconify-icon icon="mdi:cog-outline"></iconify-icon>Portal Settings</a></li>
+        <li class="nav-item"><a href="javascript:void(0)" onclick="if(window.__adminSignOut){window.__adminSignOut();}else{location.href='admin-portal-settings.html';}" class="nav-link">
+          <iconify-icon icon="mdi:logout"></iconify-icon>Sign Out</a></li>
+      </ul>
+    </nav>
+    <div class="sidebar__user">
+      <div class="user-avatar user-avatar--dark" id="sidebarAvatar">AD</div>
+      <div class="user-meta"><span class="user-name" id="sidebarUserName">Admin</span><span class="user-role">Administrator</span></div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <!-- MAIN -->
+  <div class="main-wrapper">
+    <header class="topbar">
+      <button class="sidebar-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
+        <div class="topbar__left">
+        <h2 class="topbar__title">Post Notice</h2>
+        <nav class="breadcrumb">
+          <a href="admin-dashboard.html" class="breadcrumb__link">Home</a>
+          <span class="breadcrumb__sep">/</span>
+          <a href="admin-dashboard.html" class="breadcrumb__link">Dashboard</a>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current">Announcements</span>
+        </nav>
+      </div>
+      <div class="topbar__right">
+        <div class="topbar__user">
+          <div class="user-avatar user-avatar--red" id="headerAvatar">AD</div>
+          <div class="user-meta"><span class="user-name" id="headerUserName">Admin</span><span class="user-role">Administrator</span></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="form-page-wrap">
+        <div class="form-card notice-card">
+
+          <!-- Header -->
+          <div class="form-card__header">
+            <div class="form-card__icon form-card__icon--teal">
+              <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+            </div>
+            <div>
+              <h3 class="form-card__title">Create Announcement</h3>
+              <p class="form-card__sub">Publish a notice to all students or a specific course.</p>
+            </div>
+          </div>
+
+          <div class="form-card__body">
+
+            <!-- Subject Title -->
+            <div class="fp-group fp-group--full">
+              <label class="fp-label">Subject Title</label>
+              <input type="text" class="fp-input" id="pn_title" placeholder="e.g. Class Suspension for Typhoon..." />
+              <span class="fp-error" id="err_title"></span>
+            </div>
+
+            <!-- Audience Target -->
+            <div class="fp-group fp-group--full">
+              <label class="fp-label">Audience Target</label>
+              <div class="radio-group">
+                <label class="radio-option radio-option--selected" id="radio-all">
+                  <input type="radio" name="audience" value="all" checked onchange="selectAudience(this)"/>
+                  <span class="radio-dot"></span>
+                  All Registered Students
+                </label>
+                <label class="radio-option" id="radio-course">
+                  <input type="radio" name="audience" value="course" onchange="selectAudience(this)"/>
+                  <span class="radio-dot"></span>
+                  Specific Course Only
+                </label>
+                <label class="radio-option" id="radio-inst">
+                  <input type="radio" name="audience" value="instructors" onchange="selectAudience(this)"/>
+                  <span class="radio-dot"></span>
+                  Instructors Only
+                </label>
+              </div>
+              <!-- Course picker (shown when "Specific Course" selected) -->
+              <div class="section-picker" id="coursePicker" style="display:none;">
+                <select class="fp-input" id="pn_course" style="margin-top:10px;">
+                  <option value="">-- Choose a Course --</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Message Content -->
+            <div class="fp-group fp-group--full">
+              <label class="fp-label">Message Content</label>
+              <textarea class="fp-input pn-textarea" id="pn_message" placeholder="Write your full announcement here..."></textarea>
+              <div class="char-counter"><span id="charCount">0</span> / 1000 characters</div>
+              <span class="fp-error" id="err_message"></span>
+            </div>
+
+            <!-- Priority Level -->
+            <div class="fp-group" style="max-width:240px;">
+              <label class="fp-label">Priority Level</label>
+              <select class="fp-input" id="pn_priority">
+                <option value="standard">Standard Notice</option>
+                <option value="high">High Priority</option>
+                <option value="urgent">Urgent</option>
+                <option value="academic">Academic Update</option>
+                <option value="account">Account Notice</option>
+              </select>
+            </div>
+
+          </div>
+
+          <!-- Footer -->
+          <div class="form-card__footer notice-footer">
+            <div class="notice-preview-btn" onclick="togglePreview()">
+              <iconify-icon icon="mdi:eye-outline"></iconify-icon>
+              Preview
+            </div>
+            <div class="notice-footer__btns">
+              <button class="fp-btn fp-btn--ghost" onclick="discardNotice()">Discard</button>
+              <button class="fp-btn fp-btn--primary" onclick="publishNotice()">Publish Notice</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Preview Card -->
+        <div class="preview-card" id="previewCard" style="display:none;">
+          <div class="preview-card__header">
+            <iconify-icon icon="mdi:eye-outline"></iconify-icon>
+            Announcement Preview
+          </div>
+          <div class="preview-card__body">
+            <div class="preview-meta">
+              <span class="preview-badge" id="preview_priority_badge">Standard Notice</span>
+              <span class="preview-audience" id="preview_audience">All Registered Students</span>
+            </div>
+            <h4 class="preview-title" id="preview_title">Your title will appear here</h4>
+            <p class="preview-message" id="preview_message">Your announcement message will appear here...</p>
+            <p class="preview-timestamp">Published by Admin · <span id="preview_time"></span></p>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Footer hint -->
+    <div class="page-file-hint">admin/qa-post-notice.md</div>
+  </div>
+
+  <div class="adm-toast" id="admToast"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script>
+  const database = firebase.database();
+  let isPublishing = false;
+
+  function getAdminInitials(name) {
+    return (name || '').trim().split(/\s+/).filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'AD';
+  }
+
+  function applyAdminIdentity(name) {
+    const resolvedName = name || 'Admin';
+    const initials = getAdminInitials(resolvedName);
+    document.getElementById('sidebarUserName').textContent = resolvedName;
+    document.getElementById('headerUserName').textContent = resolvedName;
+    document.getElementById('sidebarAvatar').textContent = initials;
+    document.getElementById('headerAvatar').textContent = initials;
+  }
+
+  function loadAdminInfo() {
+    const adminId = sessionStorage.getItem('adminId');
+    const adminEmail = sessionStorage.getItem('adminEmail') || '';
+    const storedDisplayName = sessionStorage.getItem('adminDisplayName') || '';
+    const fallbackName = storedDisplayName || (adminEmail ? adminEmail.split('@')[0].replace(/\./g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Admin');
+
+    applyAdminIdentity(fallbackName);
+
+    if (!adminId) {
+      return;
+    }
+
+    database.ref('admins/' + adminId).on('value', (snapshot) => {
+      const adminData = snapshot.val() || {};
+      const resolvedName = adminData.name || adminData.fullName || adminData.profile?.fullName || adminData.profile?.name || fallbackName;
+      applyAdminIdentity(resolvedName);
+      sessionStorage.setItem('adminDisplayName', resolvedName);
+    });
+  }
+
+  function loadCourseOptions() {
+    const courseSelect = document.getElementById('pn_course');
+    database.ref('courses').once('value').then((snapshot) => {
+      if (!snapshot.exists()) {
+        return;
+      }
+      const opts = ['<option value="">-- Choose a Course --</option>'];
+      snapshot.forEach((child) => {
+        const c = child.val() || {};
+        const label = c.name || child.key;
+        opts.push('<option value="' + child.key + '">' + label + '</option>');
+      });
+      courseSelect.innerHTML = opts.join('');
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    loadAdminInfo();
+    loadCourseOptions();
+    updatePreview();
+
+    database.ref('students').once('value').then((snapshot) => {
+      var count = snapshot.exists() ? snapshot.numChildren() : 0;
+      var badge = document.getElementById('studentBadge');
+      if (badge) badge.textContent = count;
+    }).catch(() => {
+      var badge = document.getElementById('studentBadge');
+      if (badge) badge.textContent = '0';
+    });
+  });
+
+  const PRIORITY_LABELS = {
+    standard: 'Standard Notice',
+    high:     'High Priority',
+    urgent:   'High Priority',
+    academic: 'Academic Update',
+    account:  'Account Notice',
+  };
+
+  const PRIORITY_COLORS = {
+    standard: '#6b7280',
+    high:     '#C0392B',
+    urgent:   '#ef4444',
+    academic: '#3b82f6',
+    account:  '#d97706',
+  };
+
+  const PRIORITY_KEYS = {
+    standard: 'general',
+    high:     'high',
+    urgent:   'high',
+    academic: 'academic',
+    account:  'general',
+  };
+
+  function selectAudience(radio) {
+    document.querySelectorAll('.radio-option').forEach(el => el.classList.remove('radio-option--selected'));
+    radio.closest('.radio-option').classList.add('radio-option--selected');
+    document.getElementById('coursePicker').style.display = radio.value === 'course' ? 'block' : 'none';
+    updatePreview();
+  }
+
+  document.getElementById('pn_message').addEventListener('input', function() {
+    const len = this.value.length;
+    document.getElementById('charCount').textContent = len;
+    if (len > 1000) { this.value = this.value.slice(0, 1000); document.getElementById('charCount').textContent = 1000; }
+    updatePreview();
+  });
+
+  document.getElementById('pn_title').addEventListener('input', updatePreview);
+  document.getElementById('pn_priority').addEventListener('change', updatePreview);
+
+  function updatePreview() {
+    const title    = document.getElementById('pn_title').value || 'Your title will appear here';
+    const message  = document.getElementById('pn_message').value || 'Your announcement message will appear here...';
+    const priority = document.getElementById('pn_priority').value;
+    const audience = document.querySelector('input[name="audience"]:checked');
+    const audienceMap = { all:'All Registered Students', course:'Specific Course', instructors:'Instructors Only' };
+    const audienceLabel = audienceMap[audience?.value || 'all'];
+
+    document.getElementById('preview_title').textContent = title;
+    document.getElementById('preview_message').textContent = message;
+    const pb = document.getElementById('preview_priority_badge');
+    pb.textContent = PRIORITY_LABELS[priority] || 'Standard Notice';
+    pb.style.background = PRIORITY_COLORS[priority] + '20';
+    pb.style.color = PRIORITY_COLORS[priority];
+    pb.style.borderColor = PRIORITY_COLORS[priority] + '40';
+    document.getElementById('preview_audience').textContent = audienceLabel;
+    document.getElementById('preview_time').textContent = new Date().toLocaleString('en-PH', {month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  }
+
+  function togglePreview() {
+    const card = document.getElementById('previewCard');
+    const isHidden = card.style.display === 'none';
+    card.style.display = isHidden ? 'block' : 'none';
+    if (isHidden) updatePreview();
+  }
+
+  function notifyTargetStudents(audience, courseId, noticeTitle, noticeMessage) {
+    const snippet = String(noticeMessage || '').replace(/\s+/g, ' ').trim();
+    const preview = snippet.length > 110 ? snippet.slice(0, 110).trimEnd() + '...' : snippet;
+
+    function pushToUids(uids) {
+      if (!uids.length) return Promise.resolve();
+      const updates = {};
+      uids.forEach((uid) => {
+        const key = database.ref('notifications').push().key;
+        updates['notifications/' + key] = {
+          recipientUid: uid,
+          title: 'New Announcement',
+          message: noticeTitle + (preview ? ' - ' + preview : ''),
+          type: 'announcement',
+          read: false,
+          createdAt: Date.now()
+        };
+      });
+      return database.ref().update(updates);
+    }
+
+    if (audience === 'course' && courseId) {
+      return database.ref('students').once('value').then((snap) => {
+        const uids = [];
+        if (snap.exists()) {
+          snap.forEach((child) => {
+            const data = child.val() || {};
+            if (data.isDeleted === true) return;
+            const enrollment = data.enrollment || {};
+            if (String(enrollment.courseId || '') === courseId) uids.push(child.key);
+          });
+        }
+        return pushToUids(uids);
+      });
+    }
+
+    if (audience === 'all') {
+      return database.ref('students').once('value').then((snap) => {
+        const uids = [];
+        if (snap.exists()) {
+          snap.forEach((child) => {
+            const data = child.val() || {};
+            if (data.isDeleted !== true) uids.push(child.key);
+          });
+        }
+        return pushToUids(uids);
+      });
+    }
+
+    return Promise.resolve();
+  }
+
+  function publishNotice() {
+    if (isPublishing) {
+      return;
+    }
+
+    const title   = document.getElementById('pn_title').value.trim();
+    const message = document.getElementById('pn_message').value.trim();
+    const adminId = sessionStorage.getItem('adminId');
+    const adminEmail = sessionStorage.getItem('adminEmail') || '';
+    const audience = document.querySelector('input[name="audience"]:checked').value;
+    const selectedCourse = document.getElementById('pn_course').value;
+    let valid = true;
+    document.getElementById('err_title').textContent = '';
+    document.getElementById('err_message').textContent = '';
+    document.getElementById('pn_title').classList.remove('fp-input--error');
+    document.getElementById('pn_message').classList.remove('fp-input--error');
+
+    if (!title) {
+      document.getElementById('err_title').textContent = 'Subject title is required.';
+      document.getElementById('pn_title').classList.add('fp-input--error');
+      valid = false;
+    }
+    if (!message) {
+      document.getElementById('err_message').textContent = 'Message content is required.';
+      document.getElementById('pn_message').classList.add('fp-input--error');
+      valid = false;
+    }
+    if (audience === 'course' && !selectedCourse) {
+      showToast('Please choose a target course.');
+      valid = false;
+    }
+    if (!valid) return;
+
+    if (!adminId) {
+      showToast('Admin session invalid. Please log in again.');
+      return;
+    }
+
+    const priority = document.getElementById('pn_priority').value;
+    isPublishing = true;
+
+    database.ref('announcements').push({
+      title: title,
+      message: message,
+      category: PRIORITY_KEYS[priority] || 'general',
+      priority: (priority === 'high' || priority === 'urgent') ? 'high' : 'normal',
+      postedBy: adminEmail || 'Admin',
+      postedByUid: adminId,
+      targetAudience: audience,
+      targetCourse: audience === 'course' ? (selectedCourse || null) : null,
+      targetSectionId: null,
+      pinned: priority === 'urgent',
+      active: true,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      expiresAt: null
+    }).then(() => {
+      notifyTargetStudents(audience, selectedCourse, title, message).catch(() => {});
+      showToast('Notice published: "' + title + '"');
+      setTimeout(() => {
+        document.getElementById('pn_title').value   = '';
+        document.getElementById('pn_message').value = '';
+        document.getElementById('charCount').textContent = '0';
+        document.getElementById('pn_priority').value = 'standard';
+        document.querySelectorAll('input[name="audience"]')[0].checked = true;
+        document.querySelectorAll('.radio-option').forEach((el,i) => el.classList.toggle('radio-option--selected', i===0));
+        document.getElementById('coursePicker').style.display = 'none';
+        document.getElementById('previewCard').style.display = 'none';
+      }, 1500);
+    }).catch(() => {
+      showToast('Failed to publish notice. Please try again.');
+    }).finally(() => {
+      isPublishing = false;
+    });
+  }
+
+  function discardNotice() {
+    if (document.getElementById('pn_title').value || document.getElementById('pn_message').value) {
+      showConfirm('Discard Notice','Discard this notice? All content will be lost.',function(){
+        document.getElementById('pn_title').value   = '';
+        document.getElementById('pn_message').value = '';
+        document.getElementById('charCount').textContent = '0';
+        document.getElementById('previewCard').style.display = 'none';
+        showToast('Notice discarded');
+      });
+      return;
+    }
+    document.getElementById('pn_title').value   = '';
+    document.getElementById('pn_message').value = '';
+    document.getElementById('charCount').textContent = '0';
+    document.getElementById('previewCard').style.display = 'none';
+    showToast('Notice discarded');
+  }
+
+  let tt;
+  function showToast(msg) { const t=document.getElementById('admToast'); t.textContent=msg; t.classList.add('adm-toast--show'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('adm-toast--show'),2800); }
+  function logout(){showConfirm('Sign Out','Are you sure you want to sign out?',function(){showToast('Signing out');setTimeout(function(){sessionStorage.clear();window.location.href='admin-login.html';},1200);});}
+  function showConfirm(t,m,cb){var o=document.getElementById('confirmOverlay');o.querySelector('.confirm-title').textContent=t;o.querySelector('.confirm-message').textContent=m;o.classList.add('active');o.querySelector('.confirm-btn--cancel').onclick=function(){o.classList.remove('active');};o.querySelector('.confirm-btn--confirm').onclick=function(){o.classList.remove('active');cb();};}
+
+  window.addEventListener('beforeunload', function() {
+    const adminId = sessionStorage.getItem('adminId');
+    if (adminId) {
+      database.ref('admins/' + adminId).off('value');
+    }
+  });
+
+  </script>
+  <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><div class="confirm-icon confirm-icon--warning"><iconify-icon icon="mdi:alert-outline"></iconify-icon></div><div class="confirm-title"></div><div class="confirm-message"></div><div class="confirm-actions"><button class="confirm-btn confirm-btn--cancel">Cancel</button><button class="confirm-btn confirm-btn--confirm">Confirm</button></div></div></div>
+<script>
+function toggleMobileSidebar(){var s=document.querySelector('.sidebar'),b=document.getElementById('sidebarBackdrop');if(s.classList.contains('sidebar--mobile-open')){closeMobileSidebar();}else{s.classList.add('sidebar--mobile-open');b.classList.add('active');document.body.style.overflow='hidden';}}
+function closeMobileSidebar(){var s=document.querySelector('.sidebar');var b=document.getElementById('sidebarBackdrop');s.classList.remove('sidebar--mobile-open');b.classList.remove('active');document.body.style.overflow='';}
+window.addEventListener('resize',function(){if(window.innerWidth>700)closeMobileSidebar();});
+</script>
+<script src="admin-header-sync.js"></script>
+<script src="assets/global-search.js"></script>
+</body>
+</html>
+
+

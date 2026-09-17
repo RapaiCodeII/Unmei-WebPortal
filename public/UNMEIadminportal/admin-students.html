@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unmei – Admin Students</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="adminportal.css" />
+  <script src="assets/d3.v7.min.js"></script>
+  <script src="assets/unmei-charts.js"></script>
+  <script src="assets/iconify-icon.min.js"></script>
+<script src="assets/unmei-icons.js"></script>
+</head>
+<body>
+  <script src="session-guard.js"></script>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="brand-logo">
+        <img src="assets/logo.png" alt="UNMEI" style="width:40px;height:40px;object-fit:contain;">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UNMEI</span>
+        <span class="brand-portal">ADMIN PORTAL</span>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <p class="nav-section-label">OVERVIEW</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-dashboard.html" class="nav-link">
+          <iconify-icon icon="mdi:view-dashboard"></iconify-icon>
+          Dashboard</a></li>
+        <li class="nav-item nav-item--active"><a href="admin-students.html" class="nav-link">
+          <iconify-icon icon="mdi:account-outline"></iconify-icon>
+          Students<span class="nav-badge" id="studentBadge">0</span></a></li>
+        <li class="nav-item"><a href="admin-enrollments.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+          Recent Enrollments</a></li>
+        <li class="nav-item"><a href="admin-payments.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+          Payments</a></li>
+      </ul>
+
+      <p class="nav-section-label" style="margin-top:20px;">COURSES</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-courses.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+          Course List</a></li>
+        <li class="nav-item"><a href="admin-build-course.html" class="nav-link">
+          <iconify-icon icon="mdi:plus-circle-outline"></iconify-icon>
+          Build New Course</a></li>
+      </ul>
+
+      <p class="nav-section-label" style="margin-top:20px;">QUICK ACTIONS</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-add-student.html" class="nav-link">
+          <iconify-icon icon="mdi:account-plus-outline"></iconify-icon>
+          Add Student</a></li>
+        <li class="nav-item"><a href="admin-new-enrollment.html" class="nav-link">
+          <iconify-icon icon="mdi:plus-circle-outline"></iconify-icon>
+          New Enrollment</a></li>
+        <li class="nav-item"><a href="admin-post-notice.html" class="nav-link">
+          <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+          Post Notice</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">SYSTEM</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-portal-settings.html" class="nav-link">
+          <iconify-icon icon="mdi:cog-outline"></iconify-icon>
+          Portal Settings</a></li>
+        <li class="nav-item"><a href="javascript:void(0)" onclick="if(window.__adminSignOut){window.__adminSignOut();}else{location.href='admin-portal-settings.html';}" class="nav-link">
+          <iconify-icon icon="mdi:logout"></iconify-icon>
+          Sign Out</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar__user">
+      <div class="user-avatar user-avatar--dark" id="sidebarAvatar">AD</div>
+      <div class="user-meta">
+        <span class="user-name" id="sidebarUserName">Admin</span>
+        <span class="user-role">Administrator</span>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <!-- MAIN -->
+  <div class="main-wrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="sidebar-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
+        <div class="topbar__left">
+        <h2 class="topbar__title">Students</h2>
+        <nav class="breadcrumb">
+          <a href="admin-dashboard.html" class="breadcrumb__link">Home</a>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current">Students</span>
+        </nav>
+      </div>
+      <div class="topbar__center">
+      </div>
+      <div class="topbar__right">
+        <!-- Notification Bell -->
+        <div style="position: relative;">
+          <button class="icon-btn" id="notifBtn" onclick="toggleDropdown('notifDropdown')">
+            <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+            <span class="dropdown-badge" id="notifBadge" style="display: none;">0</span>
+          </button>
+          <div class="header-dropdown" id="notifDropdown">
+            <div class="header-dropdown__header">
+              <span class="header-dropdown__title">Notifications</span>
+              <span class="header-dropdown__link" onclick="markAllRead()">Mark all read</span>
+            </div>
+            <div class="header-dropdown__list" id="notifList">
+              <div class="header-dropdown__empty" id="notifEmpty">
+                <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+                <p>No notifications</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div style="position: relative;">
+          <button class="icon-btn" id="msgBtn" onclick="toggleDropdown('msgDropdown')">
+            <iconify-icon icon="mdi:email-outline"></iconify-icon>
+            <span class="dropdown-badge" id="msgBadge" style="display: none;">0</span>
+          </button>
+          <div class="header-dropdown" id="msgDropdown">
+            <div class="header-dropdown__header">
+              <span class="header-dropdown__title">Messages</span>
+              <span class="header-dropdown__link" onclick="viewAllMessages()">View all</span>
+            </div>
+            <div class="header-dropdown__list" id="msgList">
+              <div class="header-dropdown__empty" id="msgEmpty">
+                <iconify-icon icon="mdi:email-outline"></iconify-icon>
+                <p>No messages</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="topbar__user">
+          <div class="user-avatar user-avatar--red" id="headerAvatar">AD</div>
+          <div class="user-meta">
+            <span class="user-name" id="headerUserName">Admin</span>
+            <span class="user-role">Administrator</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- Section header -->
+      <div class="section-title">
+        <iconify-icon icon="mdi:account-multiple-outline"></iconify-icon>
+        Student Lists
+      </div>
+
+      <!-- Summary cards -->
+      <div class="summary-row">
+        <div class="sum-card">
+          <div class="sum-card__icon sum-card__icon--red">
+            <iconify-icon icon="mdi:account-outline"></iconify-icon>
+          </div>
+          <div>
+            <p class="sum-card__label">TOTAL STUDENTS</p>
+            <p class="sum-card__value" id="statTotal">--</p>
+          </div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-card__icon sum-card__icon--green">
+            <iconify-icon icon="mdi:check-circle-outline"></iconify-icon>
+          </div>
+          <div>
+            <p class="sum-card__label">ACTIVE</p>
+            <p class="sum-card__value" id="statActive">--</p>
+          </div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-card__icon sum-card__icon--yellow">
+            <iconify-icon icon="mdi:check-circle-outline"></iconify-icon>
+          </div>
+          <div>
+            <p class="sum-card__label">COMPLETED</p>
+            <p class="sum-card__value" id="statCompleted">--</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toolbar: search + filter + add -->
+      <div class="students-toolbar">
+        <div class="stu-search">
+          <iconify-icon icon="mdi:magnify"></iconify-icon>
+          <input type="text" id="inlineSearch" placeholder="Search" oninput="applyFilters()" />
+        </div>
+        <div class="filter-tabs" id="filterTabs">
+          <button class="ftab ftab--active" data-filter="All"       onclick="setFilter('All', this)">All</button>
+          <button class="ftab"              data-filter="Active"    onclick="setFilter('Active', this)">Active</button>
+          <button class="ftab"              data-filter="Completed" onclick="setFilter('Completed', this)">Completed</button>
+          <button class="ftab"              data-filter="Inactive"  onclick="setFilter('Inactive', this)">Inactive</button>
+        </div>
+        <button class="btn-add-student" onclick="window.location.href='admin-add-student.html'">+ Add Student</button>
+      </div>
+
+      <!-- Students Table -->
+      <div class="students-table-wrap">
+        <table class="students-table">
+          <thead>
+            <tr>
+              <th>STUDENT</th>
+              <th>STUDENT ID</th>
+              <th>COURSE</th>
+              <th>SCHEDULE</th>
+              <th>STATUS</th>
+              <th>PAYMENT</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="studentsTbody"></tbody>
+        </table>
+        <div class="table-empty" id="tableEmpty" style="display:none;">
+          <iconify-icon icon="mdi:information-outline"></iconify-icon>
+          <p>No students found.</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ======== VIEW STUDENT MODAL ======== -->
+  <div class="modal-overlay" id="viewStudentModal" onclick="closeOnBg(event,'viewStudentModal')">
+    <div class="modal-box modal-box--wide">
+      <div class="modal-header">
+        <h3 id="viewModalTitle">Student Profile</h3>
+        <button class="modal-close" onclick="closeModal('viewStudentModal')"><iconify-icon icon="mdi:close"></iconify-icon></button>
+      </div>
+      <div class="modal-body" id="viewModalBody"></div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn--ghost" onclick="closeModal('viewStudentModal')">Close</button>
+        <button class="modal-btn modal-btn--danger" id="viewDeleteBtn">Remove Student</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== EDIT STUDENT MODAL ======== -->
+  <div class="modal-overlay" id="editStudentModal" onclick="closeOnBg(event,'editStudentModal')">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Edit Student</h3>
+        <button class="modal-close" onclick="closeModal('editStudentModal')"><iconify-icon icon="mdi:close"></iconify-icon></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="edit_id"/>
+        <div class="mf-group"><label>Full Name</label><input type="text" id="edit_name" class="mf-input"/></div>
+        <div class="mf-group"><label>Email</label><input type="email" id="edit_email" class="mf-input"/></div>
+        <div class="mf-2col">
+          <div class="mf-group"><label>Course</label>
+            <select id="edit_course" class="mf-input" onchange="onEditCourseChange()"></select>
+          </div>
+          <div class="mf-group"><label>Instructor</label>
+            <select id="edit_instructor" class="mf-input"></select>
+          </div>
+        </div>
+        <div class="mf-group"><label>Schedule</label>
+          <select id="edit_sched" class="mf-input"></select>
+        </div>
+        <div class="mf-2col">
+          <div class="mf-group"><label>Payment</label>
+            <select id="edit_payment" class="mf-input">
+              <option>Paid</option><option>Partial</option><option>Overdue</option>
+            </select>
+          </div>
+          <div class="mf-group"><label>Status</label>
+            <select id="edit_status" class="mf-input">
+              <option>Active</option><option>Pending</option><option>Inactive</option><option>Completed</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn--ghost" onclick="closeModal('editStudentModal')">Cancel</button>
+        <button class="modal-btn modal-btn--primary" onclick="saveEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="adm-toast" id="admToast"></div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <script>
+  const database = firebase.database();
+
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function getAdminInitials(name) {
+    return (name || '').trim().split(/\s+/).filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'AD';
+  }
+
+  function applyAdminIdentity(name) {
+    const resolvedName = name || 'Admin';
+    const initials = getAdminInitials(resolvedName);
+    document.getElementById('sidebarUserName').textContent = resolvedName;
+    document.getElementById('headerUserName').textContent = resolvedName;
+    document.getElementById('sidebarAvatar').textContent = initials;
+    document.getElementById('headerAvatar').textContent = initials;
+  }
+
+  // Load admin info from Firebase
+  function loadAdminInfo() {
+    const adminId = sessionStorage.getItem('adminId');
+    const adminEmail = sessionStorage.getItem('adminEmail') || '';
+    const storedDisplayName = sessionStorage.getItem('adminDisplayName') || '';
+    const fallbackName = storedDisplayName || (adminEmail ? adminEmail.split('@')[0].replace(/\./g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Admin');
+
+    applyAdminIdentity(fallbackName);
+
+    if (!adminId) {
+      return;
+    }
+
+    database.ref('admins/' + adminId).on('value', (snapshot) => {
+      const adminData = snapshot.val() || {};
+      const resolvedName = adminData.name || adminData.fullName || adminData.profile?.fullName || adminData.profile?.name || fallbackName;
+      applyAdminIdentity(resolvedName);
+      sessionStorage.setItem('adminDisplayName', resolvedName);
+    });
+  }
+
+  window.addEventListener('beforeunload', function() {
+    const adminId = sessionStorage.getItem('adminId');
+    if (adminId) {
+      database.ref('admins/' + adminId).off('value');
+    }
+  });
+
+  // ======== DATA ========
+  const AVATAR_COLORS = ['#C0392B','#22c55e','#3b82f6','#f97316','#8b5cf6','#0d9488','#e11d48','#7c3aed'];
+  const COURSE_NAME_FALLBACK = {
+    jlpt_n5: 'JLPT N5 (Beginner)',
+    jlpt_n4: 'JLPT N4 (Elementary)',
+    jlpt_n3: 'JLPT N3 (Intermediate)',
+    jlpt_n2: 'JLPT N2 (Advanced)',
+    bundle_n5_n4: 'Bundle N5-N4',
+    bundle_n5_n3: 'Bundle N5-N3'
+  };
+  let students = [];
+  let activeFilter = 'All';
+  let coursesById = {};
+  let instructorsById = {};
+
+  function normalizeCourseId(value) {
+    return String(value || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[\s-]+/g, '_')
+      .replace(/[^a-z0-9_]/g, '');
+  }
+
+  function resolveCourseLabel(courseId, rawCourse, courseLookup) {
+    const direct = String(rawCourse || '').trim();
+    if (direct) return direct;
+    const normalizedId = normalizeCourseId(courseId);
+    if (!normalizedId) return '';
+    return courseLookup[normalizedId] || COURSE_NAME_FALLBACK[normalizedId] || '';
+  }
+
+  function formatSchedule(days, timeSlot) {
+    const normalizedDays = String(days || '').trim();
+    const normalizedTime = String(timeSlot || '').trim();
+    if (!normalizedDays && !normalizedTime) return 'N/A';
+    if (!normalizedDays) return normalizedTime;
+    if (!normalizedTime) return normalizedDays;
+    return normalizedDays + ' · ' + normalizedTime;
+  }
+
+  function toDisplayStatus(rawStatus) {
+    const status = String(rawStatus || '').trim().toLowerCase();
+    if (status === 'active') return 'Active';
+    if (status === 'pending' || status === 'processing' || status === 'assessment_required') return 'Pending';
+    if (status === 'completed') return 'Completed';
+    return 'Inactive';
+  }
+
+  function sanitizeAvatarColor(colorValue, fallbackColor) {
+    const value = String(colorValue || '').trim();
+    return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(value) ? value : fallbackColor;
+  }
+
+  function buildEnrollmentLookup(enrollmentSnapshot, courseLookup) {
+    const byUid = {};
+    const byEmail = {};
+    const byName = {};
+
+    if (!enrollmentSnapshot.exists()) {
+      return { byUid, byEmail, byName };
+    }
+
+    function keepLatest(target, key, entry) {
+      if (!key) return;
+      const current = target[key];
+      if (!current || entry.updatedAt > current.updatedAt) {
+        target[key] = entry;
+      }
+    }
+
+    enrollmentSnapshot.forEach((child) => {
+      const data = child.val() || {};
+      const entry = {
+        course: resolveCourseLabel(data.courseId, data.course, courseLookup),
+        courseId: normalizeCourseId(data.courseId),
+        scheduleDays: String(data.scheduleDays || data.schedule?.days || '').trim(),
+        scheduleTimeSlot: String(data.scheduleTimeSlot || data.schedule?.time || '').trim(),
+        status: String(data.status || data.enrollmentStatus || '').trim().toLowerCase(),
+        updatedAt: Number(data.updatedAt || data.createdAt || data.enrolledAt || 0),
+        email: String(data.email || data.studentEmail || '').trim().toLowerCase(),
+        fullName: String(data.fullName || data.studentName || data.name || '').trim()
+      };
+
+      const candidateUids = [data.studentUid, data.uid, data.studentId, data.enrollmentId];
+      if (String(child.key || '').charAt(0) !== '-') {
+        candidateUids.push(child.key);
+      }
+      candidateUids.forEach((uidValue) => {
+        const uid = String(uidValue || '').trim();
+        if (uid) keepLatest(byUid, uid, entry);
+      });
+
+      if (entry.email) keepLatest(byEmail, entry.email, entry);
+      if (entry.fullName) keepLatest(byName, entry.fullName.toLowerCase(), entry);
+    });
+
+    return { byUid, byEmail, byName };
+  }
+
+  function avatarMarkup(student, className) {
+    const avatarUrl = String(student.avatarUrl || '').trim();
+    if (avatarUrl) {
+      return `<div class="${className}" style="background:#f5f5f5;overflow:hidden;"><img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(student.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"></div>`;
+    }
+    return `<div class="${className}" style="background:${escapeHtml(student.color)}">${escapeHtml(student.initials)}</div>`;
+  }
+
+  function buildPaymentLookup(paymentSnapshot) {
+    const byUid = {};
+    const byEmail = {};
+    const byName = {};
+
+    if (!paymentSnapshot.exists()) {
+      return { byUid, byEmail, byName };
+    }
+
+    function upsertAggregate(target, key, amount, state) {
+      if (!key) return;
+      if (!target[key]) {
+        target[key] = { approvedTotal: 0, pendingTotal: 0, rejectedCount: 0 };
+      }
+      if (state === 'approved') {
+        target[key].approvedTotal += amount;
+      } else if (state === 'pending') {
+        target[key].pendingTotal += amount;
+      } else if (state === 'rejected') {
+        target[key].rejectedCount += 1;
+      }
+    }
+
+    paymentSnapshot.forEach((child) => {
+      const paymentData = child.val() || {};
+      const amount = Number(paymentData.amount || paymentData.totalAmount || paymentData.paymentAmount || 0);
+      const rawApproval = String(paymentData.adminApprovalStatus || paymentData.verificationStatus || '').toLowerCase();
+      const rawStatus = String(paymentData.status || '').toLowerCase();
+      let state = 'pending';
+      if (rawApproval === 'approved' || rawStatus === 'approved' || rawStatus === 'paid') {
+        state = 'approved';
+      } else if (rawApproval === 'rejected' || rawStatus === 'rejected') {
+        state = 'rejected';
+      }
+
+      const uid = String(paymentData.studentUid || '').trim();
+      const email = String(paymentData.studentEmail || paymentData.email || '').trim().toLowerCase();
+      const name = String(paymentData.studentName || paymentData.fullName || paymentData.name || '').trim().toLowerCase();
+
+      upsertAggregate(byUid, uid, amount, state);
+      upsertAggregate(byEmail, email, amount, state);
+      upsertAggregate(byName, name, amount, state);
+    });
+
+    return { byUid, byEmail, byName };
+  }
+
+  function getStudentPaymentStatus(paymentInfo, tuitionTotal) {
+    if (!paymentInfo) return 'N/A';
+    const approvedTotal = Number(paymentInfo.approvedTotal || 0);
+    const pendingTotal = Number(paymentInfo.pendingTotal || 0);
+    const rejectedCount = Number(paymentInfo.rejectedCount || 0);
+
+    if (tuitionTotal > 0 && approvedTotal >= tuitionTotal && approvedTotal > 0) return 'Paid';
+    if (approvedTotal > 0) return 'Partial';
+    if (pendingTotal > 0) return 'Pending';
+    if (rejectedCount > 0) return 'Overdue';
+    return 'N/A';
+  }
+
+  const SCHEDULE_SLOTS = [
+    { days: 'Monday - Wednesday - Friday', slot: '8am - 12nn' },
+    { days: 'Monday - Wednesday - Friday', slot: '1pm - 5pm' },
+    { days: 'Tuesday & Thursday', slot: '8am - 12nn' },
+    { days: 'Tuesday & Thursday', slot: '1pm - 5pm' },
+    { days: 'Monday - Friday', slot: '8am - 12nn' },
+    { days: 'Saturday Only', slot: '8am - 5pm (Sat Only)' }
+  ];
+
+  function loadStudentsFromFirebase() {
+    const requestNames = ['students', 'payments', 'enrollments', 'courses', 'professors', 'grades'];
+    Promise.allSettled([
+      database.ref('students').once('value'),
+      database.ref('payments').once('value'),
+      database.ref('enrollments').once('value'),
+      database.ref('courses').once('value'),
+      database.ref('professors').once('value'),
+      database.ref('grades').once('value')
+    ]).then((results) => {
+      // Surface partial failures instead of silently blanking the table:
+      // students is critical; the rest degrade to fallback lookups.
+      const failed = [];
+      const snap = {};
+      results.forEach((r, i) => {
+        if (r.status === 'fulfilled') {
+          snap[requestNames[i]] = r.value;
+        } else {
+          failed.push(requestNames[i]);
+          console.error('[admin-students] Failed to load "' + requestNames[i] + '":', r.reason);
+        }
+      });
+
+      const emptySnapshot = { exists: () => false, forEach: () => {} };
+      if (!snap.students) {
+        // students read itself failed — nothing to render.
+        students = [];
+        renderTable(students);
+        updateStats();
+        showToast('Unable to load students: students read failed (' + (failed.join(', ') || 'unknown') + '). See console.');
+        return;
+      }
+
+      const studentSnapshot = snap.students;
+      const paymentSnapshot = snap.payments || emptySnapshot;
+      const enrollmentSnapshot = snap.enrollments || emptySnapshot;
+      const coursesSnapshot = snap.courses || emptySnapshot;
+      const instructorsSnapshot = snap.professors || emptySnapshot;
+      const gradesSnapshot = snap.grades || emptySnapshot;
+
+      if (failed.length) {
+        showToast('Loaded students with limited data (failed: ' + failed.join(', ') + ').');
+      }
+
+      const paymentLookup = buildPaymentLookup(paymentSnapshot);
+      const courseLookup = {};
+      const coursePriceLookup = {};
+      coursesById = {};
+      if (coursesSnapshot.exists()) {
+        coursesSnapshot.forEach((child) => {
+          const courseData = child.val() || {};
+          const normalizedId = normalizeCourseId(child.key || courseData.courseId || '');
+          const courseName = String(courseData.name || courseData.course || '').trim();
+          if (normalizedId && courseName) {
+            courseLookup[normalizedId] = courseName;
+          }
+          if (normalizedId) {
+            coursesById[normalizedId] = courseData;
+            const price = Number(courseData.price || 0);
+            if (price > 0) {
+              coursePriceLookup[normalizedId] = price;
+            }
+          }
+        });
+      }
+      instructorsById = {};
+      if (instructorsSnapshot.exists()) {
+        instructorsSnapshot.forEach((child) => {
+          const d = child.val() || {};
+          instructorsById[child.key] = String(d.fullName || d.name || child.key);
+        });
+      }
+      // Live schema: grades / grades/{courseId}/{studentUid} with weekly history.
+      const gradesByUid = {};
+      if (gradesSnapshot.exists()) {
+        gradesSnapshot.forEach((courseChild) => {
+          const courseId = courseChild.key;
+          courseChild.forEach((uidChild) => {
+            const g = uidChild.val() || {};
+            gradesByUid[uidChild.key] = { courseId: courseId, average: g.average, history: g.history || {} };
+          });
+        });
+      }
+      function courseInstructorIds(courseMeta) {
+        const ids = [];
+        if (Array.isArray(courseMeta.instructorIds)) {
+          courseMeta.instructorIds.forEach((v) => { if (v) ids.push(String(v)); });
+        } else if (courseMeta.instructorIds && typeof courseMeta.instructorIds === 'object') {
+          Object.values(courseMeta.instructorIds).forEach((v) => { if (v) ids.push(String(v)); });
+        }
+        if (courseMeta.instructorId && ids.indexOf(String(courseMeta.instructorId)) === -1) {
+          ids.push(String(courseMeta.instructorId));
+        }
+        return ids;
+      }
+      function resolveInstructor(studentEnrollment, normalizedCourseId) {
+        const directId = String(studentEnrollment.instructorId || '').trim();
+        if (directId && instructorsById[directId]) return { id: directId, name: instructorsById[directId] };
+        const meta = coursesById[normalizedCourseId] || {};
+        const ids = courseInstructorIds(meta);
+        for (let i = 0; i < ids.length; i++) {
+          if (instructorsById[ids[i]]) return { id: ids[i], name: instructorsById[ids[i]] };
+        }
+        return { id: directId || (ids[0] || ''), name: '' };
+      }
+      const enrollmentLookup = buildEnrollmentLookup(enrollmentSnapshot, courseLookup);
+
+      students = [];
+      if (studentSnapshot.exists()) {
+        let idx = 0;
+        studentSnapshot.forEach((child) => {
+          const data = child.val();
+          if (!data || data.isDeleted === true) {
+            return;
+          }
+          const profile = data.profile || {};
+          const enrollment = data.enrollment || {};
+          const uid = child.key;
+          const resolvedEmail = profile.email || data.email || '';
+          const email = resolvedEmail.toLowerCase();
+          const resolvedName = profile.fullName || data.fullName || data.name || (resolvedEmail ? resolvedEmail.split('@')[0] : 'Unassigned');
+          const normalizedName = resolvedName.trim().toLowerCase();
+          const enrollmentMatch = enrollmentLookup.byUid[uid] || enrollmentLookup.byEmail[email] || enrollmentLookup.byName[normalizedName] || {};
+
+          const paymentInfo = paymentLookup.byUid[uid] || paymentLookup.byEmail[email] || paymentLookup.byName[normalizedName] || null;
+          const name = resolvedName;
+          const initials = (profile.avatarInitials || name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() || '??').toUpperCase();
+          const fallbackColor = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+          const color = sanitizeAvatarColor(profile.avatarColor || data.avatarColor, fallbackColor);
+          const avatarUrl = profile.avatarUrl || data.avatarUrl || '';
+          const year = new Date().getFullYear();
+          const normalizedCourseId = normalizeCourseId(enrollment.courseId || enrollmentMatch.courseId || '');
+          const storedStudentId = String(enrollment.studentId || profile.studentId || '').trim();
+          const studentId = storedStudentId || ('UNC-' + year + '-' + (String(uid).replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase() || '0000'));
+          const instructorInfo = resolveInstructor(enrollment, normalizedCourseId);
+
+          const resolvedCourse = resolveCourseLabel(
+            enrollment.courseId || enrollmentMatch.courseId,
+            enrollment.course || enrollmentMatch.course,
+            courseLookup
+          ) || 'N/A';
+          const tuitionTotal = Number(enrollment.courseFee || enrollment.totalFee || enrollment.totalTuition || enrollmentMatch.totalTuition || coursePriceLookup[normalizedCourseId] || 0);
+          const paymentStatus = getStudentPaymentStatus(paymentInfo, tuitionTotal);
+          const resolvedSchedule = formatSchedule(
+            enrollment.scheduleDays || enrollmentMatch.scheduleDays,
+            enrollment.scheduleTimeSlot || enrollmentMatch.scheduleTimeSlot
+          );
+          const resolvedStatus = toDisplayStatus(enrollment.status || enrollmentMatch.status);
+
+          const scores = data.scores || {};
+          const attended = typeof data.attendance === 'number' ? data.attendance : 0;
+          const appData = data.appSyncData || {};
+          const gradeRec = gradesByUid[uid] || {};
+          const skillBreakdown = {
+            reading: Number(scores.reading || 0),
+            writing: Number(scores.writing || 0),
+            listening: Number(scores.listening || 0),
+            speaking: Number(scores.speaking || 0),
+            grammar: Number(scores.grammar || 0),
+            vocabulary: Number(scores.vocabulary || 0)
+          };
+          const modulesCompleted = Array.isArray(appData.modulesCompleted)
+            ? appData.modulesCompleted.length
+            : Number(appData.modulesCompleted || 0);
+          const totalModules = Number(appData.totalModules || 0);
+          const courseProgress = totalModules > 0 ? Math.round((modulesCompleted / totalModules) * 100) : 0;
+          // Weekly score progression from grades/{course}/{uid}/history
+          const gradeHistory = (gradeRec && gradeRec.history) || {};
+          const weekKeys = Object.keys(gradeHistory).sort();
+          const weeklyProgress = weekKeys.map((wk) => {
+            const h = gradeHistory[wk] || {};
+            const vals = [h.reading, h.writing, h.listening, h.speaking].filter((v) => typeof v === 'number');
+            return vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : null;
+          }).filter((v) => v !== null);
+          const skillVals = [skillBreakdown.reading, skillBreakdown.writing, skillBreakdown.listening, skillBreakdown.speaking, skillBreakdown.grammar, skillBreakdown.vocabulary];
+          const averageScore = (typeof gradeRec.average === 'number' && gradeRec.average > 0)
+            ? gradeRec.average
+            : (skillVals.some((v) => v > 0) ? Math.round(skillVals.reduce((a, b) => a + b, 0) / 6) : 0);
+          const attendanceRate = attended;
+          const streakDays = Number(appData.streakDays || 0);
+          const practiceMinutes = Number(appData.totalPracticeMinutes || 0);
+          const lastActivityAt = Number(appData.lastSyncTimestamp || 0);
+          const SKILL_LABELS = { reading: 'Reading', writing: 'Writing', listening: 'Listening', speaking: 'Speaking', grammar: 'Grammar', vocabulary: 'Vocabulary' };
+          const areasOfImprovement = Object.keys(skillBreakdown)
+            .filter((k) => skillBreakdown[k] > 0 && skillBreakdown[k] < 60)
+            .sort((a, b) => skillBreakdown[a] - skillBreakdown[b])
+            .slice(0, 3)
+            .map((k) => SKILL_LABELS[k] || k);
+          const hasPerformance = true;
+
+          students.push({
+            uid: uid,
+            id: idx + 1,
+            initials: initials,
+            color: color,
+            avatarUrl: avatarUrl,
+            name: name,
+            email: resolvedEmail,
+            studentId: studentId,
+            hasPerformance: hasPerformance,
+            courseId: normalizedCourseId,
+            instructorId: instructorInfo.id,
+            instructorName: instructorInfo.name,
+            course: resolvedCourse,
+            schedule: resolvedSchedule,
+            scheduleDays: String(enrollment.scheduleDays || enrollmentMatch.scheduleDays || '').trim(),
+            scheduleTimeSlot: String(enrollment.scheduleTimeSlot || enrollmentMatch.scheduleTimeSlot || '').trim(),
+            status: resolvedStatus,
+            payment: paymentStatus,
+            performance: {
+              courseProgress: courseProgress,
+              modulesCompleted: modulesCompleted,
+              totalModules: totalModules,
+              averageScore: averageScore,
+              attendanceRate: attendanceRate,
+              streakDays: streakDays,
+              practiceMinutes: practiceMinutes,
+              lastActivityAt: lastActivityAt,
+              skillBreakdown: skillBreakdown,
+              weeklyProgress: weeklyProgress,
+              areasOfImprovement: areasOfImprovement
+            }
+          });
+          idx++;
+        });
+      }
+      renderTable(students);
+      updateStats();
+    }).catch((err) => {
+      // allSettled never rejects; reaching here means a rendering bug.
+      // Never blank the table silently — keep existing rows and surface it.
+      console.error('[admin-students] render failure:', err);
+      showToast('A rendering error occurred while loading students. See console.');
+    });
+  }
+
+  // ======== RENDER ========
+  function statusBadge(s) {
+    const cls = { Active:'stu-badge--active', Pending:'stu-badge--pending', Completed:'stu-badge--completed', Inactive:'stu-badge--inactive' };
+    return `<span class="stu-badge ${cls[s]||''}">${s}</span>`;
+  }
+
+  function payBadge(p) {
+    const cls = { Paid:'pay-badge--paid', Partial:'pay-badge--partial', Overdue:'pay-badge--overdue', 'N/A':'' };
+    if (p === 'N/A') return '<span style="color:var(--gray-400);font-size:0.7rem;">N/A</span>';
+    return `<span class="pay-badge ${cls[p]||''}">${p}</span>`;
+  }
+
+  function avatarEl(s) {
+    return avatarMarkup(s, 'stu-avatar');
+  }
+
+  function renderTable(list) {
+    const tbody = document.getElementById('studentsTbody');
+    const empty = document.getElementById('tableEmpty');
+    if (!list.length) {
+      tbody.innerHTML = '';
+      empty.style.display = 'flex';
+      return;
+    }
+    empty.style.display = 'none';
+    tbody.innerHTML = list.map(s => `
+      <tr>
+        <td>
+          <div class="stu-cell">
+            ${avatarEl(s)}
+            <div>
+              <p class="stu-name">${escapeHtml(s.name)}</p>
+              <p class="stu-email">${escapeHtml(s.email)}</p>
+            </div>
+          </div>
+        </td>
+        <td class="stu-id">${escapeHtml(s.studentId)}</td>
+        <td>${escapeHtml(s.course)}</td>
+        <td>${escapeHtml(s.schedule)}</td>
+        <td>${statusBadge(s.status)}</td>
+        <td>${payBadge(s.payment)}</td>
+        <td>
+          <div class="action-group">
+            <button class="action-btn action-btn--view"   onclick="viewStudent('${s.uid}')">View</button>
+            <button class="action-btn action-btn--edit"   onclick="editStudent('${s.uid}')">Edit</button>
+            <button class="action-btn action-btn--remove" onclick="removeStudent('${s.uid}')">Remove</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function updateStats() {
+    const total = students.length;
+    const active = students.filter(s => s.status === 'Active').length;
+    const completed = students.filter(s => s.status === 'Completed').length;
+    const targets = [
+      ['statTotal', total],
+      ['statActive', active],
+      ['statCompleted', completed],
+      ['sidebarCount', total],
+      ['studentBadge', total]
+    ];
+    targets.forEach(([id, value]) => {
+      const element = document.getElementById(id);
+      if (element) element.textContent = value;
+    });
+  }
+
+  function applyFilters() {
+    const q = (document.getElementById('inlineSearch').value).toLowerCase();
+    let list = students;
+    if (activeFilter !== 'All') list = list.filter(s => s.status === activeFilter);
+    if (q) list = list.filter(s => s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q) || s.course.toLowerCase().includes(q) || s.studentId.toLowerCase().includes(q));
+    renderTable(list);
+  }
+
+  function setFilter(val, btn) {
+    activeFilter = val;
+    document.querySelectorAll('.ftab').forEach(b => b.classList.remove('ftab--active'));
+    btn.classList.add('ftab--active');
+    applyFilters();
+  }
+
+  // ======== VIEW ========
+  function viewStudent(uid) {
+    const s = students.find(x => x.uid === uid);
+    if (!s) return;
+    const perf = s.performance || {};
+    const skills = perf.skillBreakdown || { reading: 0, writing: 0, listening: 0, speaking: 0, grammar: 0, vocabulary: 0 };
+    const weekly = perf.weeklyProgress || [];
+    const areas = perf.areasOfImprovement || [];
+    const lastActivityText = perf.lastActivityAt
+      ? new Date(perf.lastActivityAt).toLocaleString()
+      : 'No activity recorded yet';
+
+    document.getElementById('viewModalTitle').textContent = s.name + ' — Performance Analytics';
+    document.getElementById('viewModalBody').innerHTML = `
+      <div class="view-profile" style="display:flex;gap:16px;align-items:center;padding:16px;background:var(--gray-50,#f9fafb);border-radius:10px;margin-bottom:16px;">
+        ${avatarMarkup(s, 'view-avatar')}
+        <div class="view-info" style="flex:1;">
+          <h4 style="margin:0 0 4px 0;font-size:1.15rem;font-weight:700;color:var(--gray-900,#111827);">${escapeHtml(s.name)}</h4>
+          <p style="margin:0 0 6px 0;color:var(--gray-500,#6b7280);font-size:0.875rem;">${escapeHtml(s.email)} • ID: <strong style="color:var(--gray-700,#374151);">${escapeHtml(s.studentId)}</strong></p>
+          <div class="view-badges" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            ${statusBadge(s.status)} ${payBadge(s.payment)}
+            <span style="font-size:0.8rem;color:var(--gray-600);background:#fff;padding:2px 8px;border-radius:4px;border:1px solid #e5e7eb;">${escapeHtml(s.course)}</span>
+            <span style="font-size:0.8rem;color:var(--gray-600);background:#fff;padding:2px 8px;border-radius:4px;border:1px solid #e5e7eb;">${escapeHtml(s.schedule)}</span>
+            ${s.instructorName ? `<span style="font-size:0.8rem;color:var(--gray-600);background:#fff;padding:2px 8px;border-radius:4px;border:1px solid #e5e7eb;display:inline-flex;align-items:center;gap:4px;"><iconify-icon icon="mdi:account-tie-outline"></iconify-icon>${escapeHtml(s.instructorName)}</span>` : ''}
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance KPI summary boxes -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;">
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px;text-align:center;">
+          <span style="font-size:0.75rem;color:#6b7280;text-transform:uppercase;font-weight:600;">Course Progress</span>
+          <p style="margin:4px 0 0 0;font-size:1.25rem;font-weight:700;color:#C0392B;">${perf.courseProgress || 0}%</p>
+        </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px;text-align:center;">
+          <span style="font-size:0.75rem;color:#6b7280;text-transform:uppercase;font-weight:600;">Modules</span>
+          <p style="margin:4px 0 0 0;font-size:1.25rem;font-weight:700;color:#2563EB;">${perf.modulesCompleted || 0}/${perf.totalModules || 12}</p>
+        </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px;text-align:center;">
+          <span style="font-size:0.75rem;color:#6b7280;text-transform:uppercase;font-weight:600;">Avg Quiz Score</span>
+          <p style="margin:4px 0 0 0;font-size:1.25rem;font-weight:700;color:#16A34A;">${perf.averageScore || 0}%</p>
+        </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px;text-align:center;">
+          <span style="font-size:0.75rem;color:#6b7280;text-transform:uppercase;font-weight:600;">Attendance</span>
+          <p style="margin:4px 0 0 0;font-size:1.25rem;font-weight:700;color:#8B5CF6;">${perf.attendanceRate || 0}%</p>
+        </div>
+      </div>
+      <p style="margin:-8px 0 16px 0;font-size:0.78rem;color:#6b7280;display:flex;align-items:center;gap:4px;"><iconify-icon icon="mdi:clock-outline"></iconify-icon>Last activity: ${escapeHtml(lastActivityText)}</p>
+
+      <!-- D3 Interactive Charts Row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;">
+          <h5 style="margin:0 0 10px 0;font-size:0.9rem;font-weight:600;color:#374151;">Skill Mastery Breakdown</h5>
+          <div id="modalSkillRadarChart" style="min-height:220px;display:flex;align-items:center;justify-content:center;"></div>
+        </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;">
+          <h5 style="margin:0 0 10px 0;font-size:0.9rem;font-weight:600;color:#374151;">Weekly Score Progression Trend</h5>
+          <div id="modalScoreLineChart" style="min-height:220px;"></div>
+        </div>
+      </div>
+
+      <!-- Areas of Improvement -->
+      <div style="background:var(--gray-50,#f9fafb);border:1px solid #e5e7eb;border-radius:8px;padding:12px 16px;">
+        <span style="font-size:0.8rem;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">Target Areas of Improvement</span>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          ${areas.length
+            ? areas.map(a => `<span style="display:inline-flex;align-items:center;gap:4px;background:#fee2e2;color:#991b1b;padding:4px 10px;border-radius:9999px;font-size:0.8rem;font-weight:600;"><iconify-icon icon="mdi:target"></iconify-icon>${escapeHtml(a)}</span>`).join('')
+            : '<span style="font-size:0.85rem;color:#6b7280;">No flagged areas yet.</span>'}
+        </div>
+      </div>
+    `;
+
+    document.getElementById('viewDeleteBtn').onclick = () => { removeStudent(uid); closeModal('viewStudentModal'); };
+    openModal('viewStudentModal');
+
+    // Render D3 charts after modal is displayed in DOM
+    setTimeout(() => {
+      if (window.UnmeiCharts) {
+        // Skill radar chart
+        const radarAxes = [
+          { label: 'Reading', value: Number(skills.reading || 0) },
+          { label: 'Writing', value: Number(skills.writing || 0) },
+          { label: 'Listening', value: Number(skills.listening || 0) },
+          { label: 'Speaking', value: Number(skills.speaking || 0) },
+          { label: 'Grammar', value: Number(skills.grammar || 0) },
+          { label: 'Vocabulary', value: Number(skills.vocabulary || 0) }
+        ];
+        const hasSkills = radarAxes.some((axis) => axis.value > 0);
+        if (hasSkills) {
+          UnmeiCharts.radarChart('modalSkillRadarChart', { axes: radarAxes, color: '#C0392B', height: 210 });
+        } else {
+          const radarHost = document.getElementById('modalSkillRadarChart');
+          if (radarHost) radarHost.innerHTML = '<p style="margin:0;color:#6b7280;text-align:center;padding-top:70px;">No skill data recorded yet</p>';
+        }
+
+        // Weekly quiz score progression line chart
+        const labels = weekly.map((_, i) => 'W' + (i + 1));
+        if (weekly.length) {
+          UnmeiCharts.multiLine('modalScoreLineChart', {
+            labels: labels,
+            height: 210,
+            yMax: 100,
+            series: [{ name: 'Quiz Score', data: weekly, color: '#2563EB', fill: true }]
+          });
+        } else {
+          const weeklyHost = document.getElementById('modalScoreLineChart');
+          if (weeklyHost) weeklyHost.innerHTML = '<p style="margin:0;color:#6b7280;text-align:center;padding-top:70px;">No weekly score data recorded yet</p>';
+        }
+      }
+    }, 80);
+  }
+
+  // ======== EDIT ========
+  function populateEditCourseOptions(selectedCourseId, fallbackLabel) {
+    const sel = document.getElementById('edit_course');
+    const ids = Object.keys(coursesById);
+    sel.innerHTML = ids.length
+      ? ids.map(id => `<option value="${escapeHtml(id)}">${escapeHtml(coursesById[id].name || id)}</option>`).join('')
+      : `<option value="">${escapeHtml(fallbackLabel || 'No courses available')}</option>`;
+    if (selectedCourseId && coursesById[selectedCourseId]) sel.value = selectedCourseId;
+  }
+
+  function onEditCourseChange(preselectInstructorId) {
+    const courseId = document.getElementById('edit_course').value;
+    const sel = document.getElementById('edit_instructor');
+    const meta = coursesById[courseId] || {};
+    const ids = [];
+    if (Array.isArray(meta.instructorIds)) {
+      meta.instructorIds.forEach(v => { if (v) ids.push(String(v)); });
+    } else if (meta.instructorIds && typeof meta.instructorIds === 'object') {
+      Object.values(meta.instructorIds).forEach(v => { if (v) ids.push(String(v)); });
+    }
+    if (meta.instructorId && ids.indexOf(String(meta.instructorId)) === -1) ids.push(String(meta.instructorId));
+    const valid = ids.filter(id => id && instructorsById[id]);
+    sel.innerHTML = '<option value="">-- Unassigned --</option>' +
+      valid.map(id => `<option value="${escapeHtml(id)}">${escapeHtml(instructorsById[id])}</option>`).join('');
+    if (preselectInstructorId && valid.indexOf(preselectInstructorId) !== -1) sel.value = preselectInstructorId;
+  }
+
+  function populateEditScheduleOptions(selectedDays, selectedSlot) {
+    const sel = document.getElementById('edit_sched');
+    sel.innerHTML = SCHEDULE_SLOTS.map((slot, i) =>
+      `<option value="${i}">${escapeHtml(slot.days + ' · ' + slot.slot)}</option>`
+    ).join('');
+    const matchIndex = SCHEDULE_SLOTS.findIndex(slot => slot.days === selectedDays && slot.slot === selectedSlot);
+    sel.value = String(matchIndex !== -1 ? matchIndex : 0);
+  }
+
+  function editStudent(uid) {
+    const s = students.find(x => x.uid === uid);
+    if (!s) return;
+    document.getElementById('edit_id').value      = uid;
+    document.getElementById('edit_name').value    = s.name;
+    document.getElementById('edit_email').value   = s.email;
+    populateEditCourseOptions(s.courseId, s.course);
+    onEditCourseChange(s.instructorId);
+    populateEditScheduleOptions(s.scheduleDays, s.scheduleTimeSlot);
+    document.getElementById('edit_payment').value = s.payment;
+    document.getElementById('edit_status').value  = s.status;
+    openModal('editStudentModal');
+  }
+
+  function saveEdit() {
+    const uid     = document.getElementById('edit_id').value;
+    const name    = document.getElementById('edit_name').value.trim();
+    const email   = document.getElementById('edit_email').value.trim();
+    const courseId     = document.getElementById('edit_course').value;
+    const instructorId = document.getElementById('edit_instructor').value;
+    const slotIndex    = parseInt(document.getElementById('edit_sched').value, 10);
+    const slot         = SCHEDULE_SLOTS[slotIndex] || SCHEDULE_SLOTS[0];
+    const courseName   = (coursesById[courseId] && coursesById[courseId].name) || '';
+    const payment = document.getElementById('edit_payment').value;
+    const status  = document.getElementById('edit_status').value;
+    if (!name || !email) { showToast('Name and email required'); return; }
+    const parts = name.split(' ');
+    const initials = (parts[0][0] + (parts[1]?.[0] || '')).toUpperCase();
+
+    var normalizedStatus = status.toLowerCase();
+    database.ref('students/' + uid).update({
+      'profile/fullName': name,
+      'profile/email': email,
+      'profile/avatarInitials': initials,
+      'profile/updatedAt': Date.now(),
+      'enrollment/course': courseName,
+      'enrollment/courseId': courseId,
+      'enrollment/instructorId': instructorId,
+      'enrollment/scheduleDays': slot.days,
+      'enrollment/scheduleTimeSlot': slot.slot,
+      'enrollment/status': normalizedStatus,
+      'isRevoked': normalizedStatus === 'inactive' || normalizedStatus === 'revoked',
+      'isDeleted': false
+    }).then(() => {
+      loadStudentsFromFirebase();
+      closeModal('editStudentModal');
+      showToast(name + ' updated');
+    });
+  }
+
+  // ======== REMOVE ========
+  function removeStudent(uid) {
+    const s = students.find(x => x.uid === uid);
+    if (!s) return;
+    showConfirm('Remove Student','Remove ' + s.name + ' from the system?',function(){
+      var emailLower = String(s.email || '').trim().toLowerCase();
+      var nameLower = String(s.name || '').trim().toLowerCase();
+
+      function matchesStudentRecord(data) {
+        var row = data || {};
+        var rowUid = String(row.studentUid || row.uid || row.recipientUid || row.toUid || row.senderUid || '').trim();
+        if (rowUid && rowUid === uid) return true;
+
+        var rowEmail = String(row.studentEmail || row.email || row.recipientEmail || '').trim().toLowerCase();
+        if (emailLower && rowEmail && rowEmail === emailLower) return true;
+
+        var rowName = String(row.studentName || row.fullName || row.name || '').trim().toLowerCase();
+        if (nameLower && rowName && rowName === nameLower) return true;
+
+        return false;
+      }
+
+      Promise.all([
+        database.ref('payments').once('value'),
+        database.ref('enrollments').once('value'),
+        database.ref('notifications').once('value'),
+        database.ref('messages').once('value')
+      ]).then(function(snaps) {
+        var updates = {};
+        updates['students/' + uid] = null;
+        updates['users/' + uid] = null;
+
+        snaps[0].forEach(function(child) {
+          if (matchesStudentRecord(child.val())) {
+            updates['payments/' + child.key] = null;
+          }
+        });
+        snaps[1].forEach(function(child) {
+          if (matchesStudentRecord(child.val())) {
+            updates['enrollments/' + child.key] = null;
+          }
+        });
+        snaps[2].forEach(function(child) {
+          if (matchesStudentRecord(child.val())) {
+            updates['notifications/' + child.key] = null;
+          }
+        });
+        snaps[3].forEach(function(child) {
+          if (matchesStudentRecord(child.val())) {
+            updates['messages/' + child.key] = null;
+          }
+        });
+
+        return database.ref().update(updates);
+      }).then(() => {
+        loadStudentsFromFirebase();
+        showToast(s.name + ' removed');
+      }).catch((err) => {
+        console.error('[admin-students] remove student failed for uid=' + uid + ':', err);
+        showToast('Unable to remove student completely. Please retry.');
+      });
+    });
+  }
+
+  // ======== MODAL HELPERS ========
+  function openModal(id) {
+    document.getElementById(id).classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  function closeOnBg(e, id) {
+    if (e.target.id === id) closeModal(id);
+  }
+
+  // ======== TOAST ========
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('admToast');
+    t.textContent = msg;
+    t.classList.add('adm-toast--show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('adm-toast--show'), 2800);
+  }
+
+  // ======== DROPDOWNS ========
+  function toggleDropdown(id) {
+    const dropdown = document.getElementById(id);
+    const isActive = dropdown.classList.contains('active');
+    document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('active'));
+    document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--active'));
+    if (!isActive) {
+      dropdown.classList.add('active');
+      document.getElementById(id === 'notifDropdown' ? 'notifBtn' : 'msgBtn').classList.add('icon-btn--active');
+    }
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.icon-btn') && !e.target.closest('.header-dropdown')) {
+      document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('active'));
+      document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--active'));
+    }
+  });
+
+  function markAllRead() {
+    document.querySelectorAll('.dropdown-item--unread').forEach(item => item.classList.remove('dropdown-item--unread'));
+    document.getElementById('notifBadge').style.display = 'none';
+    showToast('All notifications marked as read');
+  }
+
+  function viewNotif(el) {
+    el.classList.remove('dropdown-item--unread');
+    const unreadCount = document.querySelectorAll('.dropdown-item--unread').length;
+    const badge = document.getElementById('notifBadge');
+    if (unreadCount === 0) {
+      badge.style.display = 'none';
+    } else {
+      badge.textContent = unreadCount;
+    }
+  }
+
+  function viewAllMessages() {
+    showToast('No messages');
+  }
+
+  function openMessage(user) {
+    showToast('Open message from ' + user);
+  }
+
+  function showConfirm(t,m,cb){var o=document.getElementById('confirmOverlay');o.querySelector('.confirm-title').textContent=t;o.querySelector('.confirm-message').textContent=m;o.classList.add('active');o.querySelector('.confirm-btn--cancel').onclick=function(){o.classList.remove('active');};o.querySelector('.confirm-btn--confirm').onclick=function(){o.classList.remove('active');cb();};}
+
+  loadAdminInfo();
+  loadStudentsFromFirebase();
+
+  // Deep link from admin-course-view.html roster (?student=UID):
+  // wait for the students array to populate, then open the performance view modal.
+  const deepLinkUid = new URLSearchParams(window.location.search).get('student');
+  if (deepLinkUid) {
+    let attempts = 0;
+    const tryOpenDeepLink = () => {
+      const target = students.find(x => x.uid === deepLinkUid);
+      if (target) { viewStudent(deepLinkUid); return; }
+      if (++attempts < 20) setTimeout(tryOpenDeepLink, 300);
+    };
+    setTimeout(tryOpenDeepLink, 400);
+  }
+  </script>
+  <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><div class="confirm-icon confirm-icon--warning"><iconify-icon icon="mdi:alert-outline"></iconify-icon></div><div class="confirm-title"></div><div class="confirm-message"></div><div class="confirm-actions"><button class="confirm-btn confirm-btn--cancel">Cancel</button><button class="confirm-btn confirm-btn--confirm">Confirm</button></div></div></div>
+<script>
+function toggleMobileSidebar(){var s=document.querySelector('.sidebar'),b=document.getElementById('sidebarBackdrop');if(s.classList.contains('sidebar--mobile-open')){closeMobileSidebar();}else{s.classList.add('sidebar--mobile-open');b.classList.add('active');document.body.style.overflow='hidden';}}
+function closeMobileSidebar(){var s=document.querySelector('.sidebar');var b=document.getElementById('sidebarBackdrop');s.classList.remove('sidebar--mobile-open');b.classList.remove('active');document.body.style.overflow='';}
+window.addEventListener('resize',function(){if(window.innerWidth>700)closeMobileSidebar();});
+</script>
+<script src="admin-header-sync.js"></script>
+<script src="assets/global-search.js"></script>
+</body>
+</html>

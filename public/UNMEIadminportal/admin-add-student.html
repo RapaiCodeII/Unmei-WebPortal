@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unmei - Add New Student</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="adminportal.css" />
+  <script src="assets/iconify-icon.min.js"></script>
+<script src="assets/unmei-icons.js"></script>
+</head>
+<body>
+  <script src="session-guard.js"></script>
+
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="brand-logo">
+        <img src="assets/logo.png" alt="UNMEI" style="width:40px;height:40px;object-fit:contain;">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UNMEI</span>
+        <span class="brand-portal">ADMIN PORTAL</span>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <p class="nav-section-label">OVERVIEW</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-dashboard.html" class="nav-link">
+          <iconify-icon icon="mdi:view-dashboard"></iconify-icon>Dashboard</a></li>
+        <li class="nav-item"><a href="admin-students.html" class="nav-link">
+          <iconify-icon icon="mdi:account-outline"></iconify-icon>Students<span class="nav-badge" id="studentBadge">0</span></a></li>
+        <li class="nav-item"><a href="admin-enrollments.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>Recent Enrollments</a></li>
+        <li class="nav-item"><a href="admin-payments.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>Payments</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">COURSES</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-courses.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>Course List</a></li>
+        <li class="nav-item"><a href="admin-build-course.html" class="nav-link">
+          <iconify-icon icon="mdi:plus-circle-outline"></iconify-icon>Build New Course</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">QUICK ACTIONS</p>
+      <ul class="nav-list">
+        <li class="nav-item nav-item--active"><a href="admin-add-student.html" class="nav-link">
+          <iconify-icon icon="mdi:account-plus-outline"></iconify-icon>Add Student</a></li>
+        <li class="nav-item"><a href="admin-new-enrollment.html" class="nav-link">
+          <iconify-icon icon="mdi:plus-circle-outline"></iconify-icon>New Enrollment</a></li>
+        <li class="nav-item"><a href="admin-post-notice.html" class="nav-link">
+          <iconify-icon icon="mdi:bell-outline"></iconify-icon>Post Notice</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">SYSTEM</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-portal-settings.html" class="nav-link">
+          <iconify-icon icon="mdi:cog-outline"></iconify-icon>Portal Settings</a></li>
+        <li class="nav-item"><a href="javascript:void(0)" onclick="if(window.__adminSignOut){window.__adminSignOut();}else{location.href='admin-portal-settings.html';}" class="nav-link">
+          <iconify-icon icon="mdi:logout"></iconify-icon>Sign Out</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar__user">
+      <div class="user-avatar user-avatar--dark">AD</div>
+      <div class="user-meta"><span class="user-name">Admin</span><span class="user-role">Administrator</span></div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <button class="sidebar-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
+      <div class="topbar__left">
+        <h2 class="topbar__title">Add New Student</h2>
+        <nav class="breadcrumb">
+          <a href="admin-dashboard.html" class="breadcrumb__link">Home</a>
+          <span class="breadcrumb__sep">/</span>
+          <a href="admin-dashboard.html" class="breadcrumb__link">Dashboard</a>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current">Add Student</span>
+        </nav>
+      </div>
+      <div class="topbar__right">
+        <div class="topbar__user">
+          <div class="user-avatar user-avatar--red">AD</div>
+          <div class="user-meta"><span class="user-name">Admin</span><span class="user-role">Administrator</span></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="form-page-wrap">
+        <div class="form-card enroll-card">
+          <div class="form-card__header">
+            <div class="form-card__icon form-card__icon--blue">
+              <iconify-icon icon="mdi:account-plus-outline"></iconify-icon>
+            </div>
+            <div>
+              <h3 class="form-card__title">Add Student Wizard</h3>
+              <p class="form-card__sub">Create Auth account, profile, enrollment, and payment in one guided flow.</p>
+            </div>
+          </div>
+
+          <div class="form-card__body">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">
+              <div style="display:flex;gap:6px;align-items:center;">
+                <span class="wiz-step" id="asDot1" style="width:26px;height:8px;border-radius:8px;background:var(--red);"></span>
+                <span class="wiz-step" id="asDot2" style="width:12px;height:8px;border-radius:8px;background:#ddd;"></span>
+                <span class="wiz-step" id="asDot3" style="width:12px;height:8px;border-radius:8px;background:#ddd;"></span>
+                <span class="wiz-step" id="asDot4" style="width:12px;height:8px;border-radius:8px;background:#ddd;"></span>
+              </div>
+              <span id="asStepLabel" style="font-size:0.72rem;color:var(--gray-500);font-weight:600;">Step 1 of 4</span>
+            </div>
+
+            <div id="asStep1" class="wiz-panel">
+              <div class="fp-group fp-group--full">
+                <label class="fp-label">Full Name</label>
+                <input type="text" class="fp-input" id="ns_fullname" placeholder="Enter full legal name" />
+                <span class="fp-error" id="err_fullname"></span>
+              </div>
+              <div class="fp-row">
+                <div class="fp-group">
+                  <label class="fp-label">Birth Country</label>
+                  <input type="text" class="fp-input" id="ns_country" placeholder="e.g. Philippines" />
+                  <span class="fp-error" id="err_country"></span>
+                </div>
+                <div class="fp-group">
+                  <label class="fp-label">Date of Birth</label>
+                  <input type="date" class="fp-input" id="ns_dob" />
+                  <span class="fp-error" id="err_dob"></span>
+                </div>
+              </div>
+              <div class="fp-row">
+                <div class="fp-group">
+                  <label class="fp-label">Gender</label>
+                  <select class="fp-input" id="ns_gender">
+                    <option value="">-- Select --</option>
+                    <option value="female">Female</option>
+                    <option value="male">Male</option>
+                    <option value="other">Other</option>
+                    <option value="prefer_not_to_say">Prefer not to say</option>
+                  </select>
+                  <span class="fp-error" id="err_gender"></span>
+                </div>
+                <div class="fp-group">
+                  <label class="fp-label">Contact Number</label>
+                  <input type="tel" class="fp-input" id="ns_contact" placeholder="+63 9XX XXX XXXX" />
+                  <span class="fp-error" id="err_contact"></span>
+                </div>
+              </div>
+            </div>
+
+            <div id="asStep2" class="wiz-panel" style="display:none;">
+              <div class="fp-group fp-group--full">
+                <label class="fp-label">Student Email</label>
+                <input type="email" class="fp-input" id="ns_email" placeholder="student@example.com" />
+                <span class="fp-error" id="err_email"></span>
+              </div>
+              <div class="fp-row">
+                <div class="fp-group">
+                  <label class="fp-label">Password</label>
+                  <input type="password" class="fp-input" id="ns_password" placeholder="At least 8 chars with upper/lower/number" />
+                  <span class="fp-error" id="err_password"></span>
+                </div>
+                <div class="fp-group">
+                  <label class="fp-label">Confirm Password</label>
+                  <input type="password" class="fp-input" id="ns_password_confirm" placeholder="Retype password" />
+                  <span class="fp-error" id="err_password_confirm"></span>
+                </div>
+              </div>
+              <div class="fp-group fp-group--full">
+                <label class="fp-label">Password Strength</label>
+                <div id="passStrength" style="height:8px;background:#e5e7eb;border-radius:999px;overflow:hidden;">
+                  <div id="passBar" style="height:100%;width:0;background:#ef4444;"></div>
+                </div>
+                <p class="fp-hint" id="passHint">Use 8+ characters with uppercase, lowercase, and a number.</p>
+                <button type="button" class="fp-regen-btn" onclick="regenPassword()" style="margin-top:8px;">Generate Password</button>
+              </div>
+            </div>
+
+            <div id="asStep3" class="wiz-panel" style="display:none;">
+              <div class="fp-row">
+                <div class="fp-group">
+                  <label class="fp-label">Course Level</label>
+                  <select class="fp-input" id="ns_course">
+                    <option value="">-- Select course level --</option>
+                    <option value="jlpt_n5">JLPT N5 (Beginner)</option>
+                    <option value="jlpt_n4">JLPT N4 (Elementary)</option>
+                    <option value="jlpt_n3">JLPT N3 (Intermediate)</option>
+                    <option value="jlpt_n2">JLPT N2 (Advanced)</option>
+                  </select>
+                  <span class="fp-error" id="err_course"></span>
+                </div>
+                <div class="fp-group">
+                  <label class="fp-label">Class Schedule</label>
+                  <select class="fp-input" id="ns_schedule">
+                    <option value="">-- Select class schedule --</option>
+                    <option value="Monday - Wednesday - Friday|8am - 12nn">Mon-Wed-Fri · 8am - 12nn</option>
+                    <option value="Monday - Wednesday - Friday|1pm - 5pm">Mon-Wed-Fri · 1pm - 5pm</option>
+                    <option value="Tuesday - Thursday|8am - 12nn">Tue-Thu · 8am - 12nn</option>
+                    <option value="Tuesday - Thursday|1pm - 5pm">Tue-Thu · 1pm - 5pm</option>
+                    <option value="Monday - Friday|8am - 12nn">Mon-Fri · 8am - 12nn</option>
+                    <option value="Monday - Friday|1pm - 5pm">Mon-Fri · 1pm - 5pm</option>
+                    <option value="Saturday Only|8am - 5pm (Sat Only)">Saturday Only · 8am - 5pm</option>
+                  </select>
+                  <span class="fp-error" id="err_schedule"></span>
+                </div>
+              </div>
+              <div class="fp-row">
+                <div class="fp-group">
+                  <label class="fp-label">Pre-test Eligibility</label>
+                  <select class="fp-input" id="ns_pretest">
+                    <option value="">-- Select eligibility --</option>
+                    <option value="eligible">Eligible / Passed</option>
+                    <option value="not_eligible">Not Eligible / Pending</option>
+                  </select>
+                  <span class="fp-error" id="err_pretest"></span>
+                </div>
+                <div class="fp-group">
+                  <label class="fp-label">Course Fee</label>
+                  <input type="text" class="fp-input" id="ns_course_fee" value="PHP 0" readonly />
+                </div>
+              </div>
+              <div class="section-info-preview" id="nsCourseInfo" style="display:none;margin-top:4px;">
+                <iconify-icon icon="mdi:clock-outline"></iconify-icon>
+                <span id="nsCourseInfoText"></span>
+              </div>
+            </div>
+
+            <div id="asStep4" class="wiz-panel" style="display:none;">
+              <div class="fp-row">
+                <div class="fp-group">
+                  <label class="fp-label">Payment Plan Assignment</label>
+                  <select class="fp-input" id="ns_payment_plan">
+                    <option value="full">Full Payment</option>
+                    <option value="installment_2">2 Installments</option>
+                    <option value="installment_3">3 Installments</option>
+                  </select>
+                </div>
+                <div class="fp-group">
+                  <label class="fp-label">Initial Payment Status</label>
+                  <select class="fp-input" id="ns_payment_status">
+                    <option value="pending">Pending</option>
+                    <option value="partial">Partial</option>
+                    <option value="approved">Paid</option>
+                  </select>
+                </div>
+              </div>
+              <div class="fp-row">
+                <div class="fp-group">
+                  <label class="fp-label">Initial Amount (PHP)</label>
+                  <input type="number" class="fp-input" id="ns_initial_amount" min="0" step="100" value="0" />
+                  <span class="fp-error" id="err_initial_amount"></span>
+                </div>
+                <div class="fp-group">
+                  <label class="fp-label">First Due Date</label>
+                  <input type="date" class="fp-input" id="ns_due_date" />
+                </div>
+              </div>
+              <div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:10px;padding:12px;">
+                <p style="font-size:0.72rem;font-weight:700;color:var(--gray-700);margin-bottom:8px;">Enrollment Summary</p>
+                <p style="font-size:0.76rem;color:var(--gray-600);margin-bottom:4px;">Student: <strong id="asSummaryName">--</strong></p>
+                <p style="font-size:0.76rem;color:var(--gray-600);margin-bottom:4px;">Course: <strong id="asSummaryCourse">--</strong></p>
+                <p style="font-size:0.76rem;color:var(--gray-600);margin-bottom:4px;">Schedule: <strong id="asSummarySection">--</strong></p>
+                <p style="font-size:0.76rem;color:var(--gray-600);margin-bottom:0;">Payment: <strong id="asSummaryPayment">--</strong></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-card__footer">
+            <button class="fp-btn fp-btn--ghost" onclick="window.location.href='admin-students.html'">Cancel</button>
+            <button class="fp-btn fp-btn--ghost" id="asBack" onclick="asPrevStep()" style="display:none;">Back</button>
+            <button class="fp-btn fp-btn--primary" id="asNext" onclick="asNextStep()">Next</button>
+            <button class="fp-btn fp-btn--primary" id="asCreate" onclick="createStudentFromWizard()" style="display:none;">Create Student</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="adm-toast" id="admToast"></div>
+
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+      <div class="confirm-icon confirm-icon--warning">
+        <iconify-icon icon="mdi:alert-outline"></iconify-icon>
+      </div>
+      <div class="confirm-title"></div>
+      <div class="confirm-message"></div>
+      <div class="confirm-actions">
+        <button class="confirm-btn confirm-btn--cancel">Cancel</button>
+        <button class="confirm-btn confirm-btn--confirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script>
+  const database = firebase.database();
+  const auth = firebase.auth();
+
+  const AS_COURSE_FALLBACK = {
+    jlpt_n5: { name: 'JLPT N5 (Beginner)', price: 8000, requiresAssessment: false },
+    jlpt_n4: { name: 'JLPT N4 (Elementary)', price: 10000, requiresAssessment: true },
+    jlpt_n3: { name: 'JLPT N3 (Intermediate)', price: 12000, requiresAssessment: true },
+    jlpt_n2: { name: 'JLPT N2 (Advanced)', price: 15000, requiresAssessment: true }
+  };
+
+  let asStep = 1;
+  let asSubmitting = false;
+  let asCourseCatalog = {};
+
+  document.addEventListener('DOMContentLoaded', function() {
+    asLoadStudentBadge();
+    asInitCourseData();
+    asBindEvents();
+    asUpdateStepUI();
+    asGeneratePassword();
+  });
+
+  function asBindEvents() {
+    document.getElementById('ns_password').addEventListener('input', function() {
+      asUpdatePasswordStrength(this.value);
+    });
+    document.getElementById('ns_course').addEventListener('change', function() {
+      asUpdateCourseMeta();
+      asApplyPaymentDefaults();
+      asUpdateSummary();
+    });
+    document.getElementById('ns_schedule').addEventListener('change', asUpdateSummary);
+    document.getElementById('ns_payment_plan').addEventListener('change', asUpdateSummary);
+    document.getElementById('ns_payment_status').addEventListener('change', asApplyPaymentDefaults);
+    document.getElementById('ns_initial_amount').addEventListener('input', asUpdateSummary);
+    document.getElementById('ns_pretest').addEventListener('change', function() {
+      asUpdateCourseMeta();
+      asUpdateSummary();
+    });
+    document.getElementById('ns_fullname').addEventListener('input', asUpdateSummary);
+  }
+
+  function asLoadStudentBadge() {
+    database.ref('students').once('value').then(function(snapshot) {
+      var count = snapshot.exists() ? snapshot.numChildren() : 0;
+      var badge = document.getElementById('studentBadge');
+      if (badge) badge.textContent = count;
+    });
+  }
+
+  function asNormalizeCourseId(raw) {
+    var v = String(raw || '').trim().toLowerCase().replace(/\s+/g, '_');
+    if (!v) return '';
+    if (v === 'n5' || v === 'jlpt_n5') return 'jlpt_n5';
+    if (v === 'n4' || v === 'jlpt_n4') return 'jlpt_n4';
+    if (v === 'n3' || v === 'jlpt_n3') return 'jlpt_n3';
+    if (v === 'n2' || v === 'jlpt_n2') return 'jlpt_n2';
+    return v;
+  }
+
+  function asGetCourseMeta(courseId) {
+    var id = asNormalizeCourseId(courseId);
+    return asCourseCatalog[id] || AS_COURSE_FALLBACK[id] || null;
+  }
+
+  function asInitCourseData() {
+    database.ref('courses').once('value').then(function(coursesSnap) {
+      asCourseCatalog = {};
+      if (coursesSnap.exists()) {
+        coursesSnap.forEach(function(child) {
+          var id = asNormalizeCourseId(child.key);
+          var data = child.val() || {};
+          asCourseCatalog[id] = {
+            name: data.name || child.key,
+            price: Number(data.price || 0),
+            requiresAssessment: !!data.requiresAssessment
+          };
+        });
+      }
+
+      var courseSelect = document.getElementById('ns_course');
+      if (courseSelect) {
+        var courseOptions = Object.keys(asCourseCatalog);
+        if (!courseOptions.length) courseOptions = Object.keys(AS_COURSE_FALLBACK);
+        courseSelect.innerHTML = '<option value="">-- Select course --</option>' +
+          courseOptions.map(function(id) {
+            var meta = asGetCourseMeta(id) || {};
+            return '<option value="' + id + '">' + String(meta.name || id).replace(/[&<>"']/g, function(ch) {
+              return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+            }) + '</option>';
+          }).join('');
+      }
+
+      asUpdateCourseMeta();
+      asApplyPaymentDefaults();
+      asUpdateSummary();
+    });
+  }
+
+  function asGeneratePassword() {
+    var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$';
+    var pw = '';
+    for (var i = 0; i < 12; i++) {
+      pw += chars[Math.floor(Math.random() * chars.length)];
+    }
+    document.getElementById('ns_password').value = pw;
+    document.getElementById('ns_password_confirm').value = pw;
+    asUpdatePasswordStrength(pw);
+  }
+
+  function regenPassword() {
+    asGeneratePassword();
+    showToast('Password regenerated');
+  }
+
+  function asUpdatePasswordStrength(pass) {
+    var score = 0;
+    if (pass.length >= 8) score++;
+    if (/[A-Z]/.test(pass)) score++;
+    if (/[a-z]/.test(pass)) score++;
+    if (/[0-9]/.test(pass)) score++;
+    if (/[^A-Za-z0-9]/.test(pass)) score++;
+
+    var pct = score * 20;
+    var color = '#ef4444';
+    var label = 'Weak';
+    if (pct >= 80) {
+      color = '#22c55e';
+      label = 'Strong';
+    } else if (pct >= 60) {
+      color = '#f59e0b';
+      label = 'Medium';
+    }
+
+    document.getElementById('passBar').style.width = pct + '%';
+    document.getElementById('passBar').style.background = color;
+    document.getElementById('passHint').textContent = label + ' password strength';
+  }
+
+  function asUpdateCourseMeta() {
+    var courseId = asNormalizeCourseId(document.getElementById('ns_course').value);
+    var meta = asGetCourseMeta(courseId);
+    var fee = meta ? Number(meta.price || 0) : 0;
+    document.getElementById('ns_course_fee').value = 'PHP ' + fee.toLocaleString();
+
+    var info = document.getElementById('nsCourseInfo');
+    var infoText = document.getElementById('nsCourseInfoText');
+    if (!meta) {
+      info.style.display = 'none';
+      return;
+    }
+
+    var eligible = document.getElementById('ns_pretest').value;
+    var note = meta.requiresAssessment ? 'Pre-test required for this level.' : 'No pre-test required for this level.';
+    if (meta.requiresAssessment && eligible === 'not_eligible') {
+      note = 'Marked not eligible: enrollment will be flagged for assessment follow-up.';
+    }
+    infoText.textContent = note;
+    info.style.display = 'flex';
+  }
+
+  function asApplyPaymentDefaults() {
+    var meta = asGetCourseMeta(document.getElementById('ns_course').value);
+    var fee = meta ? Number(meta.price || 0) : 0;
+    var status = document.getElementById('ns_payment_status').value;
+    var amountEl = document.getElementById('ns_initial_amount');
+    if (status === 'approved') amountEl.value = fee;
+    if (status === 'pending') amountEl.value = 0;
+    asUpdateSummary();
+  }
+
+  function asUpdateSummary() {
+    var fullName = document.getElementById('ns_fullname').value.trim() || '--';
+    var courseId = asNormalizeCourseId(document.getElementById('ns_course').value);
+    var courseMeta = asGetCourseMeta(courseId);
+    var scheduleSel = document.getElementById('ns_schedule');
+    var scheduleText = scheduleSel.value ? scheduleSel.options[scheduleSel.selectedIndex].text : '--';
+    var plan = document.getElementById('ns_payment_plan').value;
+    var status = document.getElementById('ns_payment_status').value;
+    var amount = Number(document.getElementById('ns_initial_amount').value || 0);
+
+    document.getElementById('asSummaryName').textContent = fullName;
+    document.getElementById('asSummaryCourse').textContent = courseMeta ? courseMeta.name : '--';
+    document.getElementById('asSummarySection').textContent = scheduleText;
+    document.getElementById('asSummaryPayment').textContent = plan + ' / ' + status + ' / PHP ' + amount.toLocaleString();
+  }
+
+  function asSetError(fieldId, message) {
+    var err = document.getElementById('err_' + fieldId);
+    if (err) err.textContent = message;
+  }
+
+  function asClearErrors() {
+    document.querySelectorAll('.fp-error').forEach(function(el) {
+      el.textContent = '';
+    });
+  }
+
+  function asValidateStep1() {
+    asClearErrors();
+    var ok = true;
+    if (!document.getElementById('ns_fullname').value.trim()) { asSetError('fullname', 'Full name is required.'); ok = false; }
+    if (!document.getElementById('ns_country').value.trim()) { asSetError('country', 'Birth country is required.'); ok = false; }
+    if (!document.getElementById('ns_dob').value) { asSetError('dob', 'Date of birth is required.'); ok = false; }
+    if (!document.getElementById('ns_gender').value) { asSetError('gender', 'Gender is required.'); ok = false; }
+    if (!document.getElementById('ns_contact').value.trim()) { asSetError('contact', 'Contact number is required.'); ok = false; }
+    return ok;
+  }
+
+  async function asEmailExists(email) {
+    var lower = String(email || '').trim().toLowerCase();
+    if (!lower) return false;
+
+    try {
+      var methods = await auth.fetchSignInMethodsForEmail(lower);
+      if (Array.isArray(methods) && methods.length > 0) return true;
+    } catch (_ignored) {}
+
+    var snaps = await Promise.all([
+      database.ref('users').once('value'),
+      database.ref('students').once('value')
+    ]);
+
+    var usersSnap = snaps[0];
+    var studentsSnap = snaps[1];
+    var dup = false;
+
+    if (usersSnap.exists()) {
+      usersSnap.forEach(function(child) {
+        var u = child.val() || {};
+        if (String(u.email || '').toLowerCase() === lower) dup = true;
+      });
+    }
+    if (dup) return true;
+
+    if (studentsSnap.exists()) {
+      studentsSnap.forEach(function(child) {
+        var p = (child.val() || {}).profile || {};
+        if (String(p.email || '').toLowerCase() === lower) dup = true;
+      });
+    }
+    return dup;
+  }
+
+  async function asValidateStep2() {
+    asClearErrors();
+    var email = document.getElementById('ns_email').value.trim();
+    var pass = document.getElementById('ns_password').value;
+    var pass2 = document.getElementById('ns_password_confirm').value;
+    var ok = true;
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      asSetError('email', 'Valid email is required.');
+      ok = false;
+    }
+    if (!pass || pass.length < 8 || !/[A-Z]/.test(pass) || !/[a-z]/.test(pass) || !/[0-9]/.test(pass)) {
+      asSetError('password', 'Password must be 8+ chars with uppercase, lowercase, and number.');
+      ok = false;
+    }
+    if (pass !== pass2) {
+      asSetError('password_confirm', 'Passwords do not match.');
+      ok = false;
+    }
+    if (!ok) return false;
+
+    var exists = await asEmailExists(email);
+    if (exists) {
+      asSetError('email', 'Email already exists in Firebase Auth or database. Overwriting JSON does not remove Auth users.');
+      return false;
+    }
+
+    return true;
+  }
+
+  function asValidateStep3() {
+    asClearErrors();
+    var ok = true;
+    if (!document.getElementById('ns_course').value) { asSetError('course', 'Course level is required.'); ok = false; }
+    if (!document.getElementById('ns_schedule').value) { asSetError('schedule', 'Class schedule is required.'); ok = false; }
+    if (!document.getElementById('ns_pretest').value) { asSetError('pretest', 'Pre-test eligibility is required.'); ok = false; }
+    return ok;
+  }
+
+  function asValidateStep4() {
+    asClearErrors();
+    var amount = Number(document.getElementById('ns_initial_amount').value || 0);
+    if (isNaN(amount) || amount < 0) {
+      asSetError('initial_amount', 'Initial amount must be zero or greater.');
+      return false;
+    }
+    return true;
+  }
+
+  function asUpdateStepUI() {
+    ['asStep1', 'asStep2', 'asStep3', 'asStep4'].forEach(function(id, idx) {
+      document.getElementById(id).style.display = (idx + 1 === asStep) ? '' : 'none';
+    });
+
+    ['asDot1', 'asDot2', 'asDot3', 'asDot4'].forEach(function(id, idx) {
+      var dot = document.getElementById(id);
+      if (idx + 1 <= asStep) {
+        dot.style.background = 'var(--red)';
+        dot.style.width = (idx + 1 === asStep) ? '26px' : '12px';
+      } else {
+        dot.style.background = '#ddd';
+        dot.style.width = '12px';
+      }
+    });
+
+    document.getElementById('asStepLabel').textContent = 'Step ' + asStep + ' of 4';
+    document.getElementById('asBack').style.display = asStep > 1 ? '' : 'none';
+    document.getElementById('asNext').style.display = asStep < 4 ? '' : 'none';
+    document.getElementById('asCreate').style.display = asStep === 4 ? '' : 'none';
+    asUpdateSummary();
+  }
+
+  async function asNextStep() {
+    if (asStep === 1 && !asValidateStep1()) return;
+    if (asStep === 2 && !(await asValidateStep2())) return;
+    if (asStep === 3 && !asValidateStep3()) return;
+    asStep = Math.min(4, asStep + 1);
+    asUpdateStepUI();
+  }
+
+  function asPrevStep() {
+    asStep = Math.max(1, asStep - 1);
+    asUpdateStepUI();
+  }
+
+  function asGetInitials(name) {
+    var parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    return parts.map(function(p) { return p.charAt(0); }).join('').slice(0, 2).toUpperCase() || 'ST';
+  }
+
+  function asPickColor(seed) {
+    var colors = ['#C0392B', '#22c55e', '#3b82f6', '#f97316', '#8b5cf6', '#0d9488'];
+    var idx = 0;
+    for (var i = 0; i < seed.length; i++) idx += seed.charCodeAt(i);
+    return colors[idx % colors.length];
+  }
+
+  function asGetSecondaryAuth() {
+    var appName = 'UNMEI_ADMIN_CREATE_STUDENT';
+    for (var i = 0; i < firebase.apps.length; i++) {
+      if (firebase.apps[i].name === appName) return firebase.apps[i].auth();
+    }
+    var cfg = window.__UNMEI_FIREBASE_CONFIG || firebase.app().options;
+    return firebase.initializeApp(cfg, appName).auth();
+  }
+
+  async function createStudentFromWizard() {
+    if (asSubmitting) return;
+    if (!asValidateStep4()) return;
+
+    var fullName = document.getElementById('ns_fullname').value.trim();
+    var country = document.getElementById('ns_country').value.trim();
+    var dob = document.getElementById('ns_dob').value;
+    var gender = document.getElementById('ns_gender').value;
+    var contact = document.getElementById('ns_contact').value.trim();
+    var email = document.getElementById('ns_email').value.trim().toLowerCase();
+    var password = document.getElementById('ns_password').value;
+    var courseId = asNormalizeCourseId(document.getElementById('ns_course').value);
+    var scheduleRaw = String(document.getElementById('ns_schedule').value || '').split('|');
+    var scheduleDays = (scheduleRaw[0] || '').trim();
+    var scheduleTimeSlot = (scheduleRaw[1] || '').trim();
+    var pretestValue = document.getElementById('ns_pretest').value;
+    var paymentPlan = document.getElementById('ns_payment_plan').value;
+    var paymentStatus = document.getElementById('ns_payment_status').value;
+    var initialAmount = Number(document.getElementById('ns_initial_amount').value || 0);
+    var dueDate = document.getElementById('ns_due_date').value;
+
+    var courseMeta = asGetCourseMeta(courseId) || { name: 'Unassigned Course', price: 0, requiresAssessment: false };
+    var scheduleSelect = document.getElementById('ns_schedule');
+    var scheduleLabel = scheduleSelect.value ? scheduleSelect.options[scheduleSelect.selectedIndex].text : '';
+
+    asSubmitting = true;
+    document.getElementById('asCreate').disabled = true;
+    document.getElementById('asCreate').textContent = 'Creating...';
+
+    var createdUser = null;
+    var enrollmentId = database.ref('enrollments').push().key;
+    var paymentId = database.ref('payments').push().key;
+    var logId = database.ref('logs').push().key;
+    var secondaryAuth = asGetSecondaryAuth();
+
+    try {
+      await secondaryAuth.setPersistence(firebase.auth.Auth.Persistence.NONE).catch(function() {});
+
+      var duplicate = await asEmailExists(email);
+      if (duplicate) throw { code: 'auth/email-already-in-use' };
+
+      var cred = await secondaryAuth.createUserWithEmailAndPassword(email, password);
+      createdUser = cred.user;
+
+      var uid = createdUser.uid;
+      var now = Date.now();
+      var initials = asGetInitials(fullName);
+      var avatarColor = asPickColor(uid);
+      var enrollmentStatus = (courseMeta.requiresAssessment && pretestValue !== 'eligible') ? 'assessment_required' : 'active';
+
+      var studentsCountSnap = await database.ref('students').once('value');
+      var studentCode = 'UNC-' + new Date().getFullYear() + '-' + String(studentsCountSnap.numChildren() + 100).padStart(4, '0');
+
+      var updates = {};
+      updates['users/' + uid] = {
+        uid: uid,
+        email: email,
+        emailLower: email,
+        name: fullName,
+        role: 'student',
+        isRevoked: false,
+        createdAt: now,
+        updatedAt: now
+      };
+      updates['students/' + uid] = {
+        name: fullName,
+        attendance: 0,
+        classIds: [],
+        trend: 'neutral',
+        isRevoked: false,
+        isDeleted: false,
+        onboardingComplete: false,
+        profile: {
+          fullName: fullName,
+          email: email,
+          mobileNumber: contact,
+          country: country,
+          dateOfBirth: dob,
+          gender: gender,
+          avatarUrl: '',
+          avatarInitials: initials,
+          avatarColor: avatarColor,
+          createdAt: now,
+          updatedAt: now
+        },
+        enrollment: {
+          enrollmentId: enrollmentId,
+          studentId: studentCode,
+          course: courseMeta.name,
+          courseId: courseId,
+          classSetup: scheduleDays ? 'assigned' : 'pending',
+          sectionId: '',
+          scheduleTimeSlot: scheduleTimeSlot,
+          scheduleDays: scheduleDays,
+          status: enrollmentStatus,
+          pretestEligible: pretestValue === 'eligible',
+          paymentPlan: paymentPlan,
+          enrolledAt: now,
+          expiresAt: 0
+        },
+        scores: {
+          grammar: 0,
+          kanji: 0,
+          listening: 0,
+          reading: 0,
+          speaking: 0,
+          vocabulary: 0,
+          updatedAt: now
+        },
+        settings: {
+          emailNotifications: true,
+          smsNotifications: false,
+          language: 'en',
+          theme: 'light',
+          updatedAt: now
+        },
+        session: {
+          lastActivity: 0,
+          timeoutMinutes: 30,
+          token: ''
+        }
+      };
+      updates['enrollments/' + enrollmentId] = {
+        fullName: fullName,
+        email: email,
+        course: courseMeta.name,
+        courseId: courseId,
+        classSetup: scheduleDays ? 'assigned' : 'pending',
+        sectionId: '',
+        scheduleTimeSlot: scheduleTimeSlot,
+        scheduleDays: scheduleDays,
+        status: enrollmentStatus,
+        assessmentPassed: pretestValue === 'eligible',
+        createdAt: now,
+        updatedAt: now,
+        validationStatus: 'approved'
+      };
+      updates['payments/' + paymentId] = {
+        studentUid: uid,
+        studentName: fullName,
+        studentEmail: email,
+        enrollmentId: enrollmentId,
+        course: courseMeta.name,
+        courseId: courseId,
+        type: 'tuition',
+        amount: initialAmount,
+        currency: 'PHP',
+        paymentMode: paymentPlan,
+        installmentNumber: null,
+        totalInstallments: paymentPlan === 'installment_2' ? 2 : (paymentPlan === 'installment_3' ? 3 : 1),
+        status: paymentStatus,
+        dueDate: dueDate ? new Date(dueDate).getTime() : 0,
+        dueDateEnabled: !!dueDate,
+        receiptImageUrl: '',
+        receiptFileName: '',
+        receiptFileType: '',
+        receiptUploadedAt: null,
+        adminApprovalStatus: paymentStatus,
+        adminApprovalNote: 'Initialized via Admin Add Student wizard',
+        adminApprovedBy: sessionStorage.getItem('adminEmail') || 'admin@unmei-ph.com',
+        adminApprovedAt: paymentStatus === 'approved' ? now : null,
+        createdAt: now,
+        updatedAt: now
+      };
+      updates['logs/' + logId] = {
+        action: 'admin_add_student',
+        actorUid: sessionStorage.getItem('adminId') || 'local-admin-001',
+        actorEmail: sessionStorage.getItem('adminEmail') || 'admin@unmei-ph.com',
+        targetId: uid,
+        targetType: 'student',
+        metadata: {
+          courseId: courseId,
+          scheduleDays: scheduleDays,
+          scheduleTimeSlot: scheduleTimeSlot,
+          scheduleLabel: scheduleLabel,
+          paymentPlan: paymentPlan,
+          paymentStatus: paymentStatus
+        },
+        createdAt: now
+      };
+
+      await database.ref().update(updates);
+
+      showToast('Student created: ' + fullName);
+      setTimeout(function() {
+        window.location.href = 'admin-students.html';
+      }, 1200);
+    } catch (error) {
+      var code = error && error.code ? error.code : '';
+      var message = 'Unable to create student account. Please try again.';
+      if (code === 'auth/email-already-in-use') message = 'Email already exists in Firebase Authentication. JSON overwrite does not clear Auth users.';
+      if (code === 'auth/invalid-email') message = 'Invalid email address.';
+      if (code === 'auth/weak-password') message = 'Password is too weak.';
+
+      if (createdUser) {
+        var rollback = {};
+        rollback['users/' + createdUser.uid] = null;
+        rollback['students/' + createdUser.uid] = null;
+        rollback['enrollments/' + enrollmentId] = null;
+        rollback['payments/' + paymentId] = null;
+        rollback['logs/' + logId] = null;
+        await database.ref().update(rollback).catch(function() {});
+        await createdUser.delete().catch(function() {});
+      }
+
+      showToast(message);
+    } finally {
+      if (secondaryAuth && secondaryAuth.currentUser) {
+        await secondaryAuth.signOut().catch(function() {});
+      }
+      asSubmitting = false;
+      document.getElementById('asCreate').disabled = false;
+      document.getElementById('asCreate').textContent = 'Create Student';
+    }
+  }
+
+  var toastTimer;
+  function showToast(msg) {
+    var t = document.getElementById('admToast');
+    t.textContent = msg;
+    t.classList.add('adm-toast--show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() { t.classList.remove('adm-toast--show'); }, 2800);
+  }
+
+  function showConfirm(title, message, onConfirm) {
+    var o = document.getElementById('confirmOverlay');
+    o.querySelector('.confirm-title').textContent = title;
+    o.querySelector('.confirm-message').textContent = message;
+    o.classList.add('active');
+    o.querySelector('.confirm-btn--cancel').onclick = function() { o.classList.remove('active'); };
+    o.querySelector('.confirm-btn--confirm').onclick = function() {
+      o.classList.remove('active');
+      onConfirm();
+    };
+  }
+
+  function toggleMobileSidebar() {
+    var s = document.querySelector('.sidebar');
+    var b = document.getElementById('sidebarBackdrop');
+    if (s.classList.contains('sidebar--mobile-open')) {
+      closeMobileSidebar();
+    } else {
+      s.classList.add('sidebar--mobile-open');
+      b.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeMobileSidebar() {
+    var s = document.querySelector('.sidebar');
+    var b = document.getElementById('sidebarBackdrop');
+    s.classList.remove('sidebar--mobile-open');
+    b.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 700) closeMobileSidebar();
+  });
+  </script>
+<script src="admin-header-sync.js"></script>
+<script src="assets/global-search.js"></script>
+</body>
+</html>

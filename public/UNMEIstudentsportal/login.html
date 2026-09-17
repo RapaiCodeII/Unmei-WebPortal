@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unmei Nihongo Center – Student Access Portal</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/UNMEIstudentsportal/assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="/UNMEIstudentsportal/studentportal.css" />
+  <script src="/UNMEIstudentsportal/assets/iconify-icon.min.js"></script>
+<script src="/UNMEIstudentsportal/assets/unmei-icons.js"></script>
+</head>
+<body class="page-login">
+
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-brand">
+        <img src="/UNMEIstudentsportal/assets/cropped-logo-updated-size-1.png" alt="Unmei Nihongo Center" class="login-logo">
+        <span class="login-portal-label">Student Access Portal</span>
+      </div>
+
+      <h1 class="login-title">Welcome Back</h1>
+      <p class="login-subtitle">Sign in to access your learning dashboard</p>
+
+      <div class="login-form">
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input type="email" id="email" class="form-control" placeholder="Enter your email address" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="password-group">
+            <div class="password-input-wrap">
+              <input type="password" id="password" class="form-control" placeholder="Enter your password" autocomplete="current-password" />
+              <button type="button" class="password-toggle" onclick="togglePasswordVisibility()" aria-label="Toggle password visibility">
+                <iconify-icon icon="mdi:eye-outline" id="eyeIcon"></iconify-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="login-alert" id="loginAlert"></div>
+        <button class="btn-signin" type="button" onclick="handleSignIn()">
+          <span>Sign In</span>
+        </button>
+        
+      </div>
+
+      <div class="login-register">
+        <span>Don't have an account?</span>
+        <a href="/register?source=student-portal&amp;intent=pre-enroll" class="register-link">Register here</a>
+      </div>
+
+      <div class="login-footer">
+        <span>&copy; 2026 UNMEI Nihongo Center. All rights reserved.</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="/UNMEIstudentsportal/firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script>
+    // Auto-redirect if user has an active session
+    (function() {
+      var SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+      var uid = localStorage.getItem('studentUid');
+      var lastActivity = parseInt(localStorage.getItem('lastActivity'), 10);
+      
+      if (uid && lastActivity && (Date.now() - lastActivity <= SESSION_TIMEOUT)) {
+        // Valid session exists - redirect to dashboard
+        localStorage.setItem('lastActivity', Date.now().toString());
+        window.location.replace('/UNMEIstudentsportal/dashboard.html');
+      }
+    })();
+    var auth = firebase.auth();
+    var isSigningIn = false;
+
+    function showLoginAlert(msg) {
+      var a = document.getElementById('loginAlert');
+      a.textContent = msg;
+      a.classList.add('active');
+    }
+
+    function togglePasswordVisibility() {
+      var passwordInput = document.getElementById('password');
+      var eyeIcon = document.getElementById('eyeIcon');
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.setAttribute('icon', 'mdi:eye-off-outline');
+      } else {
+        passwordInput.type = 'password';
+        eyeIcon.setAttribute('icon', 'mdi:eye-outline');
+      }
+    }
+
+    function resolveStudentUid(authUid, email) {
+      var normalizedEmail = String(email || '').trim().toLowerCase();
+      var database = firebase.database();
+      return database.ref('students/' + authUid).once('value').then(function(snapshot) {
+        if (snapshot.exists()) {
+          return authUid;
+        }
+        if (!normalizedEmail) {
+          return '';
+        }
+        return database.ref('students').once('value').then(function(studentsSnapshot) {
+          if (!studentsSnapshot.exists()) {
+            return '';
+          }
+          var resolvedUid = '';
+          studentsSnapshot.forEach(function(child) {
+            if (resolvedUid) {
+              return;
+            }
+            var data = child.val() || {};
+            var profile = data.profile || {};
+            var candidate = String(profile.email || data.email || '').trim().toLowerCase();
+            if (candidate && candidate === normalizedEmail) {
+              resolvedUid = child.key;
+            }
+          });
+          return resolvedUid;
+        });
+      });
+    }
+
+    // PHASE 2: RTDB credential fallback. Seeded test students live in the
+    // Realtime DB only (no Firebase Auth row). Plan-mandated credential:
+    // password === the student's UID key in students/. Returns the matched
+    // { uid } or null. Revoked/deleted records are rejected here.
+    function attemptRtdbStudentFallback(email, password) {
+      var database = firebase.database();
+      return database.ref('students').once('value').then(function(snapshot) {
+        var matchedKey = '';
+        var matchedRecord = null;
+        if (snapshot.exists()) {
+          snapshot.forEach(function(child) {
+            if (matchedKey) return;
+            var data = child.val() || {};
+            var profile = data.profile || {};
+            var candidate = String(profile.email || data.email || '').trim().toLowerCase();
+            if (candidate && candidate === email) {
+              matchedKey = child.key;
+              matchedRecord = data;
+            }
+          });
+        }
+        if (!matchedKey) return null;
+        if (matchedRecord.isDeleted === true || matchedRecord.isRevoked === true) return null;
+        if (password !== matchedKey) return null;
+        return { uid: matchedKey, record: matchedRecord };
+      });
+    }
+
+    function handleSignIn() {
+      var email = document.getElementById('email').value.trim().toLowerCase();
+      var password = document.getElementById('password').value;
+      var alertBox = document.getElementById('loginAlert');
+      var signInBtn = document.querySelector('.btn-signin');
+
+      if (isSigningIn) {
+        return;
+      }
+
+      alertBox.classList.remove('active');
+
+      if (!email || !password) {
+        showLoginAlert('Please enter both email and password.');
+        return;
+      }
+
+      isSigningIn = true;
+      signInBtn.disabled = true;
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then(function(userCredential) {
+          var authUid = userCredential.user.uid;
+          var userEmail = String(userCredential.user.email || email).trim().toLowerCase();
+          return resolveStudentUid(authUid, userEmail).then(function(resolvedUid) {
+            if (!resolvedUid) {
+              return auth.signOut().then(function() {
+                showLoginAlert('Your account record is no longer active in the student database. Please contact the registrar.');
+                return Promise.reject({ code: 'auth/student-record-missing' });
+              });
+            }
+
+            return firebase.database().ref('students/' + resolvedUid).once('value').then(function(studentSnapshot) {
+              if (!studentSnapshot.exists()) {
+                return auth.signOut().then(function() {
+                  showLoginAlert('Your student record was removed. Please contact the registrar for assistance.');
+                  return Promise.reject({ code: 'auth/student-record-removed' });
+                });
+              }
+
+              var studentData = studentSnapshot.val() || {};
+              if (studentData.isDeleted === true || studentData.isRevoked === true) {
+                return auth.signOut().then(function() {
+                  showLoginAlert('Your account has been suspended. Please contact the registrar for assistance.');
+                  return Promise.reject({ code: 'auth/account-revoked' });
+                });
+              }
+
+              // First sign-in after registration: arm the Get Started onboarding
+              // exactly once (Firebase truth, not a session flag).
+              if (studentData.onboardingComplete === false) {
+                localStorage.setItem('firstDashboardVisit', 'true');
+              }
+
+              localStorage.setItem('studentUid', resolvedUid);
+              localStorage.setItem('studentAuthUid', authUid);
+              localStorage.setItem('studentEmail', userEmail);
+              localStorage.setItem('lastActivity', Date.now().toString());
+              window.location.href = '/UNMEIstudentsportal/dashboard.html';
+            });
+          });
+        })
+        .catch(function(error) {
+          var code = String((error && error.code) || '');
+
+          // PHASE 2: RTDB fallback for seeded accounts whose demo credential
+          // is their student UID. Depending on Firebase Auth account state,
+          // the same seeded account can report user-not-found, invalid-
+          // credential, or wrong-password; all three must be checked against
+          // the live student record before rejecting the UID credential.
+          if (code === 'auth/user-not-found' || code === 'auth/invalid-credential' || code === 'auth/invalid-login-credentials' || code === 'auth/wrong-password') {
+            return attemptRtdbStudentFallback(email, password).then(function(match) {
+              if (!match) {
+                showLoginAlert('Invalid email or password. Please try again.');
+                return null;
+              }
+
+              // Same onboarding arm used by the Firebase Auth path.
+              if (match.record.onboardingComplete === false) {
+                localStorage.setItem('firstDashboardVisit', 'true');
+              }
+
+              localStorage.setItem('studentUid', match.uid);
+              localStorage.setItem('studentEmail', email);
+              localStorage.setItem('lastActivity', Date.now().toString());
+              window.location.href = '/UNMEIstudentsportal/dashboard.html';
+              return null;
+            });
+          }
+
+          var msg = 'Invalid email or password. Please try again.';
+          if (code === 'auth/wrong-password') msg = 'Incorrect password. Please try again.';
+          else if (code === 'auth/invalid-email') msg = 'Please enter a valid email address.';
+          else if (code === 'auth/too-many-requests') msg = 'Too many failed attempts. Please try again later.';
+          else if (code === 'auth/student-record-missing' || code === 'auth/student-record-removed' || code === 'auth/account-revoked') msg = 'Your account has been suspended. Please contact the registrar for assistance.';
+          showLoginAlert(msg);
+          return null;
+        })
+        .finally(function() {
+          isSigningIn = false;
+          signInBtn.disabled = false;
+        });
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        handleSignIn();
+      }
+    });
+  </script>
+
+</body>
+</html>

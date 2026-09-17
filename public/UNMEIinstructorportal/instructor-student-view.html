@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student View – UNMEI Instructor Portal</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="instructorportal.css" />
+  <script src="assets/iconify-icon.min.js"></script>
+  <script src="assets/unmei-icons.js"></script>
+</head>
+<body>
+  <script src="session-guard.js"></script>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="brand-logo">
+        <img src="assets/logo.png" alt="UNMEI" style="width:40px;height:40px;object-fit:contain;">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UNMEI</span>
+        <span class="brand-portal">INSTRUCTOR PORTAL</span>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <p class="nav-section-label">OVERVIEW</p>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="instructor-dashboard.html" class="nav-link">
+            <iconify-icon icon="mdi:view-dashboard"></iconify-icon>
+            Dashboard
+          </a>
+        </li>
+        <li class="nav-item nav-item--active">
+          <a href="instructor-students.html" class="nav-link">
+            <iconify-icon icon="mdi:account-multiple-outline"></iconify-icon>
+            My Students
+            <span class="nav-badge" id="studentBadge">0</span>
+          </a>
+        </li>
+      </ul>
+
+      <p class="nav-section-label" style="margin-top:20px;">ACADEMIC</p>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="instructor-ratings.html" class="nav-link">
+            <iconify-icon icon="mdi:star-outline"></iconify-icon>
+            Ratings and Feedback
+          </a>
+        </li>
+      </ul>
+
+      <p class="nav-section-label" style="margin-top:20px;">PORTAL SETTINGS</p>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="instructor-settings.html" class="nav-link">
+            <iconify-icon icon="mdi:cog-outline"></iconify-icon>
+            Settings
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="javascript:void(0)" onclick="if(window.instructorSignOut){window.instructorSignOut();}else{location.href='instructor-settings.html';}" class="nav-link">
+            <iconify-icon icon="mdi:logout"></iconify-icon>
+            Sign Out
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar__user">
+      <div class="user-avatar user-avatar--dark" id="sidebarAvatar">IN</div>
+      <div class="user-meta">
+        <span class="user-name" id="sidebarUserName">Instructor</span>
+        <span class="user-role">Instructor</span>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <!-- MAIN -->
+  <div class="main-wrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="sidebar-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
+      <div class="topbar__left">
+        <h2 class="topbar__title">Student View</h2>
+        <nav class="breadcrumb">
+          <a href="instructor-dashboard.html" class="breadcrumb__link">Home</a>
+          <span class="breadcrumb__sep">/</span>
+          <a href="instructor-students.html" class="breadcrumb__link">My Students</a>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current" id="breadcrumbStudent">Student</span>
+        </nav>
+      </div>
+      <div class="topbar__center"></div>
+      <div class="topbar__right">
+        <div class="avatar-btn" onclick="toggleAvatarMenu(event)">
+          <div class="user-avatar" id="headerAvatar">IN</div>
+          <div class="avatar-btn__meta">
+            <span class="avatar-btn__name" id="headerUserName">Instructor</span>
+            <span class="avatar-btn__role">Instructor</span>
+          </div>
+          <iconify-icon icon="mdi:chevron-down" class="avatar-btn__caret"></iconify-icon>
+          <div class="avatar-menu" id="avatarMenu">
+            <div class="avatar-menu__header">
+              <div class="user-avatar" id="menuAvatar">IN</div>
+              <div>
+                <div class="avatar-menu__name" id="menuName">Instructor</div>
+                <div class="avatar-menu__email" id="menuEmail"></div>
+              </div>
+            </div>
+            <a class="avatar-menu__item" href="instructor-settings.html#profile">
+              <iconify-icon icon="mdi:account-circle-outline"></iconify-icon>
+              View Profile
+            </a>
+            <a class="avatar-menu__item" href="instructor-settings.html">
+              <iconify-icon icon="mdi:cog-outline"></iconify-icon>
+              Settings
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content" id="viewContent">
+      <p class="panel-loading">Loading student record...</p>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="instructor-header-sync.js?v=20260907"></script>
+  <script src="assets/d3.v7.min.js"></script>
+  <script src="assets/unmei-charts.js"></script>
+  <script>
+    const database = firebase.database();
+    const instructorId = sessionStorage.getItem('instructorId') || '';
+    const instructorEmail = sessionStorage.getItem('instructorEmail') || '';
+    if (window.syncInstructorStudentBadge) window.syncInstructorStudentBadge();
+    const studentUid = new URLSearchParams(window.location.search).get('id') || '';
+
+    // Session safety: if this page was opened without an instructor session
+    // (fresh tab / expired session), the ownership check below would always
+    // fail and look like a broken page. Route to sign-in instead.
+    if (!instructorId) {
+      window.location.replace('instructor-login.html');
+    }
+
+    // ---------- avatar menu ----------
+    function toggleAvatarMenu(event) {
+      event.stopPropagation();
+      document.getElementById('avatarMenu').classList.toggle('active');
+    }
+    document.addEventListener('click', function (e) {
+      const menu = document.getElementById('avatarMenu');
+      if (menu && !e.target.closest('.avatar-btn')) menu.classList.remove('active');
+    });
+    function applyMenuIdentity(name) {
+      const display = String(name || 'Instructor');
+      const parts = display.trim().split(/\s+/).filter(Boolean);
+      const ini = parts.length >= 2
+        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+        : (display.slice(0, 2) || 'IN').toUpperCase();
+      ['headerAvatar', 'menuAvatar'].forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = ini;
+      });
+      const nameEl = document.getElementById('menuName');
+      if (nameEl) nameEl.textContent = display;
+      const emailEl = document.getElementById('menuEmail');
+      if (emailEl) emailEl.textContent = instructorEmail;
+    }
+    database.ref('professors/' + instructorId).once('value').then(function (snapshot) {
+      applyMenuIdentity((snapshot.val() || {}).fullName || sessionStorage.getItem('instructorDisplayName'));
+    });
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('toast--show');
+      setTimeout(function () { toast.classList.remove('toast--show'); }, 2600);
+    }
+
+    function normalizeCourseId(value) {
+      return String(value || '').trim().toLowerCase().replace(/\s+/g, '_');
+    }
+
+    function listOf(value) {
+      if (Array.isArray(value)) return value.filter(Boolean);
+      if (value && typeof value === 'object') return Object.values(value).filter(Boolean);
+      return [];
+    }
+
+    if (!studentUid) {
+      document.getElementById('viewContent').innerHTML = '<div class="table-empty"><iconify-icon icon="mdi:account-off-outline" style="font-size:40px;opacity:0.4;"></iconify-icon><p>No student selected. <a href="instructor-students.html" style="color:var(--red);font-weight:600;">Back to My Students</a></p></div>';
+    } else {
+      loadStudent();
+    }
+
+    function loadStudent() {
+      Promise.all([
+        database.ref('students/' + studentUid).once('value'),
+        database.ref('courses').once('value'),
+        database.ref('professors/' + instructorId).once('value'),
+        database.ref('grades').once('value'),
+        database.ref('activityCalendar/' + studentUid).once('value'),
+        database.ref('sections').once('value')
+      ]).then(function (results) {
+        const snap = results[0];
+        const coursesSnap = results[1];
+        const instructorSnap = results[2];
+        const gradesSnap = results[3];
+        const activity = results[4].exists() ? (results[4].val() || {}) : {};
+        const sectionsSnap = results[5];
+
+        if (!snap.exists()) {
+          document.getElementById('viewContent').innerHTML = '<div class="table-empty"><iconify-icon icon="mdi:account-off-outline" style="font-size:40px;opacity:0.4;"></iconify-icon><p>Student record not found.</p></div>';
+          return;
+        }
+
+        const data = snap.val() || {};
+        const profile = data.profile || {};
+        const enrollment = data.enrollment || {};
+
+        // Course label lookup
+        const courseId = normalizeCourseId(enrollment.courseId || '');
+        let courseLabel = enrollment.course || 'N/A';
+        if (coursesSnap.exists() && courseId) {
+          const courseNode = coursesSnap.child(courseId).val();
+          if (courseNode && courseNode.name) courseLabel = String(courseNode.name);
+        }
+
+        // Live grades: grades/{courseId}/{studentUid} -> { average, history }
+        const gradeObj = {};
+        if (gradesSnap && gradesSnap.exists()) {
+          const g = gradesSnap.child(courseId).child(studentUid).val();
+          if (g) {
+            gradeObj.average = g.average;
+            gradeObj.history = g.history || {};
+            gradeObj.skills = { reading: g.reading, writing: g.writing, listening: g.listening, speaking: g.speaking };
+          }
+        }
+
+        // Ownership check: the student must belong to one of this instructor's assigned courses
+        const instructorData = instructorSnap.val() || {};
+        const assignedCourses = new Set();
+        listOf(instructorData.coursesAssigned).forEach(function (id) { assignedCourses.add(normalizeCourseId(id)); });
+        if (coursesSnap.exists()) {
+          coursesSnap.forEach(function (child) {
+            const node = child.val() || {};
+            const ids = listOf(node.instructorIds);
+            if (node.instructorId) ids.push(node.instructorId);
+            if (ids.map(String).indexOf(instructorId) !== -1) assignedCourses.add(normalizeCourseId(child.key));
+          });
+        }
+        if (sectionsSnap && sectionsSnap.exists() && enrollment.sectionId) {
+          const section = sectionsSnap.child(enrollment.sectionId).val() || {};
+          const sectionInstructor = String(section.instructor || section.instructorName || '').trim().toLowerCase();
+          const instructorName = String(instructorData.fullName || sessionStorage.getItem('instructorDisplayName') || '').trim().toLowerCase();
+          if (sectionInstructor && instructorName && sectionInstructor === instructorName && section.courseId) {
+            assignedCourses.add(normalizeCourseId(section.courseId));
+          }
+        }
+        if (!courseId || !assignedCourses.has(courseId)) {
+          document.getElementById('viewContent').innerHTML = '<div class="table-empty"><iconify-icon icon="mdi:lock-outline" style="font-size:40px;opacity:0.4;"></iconify-icon><p>This student is not assigned to you. You can only view performance of students enrolled in your assigned courses.</p><a href="instructor-students.html" style="color:var(--red);font-weight:600;">Back to My Students</a></div>';
+          return;
+        }
+
+        renderView(profile, enrollment, data, gradeObj, courseLabel, activity);
+      }).catch(function () {
+        showToast('Unable to load student record.');
+      });
+    }
+
+    function renderView(profile, enrollment, data, gradeObj, courseLabel, activity) {
+      const name = profile.fullName || data.fullName || data.name || 'Unknown Student';
+      const email = profile.email || data.email || '';
+      const phone = profile.phone || profile.contactNumber || '';
+      const initials = String(name).trim().split(/\s+/).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase() || '??';
+      document.getElementById('breadcrumbStudent').textContent = name;
+      document.title = name + ' – UNMEI Instructor Portal';
+
+      // Prefer the latest live progress record when direct scores are
+      // incomplete, while preserving instructor-entered grade values.
+      const historyRows = Object.values(data.progressHistory || {})
+        .filter(function (row) { return row && typeof row === 'object'; })
+        .sort(function (a, b) { return Number(a.timestamp || 0) - Number(b.timestamp || 0); });
+      const latestProgress = historyRows.length ? historyRows[historyRows.length - 1] : {};
+      const lvScores = Object.assign({}, latestProgress);
+      Object.keys(data.scores || {}).forEach(function (key) {
+        const value = Number(data.scores[key]);
+        if (key === 'updatedAt' || !Number.isFinite(value) || value > 0) lvScores[key] = data.scores[key];
+      });
+      Object.keys(gradeObj.skills || {}).forEach(function (key) {
+        const gradeValue = Number(gradeObj.skills[key]);
+        if (Number.isFinite(gradeValue) && gradeValue > 0) lvScores[key] = gradeValue;
+      });
+      const appData = data.appSyncData || {};
+      const attended = Number(data.attendance || data.attendanceRate || 0);
+      const scoreKeys = ['reading', 'writing', 'pronunciation', 'listening', 'speaking', 'grammar', 'vocabulary'];
+      const vals = scoreKeys.map(function (k) { return Number(lvScores[k] || 0); });
+      const hasAny = vals.some(function (v) { return v > 0; });
+      const modulesCompleted = Array.isArray(appData.modulesCompleted)
+        ? appData.modulesCompleted.length
+        : Number(appData.modulesCompleted || 0);
+      const totalModules = Number(appData.totalModules || 0);
+      const courseProgress = totalModules > 0
+        ? Math.round((modulesCompleted / totalModules) * 100)
+        : (Number(latestProgress.overallAccuracy || 0) > 0 ? Math.round(Number(latestProgress.overallAccuracy)) : 0);
+      const averageScore = (typeof gradeObj.average === 'number' && gradeObj.average > 0)
+        ? gradeObj.average
+        : (hasAny ? Math.round(vals.reduce(function (a, b) { return a + b; }, 0) / vals.length) : 0);
+      const attendanceRate = attended;
+      const streakDays = Number(appData.streakDays || 0);
+      const totalPracticeMinutes = Number(appData.totalPracticeMinutes || 0);
+      const lastActivityAt = Number(appData.lastSyncTimestamp || latestProgress.timestamp || enrollment.enrolledAt || 0);
+      const lastActivityText = lastActivityAt ? new Date(lastActivityAt).toLocaleString() : 'No activity recorded yet';
+
+      const skill = lvScores;
+      const SKILL_LABELS = { reading: 'Reading', writing: 'Writing', listening: 'Listening', speaking: 'Speaking', grammar: 'Grammar', vocabulary: 'Vocabulary' };
+      const improvements = scoreKeys
+        .filter(function (k) { return skill[k] > 0 && skill[k] < 60; })
+        .sort(function (a, b) { return skill[a] - skill[b]; })
+        .slice(0, 3)
+        .map(function (k) { return SKILL_LABELS[k] || k; });
+
+      // Weekly progress from grades/{course}/{uid}/history
+      const weeklyHistory = (gradeObj && gradeObj.history) || {};
+      const weekKeys = Object.keys(weeklyHistory).sort();
+      const weeklyLabels = [];
+      const weeklyValues = [];
+      weekKeys.forEach(function (wk) {
+        const entry = weeklyHistory[wk];
+        weeklyLabels.push('W' + ((weekKeys.length ? weekKeys.indexOf(wk) : 0) + 1));
+        if (entry && typeof entry === 'object') {
+          const parts = [entry.reading, entry.writing, entry.listening, entry.speaking].filter(function (x) { return typeof x === 'number'; });
+          weeklyValues.push(parts.length ? Math.round(parts.reduce(function (a, b) { return a + b; }, 0) / parts.length) : 0);
+        } else {
+          weeklyValues.push(Number(entry || 0));
+        }
+      });
+
+      // Dedicated per-skill panels driven by
+      // grades/{course}/{uid} weekly history, current course grades, and the
+      // mobile app's activityCalendar skillsPracticed log.
+      const trioSkills = [
+        { key: 'reading', label: 'Reading', icon: 'mdi:book-open-page-variant', color: '#C0392B' },
+        { key: 'writing', label: 'Writing', icon: 'mdi:pen', color: '#2563EB' },
+        { key: 'pronunciation', label: 'Pronunciation', icon: 'mdi:microphone-outline', color: '#16A34A' },
+        { key: 'listening', label: 'Listening', icon: 'mdi:headphones', color: '#F59E0B' }
+      ];
+      const trioData = trioSkills.map(function (s) {
+        const pts = [];
+        weekKeys.forEach(function (wk, idx) {
+          const entry = weeklyHistory[wk];
+          if (entry && typeof entry[s.key] === 'number') pts.push({ label: 'W' + (idx + 1), value: entry[s.key] });
+        });
+        const current = (gradeObj.skills && typeof gradeObj.skills[s.key] === 'number')
+          ? gradeObj.skills[s.key]
+          : Number(lvScores[s.key] || 0);
+        const practiceDays = Object.keys(activity || {}).filter(function (d) {
+          const sp = (activity[d] || {}).skillsPracticed;
+          if (!sp) return false;
+          return Object.keys(sp).map(function (i) { return String(sp[i]).toLowerCase(); }).indexOf(s.key) !== -1;
+        }).length;
+        return { skill: s, pts: pts, current: current, practiceDays: practiceDays };
+      });
+
+      const avatarHtml = profile.avatarUrl
+        ? '<img src="' + escapeHtml(profile.avatarUrl) + '" alt="" class="sv-avatar" style="object-fit:cover;">'
+        : '<div class="sv-avatar" style="background:#C0392B;">' + escapeHtml(initials) + '</div>';
+
+      const enrolledAt = Number(enrollment.enrolledAt || 0);
+      const status = String(enrollment.status || 'Active');
+      const statusClass = status.toLowerCase() === 'active' ? 'enroll-badge--active' : (status.toLowerCase() === 'pending' ? 'enroll-badge--pending' : 'enroll-badge--inactive');
+
+      const html = (
+        // Profile header
+        '<section class="sv-header panel">' +
+          '<div class="sv-header__main">' +
+            avatarHtml +
+            '<div class="sv-header__meta">' +
+              '<h1 class="sv-name">' + escapeHtml(name) + '</h1>' +
+              '<p class="sv-email">' + escapeHtml(email) + (phone ? ' &middot; ' + escapeHtml(phone) : '') + '</p>' +
+              '<div class="sv-tags">' +
+                '<span class="enroll-badge ' + statusClass + '">' + escapeHtml(status) + '</span>' +
+                '<span class="sv-course-tag"><iconify-icon icon="mdi:school-outline"></iconify-icon> ' + escapeHtml(courseLabel) + '</span>' +
+                (enrolledAt ? '<span class="sv-course-tag"><iconify-icon icon="mdi:calendar-outline"></iconify-icon> Enrolled ' + formatTimestamp(enrolledAt) + '</span>' : '') +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="sv-header__note"><iconify-icon icon="mdi:eye-outline"></iconify-icon> Read-only view</div>' +
+        '</section>' +
+
+        // Progress snapshot
+        '<section class="stats-grid">' +
+          statCard('mdi:progress-clock', 'COURSE PROGRESS', Math.round(courseProgress) + '%', lastActivityAt ? 'Last active ' + timeAgo(lastActivityAt) : 'No activity recorded', 'red') +
+          statCard('mdi:checkbox-marked-circle-outline', 'MODULES', modulesCompleted + ' / ' + (totalModules || '\u2014'), totalModules ? Math.round((modulesCompleted / totalModules) * 100) + '% of modules completed' : 'No module data', 'blue') +
+          statCard('mdi:clipboard-check-outline', 'AVERAGE SCORE', averageScore ? Math.round(averageScore) + '%' : 'Not available', 'Across all quizzes and assessments', 'green') +
+          statCard('mdi:calendar-check-outline', 'ATTENDANCE', attendanceRate ? Math.round(attendanceRate) + '%' : 'Not available', streakDays ? streakDays + '-day practice streak' : 'No attendance data', 'yellow') +
+        '</section>' +
+
+        // Skills + weekly progress
+        '<section class="two-col">' +
+          '<div class="panel">' +
+            '<div class="panel__header"><h3 class="panel__title"><iconify-icon icon="mdi:chart-line"></iconify-icon> Weekly Progress</h3><span class="panel__meta">' + (weeklyLabels.length ? weeklyLabels.length + ' weeks tracked' : '') + '</span></div>' +
+            '<div class="panel__body" id="weeklyPanel">' +
+              (weeklyLabels.length ? '<div id="weeklyChart"></div>' : '<div class="table-empty"><iconify-icon icon="mdi:chart-line" style="font-size:40px;opacity:0.4;"></iconify-icon><p>No weekly progress recorded yet</p></div>') +
+            '</div>' +
+          '</div>' +
+          '<div class="panel">' +
+            '<div class="panel__header"><h3 class="panel__title"><iconify-icon icon="mdi:radar"></iconify-icon> Skill Breakdown</h3></div>' +
+            '<div class="panel__body" id="radarPanel" style="display:flex;justify-content:center;">' +
+              '<div id="skillRadar"></div>' +
+            '</div>' +
+          '</div>' +
+        '</section>' +
+
+        // Skill values + areas of improvement
+        '<section class="two-col">' +
+          '<div class="panel">' +
+            '<div class="panel__header"><h3 class="panel__title"><iconify-icon icon="mdi:format-list-numbered"></iconify-icon> Skill Scores</h3><span class="panel__meta">out of 100</span></div>' +
+            '<div class="panel__body" id="skillList"></div>' +
+          '</div>' +
+          '<div class="panel">' +
+            '<div class="panel__header"><h3 class="panel__title"><iconify-icon icon="mdi:target"></iconify-icon> Areas of Improvement</h3></div>' +
+            '<div class="panel__body" id="improvementsPanel">' +
+              (improvements.length
+                ? improvements.map(function (item) { return '<span class="improve-chip">' + escapeHtml(String(item)) + '</span>'; }).join('')
+                : '<p class="panel-empty">No areas flagged yet. Flags appear as the student practices.</p>') +
+            '</div>' +
+          '</div>' +
+        '</section>' +
+
+        // Dedicated skill panels: Reading / Writing / Pronunciation / Listening
+        '<section class="sv-skill-trio">' +
+          trioData.map(function (t) {
+            const best = t.pts.length
+              ? Math.max.apply(null, t.pts.map(function (p) { return p.value; }))
+              : (t.current > 0 ? t.current : null);
+            return (
+              '<div class="panel">' +
+                '<div class="panel__header"><h3 class="panel__title" style="color:' + t.skill.color + ';"><iconify-icon icon="' + t.skill.icon + '"></iconify-icon> ' + t.skill.label + '</h3><span class="sv-skill-current" style="border-color:' + t.skill.color + ';color:' + t.skill.color + ';">' + (t.current ? Math.round(t.current) + '%' : 'Not available') + '</span></div>' +
+                '<div class="panel__body">' +
+                  (t.pts.length ? '<div id="trio-' + t.skill.key + '"></div>' : '<p class="panel-empty">' + (t.current > 0 ? 'Current score is from the latest app progress record.' : 'No score recorded yet') + '</p>') +
+                  '<div class="sv-skill-meta"><span>' + (t.pts.length ? t.pts.length + ' weeks tracked' : (t.current > 0 ? 'Latest app score' : 'No score recorded')) + '</span><span>Best ' + (best !== null ? Math.round(best) : 'Not available') + '</span><span>' + t.practiceDays + ' app practice days</span></div>' +
+                '</div>' +
+              '</div>'
+            );
+          }).join('') +
+        '</section>' +
+
+        // Study Activity Calendar (app-synced daily practice)
+        '<section class="panel">' +
+          '<div class="panel__header"><h3 class="panel__title"><iconify-icon icon="mdi:calendar-check"></iconify-icon> Study Activity Calendar</h3><span class="panel__meta">Daily study tracking</span></div>' +
+          '<div class="panel__body" id="activityCalendarPanel"></div>' +
+        '</section>' +
+
+        // Course Grades & Performance (per-course assessment scores)
+        '<section class="panel">' +
+          '<div class="panel__header"><h3 class="panel__title"><iconify-icon icon="mdi:grade"></iconify-icon> Course Grades &amp; Performance</h3><span class="panel__meta">Detailed assessment scores</span></div>' +
+          '<div class="panel__body" id="gradesPanel"></div>' +
+        '</section>'
+      );
+
+      document.getElementById('viewContent').innerHTML = html;
+      try {
+        renderCourseGrades(normalizeCourseId(enrollment.courseId || ''), gradeObj, skill);
+      } catch (error) {
+        console.error('[instructor-student-view] Failed to render course grades:', error);
+        document.getElementById('gradesPanel').innerHTML = '<div class="table-empty"><iconify-icon icon="mdi:grade" style="font-size:40px;opacity:0.4;"></iconify-icon><p>Grade data could not be displayed.</p></div>';
+      }
+
+      // Charts
+      if (weeklyLabels.length) {
+        UnmeiCharts.multiLine('weeklyChart', {
+          labels: weeklyLabels,
+          series: [{ name: 'Weekly progress', data: weeklyValues, color: '#C0392B', fill: true }],
+          yMax: 100,
+          height: 220,
+          legend: false
+        });
+      }
+
+      const radarAxes = [
+        { label: 'Reading', value: Number(skill.reading || 0) },
+        { label: 'Writing', value: Number(skill.writing || 0) },
+        { label: 'Pronunciation', value: Number(skill.pronunciation || 0) },
+        { label: 'Listening', value: Number(skill.listening || 0) },
+        { label: 'Speaking', value: Number(skill.speaking || 0) },
+        { label: 'Grammar', value: Number(skill.grammar || 0) },
+        { label: 'Vocabulary', value: Number(skill.vocabulary || 0) }
+      ];
+      const hasSkills = radarAxes.some(function (a) { return a.value > 0; });
+      if (hasSkills) {
+        UnmeiCharts.radarChart('skillRadar', { axes: radarAxes, color: '#C0392B', size: 260 });
+      } else {
+        document.getElementById('radarPanel').innerHTML = '<div class="table-empty"><iconify-icon icon="mdi:radar" style="font-size:40px;opacity:0.4;"></iconify-icon><p>No skill data recorded yet</p></div>';
+      }
+
+      const skillMeta = [
+        { key: 'reading', label: 'Reading', color: '#C0392B' },
+        { key: 'writing', label: 'Writing', color: '#2563EB' },
+        { key: 'listening', label: 'Listening', color: '#16A34A' },
+        { key: 'pronunciation', label: 'Pronunciation', color: '#16A34A' },
+        { key: 'speaking', label: 'Speaking', color: '#F59E0B' },
+        { key: 'grammar', label: 'Grammar', color: '#8B5CF6' },
+        { key: 'vocabulary', label: 'Vocabulary', color: '#EC4899' }
+      ];
+      document.getElementById('skillList').innerHTML = hasSkills
+        ? skillMeta.map(function (s) {
+            const v = Number(skill[s.key] || 0);
+            return (
+              '<div class="skill-row">' +
+                '<span class="skill-row__label">' + s.label + '</span>' +
+                '<div class="progress-track" style="flex:1;"><div class="progress-fill" style="width:' + Math.min(100, v) + '%;background:' + s.color + ';"></div></div>' +
+                '<span class="progress-label">' + Math.round(v) + '</span>' +
+              '</div>'
+            );
+          }).join('')
+        : '<p class="panel-empty">No skill data recorded yet</p>';
+
+      trioData.forEach(function (t) {
+        if (!t.pts.length) return;
+        UnmeiCharts.multiLine('trio-' + t.skill.key, {
+          labels: t.pts.map(function (p) { return p.label; }),
+          series: [{ name: t.skill.label, data: t.pts.map(function (p) { return p.value; }), color: t.skill.color, fill: true }],
+          yMax: 100,
+          height: 150,
+          legend: false
+        });
+      });
+
+      renderActivityCalendar(activity);
+    }
+
+    // Study Activity Calendar: live from activityCalendar/{uid} — the mobile
+    // app writes one entry per study day (minutes, sessions, kanji, skills).
+    function renderActivityCalendar(activity) {
+      const panel = document.getElementById('activityCalendarPanel');
+      if (!panel) return;
+      const dates = Object.keys(activity || {}).sort();
+
+      if (dates.length === 0) {
+        panel.innerHTML = '<div class="table-empty"><iconify-icon icon="mdi:calendar-check" style="font-size:40px;opacity:0.4;"></iconify-icon><p>No activity calendar data recorded yet</p></div>';
+        return;
+      }
+
+      let totalStudied = 0;
+      let totalMinutes = 0;
+      let totalKanji = 0;
+      let totalSessions = 0;
+      let maxStreak = 0;
+      let currentStreak = 0;
+
+      dates.forEach(function (date) {
+        const day = activity[date] || {};
+        if (day.studied) {
+          totalStudied++;
+          totalMinutes += Number(day.minutesStudied || 0);
+          totalKanji += Number(day.kanjiReviewed || 0);
+          totalSessions += Number(day.sessionsCompleted || 0);
+          currentStreak++;
+          if (currentStreak > maxStreak) maxStreak = currentStreak;
+        } else {
+          currentStreak = 0;
+        }
+      });
+
+      const last30Days = dates.slice(-30);
+      const calendarHtml = last30Days.map(function (date) {
+        const day = activity[date] || {};
+        const studied = day.studied;
+        const bgClass = studied ? 'activity-day--studied' : 'activity-day--empty';
+        const minutes = studied ? (day.minutesStudied || 0) + ' min' : '';
+        return '<div class="activity-day ' + bgClass + '" title="' + escapeHtml(date) + ': ' + (studied ? 'Studied ' + minutes : 'No study') + '">' +
+               '<span class="activity-day__date">' + escapeHtml(date.slice(5)) + '</span>' +
+               (studied ? '<span class="activity-day__badge"><iconify-icon icon="mdi:check"></iconify-icon></span>' : '') +
+               '</div>';
+      }).join('');
+
+      panel.innerHTML = (
+        '<div class="activity-stats">' +
+          '<div class="activity-stat"><span class="activity-stat__label">Days Studied</span><span class="activity-stat__value">' + totalStudied + '</span></div>' +
+          '<div class="activity-stat"><span class="activity-stat__label">Total Minutes</span><span class="activity-stat__value">' + totalMinutes + '</span></div>' +
+          '<div class="activity-stat"><span class="activity-stat__label">Kanji Reviewed</span><span class="activity-stat__value">' + totalKanji + '</span></div>' +
+          '<div class="activity-stat"><span class="activity-stat__label">Sessions</span><span class="activity-stat__value">' + totalSessions + '</span></div>' +
+          '<div class="activity-stat"><span class="activity-stat__label">Longest Streak</span><span class="activity-stat__value">' + maxStreak + ' days</span></div>' +
+        '</div>' +
+        '<div class="activity-calendar">' + calendarHtml + '</div>' +
+        '<p style="margin-top:12px;font-size:0.75rem;color:var(--gray-500);">Showing last ' + Math.min(30, dates.length) + ' study days of activity</p>'
+      );
+    }
+
+    // Course Grades & Performance: live from grades/{course}/{uid} — current
+    // per-skill scores plus the weekly average history chips.
+    function renderCourseGrades(courseId, gradeObj, skill) {
+      const panel = document.getElementById('gradesPanel');
+      if (!panel) return;
+      skill = skill || {};
+
+      const hasAny = gradeObj && (gradeObj.average || gradeObj.skills || (gradeObj.history && Object.keys(gradeObj.history).length));
+      if (!hasAny) {
+        panel.innerHTML = '<div class="table-empty"><iconify-icon icon="mdi:grade" style="font-size:40px;opacity:0.4;"></iconify-icon><p>No grade data recorded yet</p></div>';
+        return;
+      }
+
+      const scores = Object.assign({}, gradeObj.skills || {}, {
+        reading: Number((gradeObj.skills || {}).reading || skill.reading || 0),
+        writing: Number((gradeObj.skills || {}).writing || skill.writing || 0),
+        pronunciation: Number(skill.pronunciation || 0),
+        listening: Number((gradeObj.skills || {}).listening || skill.listening || 0),
+        speaking: Number((gradeObj.skills || {}).speaking || skill.speaking || 0)
+      });
+      const history = (gradeObj.history || {});
+      const avgScore = Number(gradeObj.average || 0);
+      const reading = Number(scores.reading || 0);
+      const writing = Number(scores.writing || 0);
+      const pronunciation = Number(scores.pronunciation || 0);
+      const listening = Number(scores.listening || 0);
+      const speaking = Number(scores.speaking || 0);
+
+      const weekKeys = Object.keys(history).sort();
+      const recentHistory = weekKeys.slice(-5).reverse();
+      const historyHtml = recentHistory.length > 0
+        ? '<div class="grade-history">' +
+            recentHistory.map(function (wk) {
+              const entry = history[wk] || {};
+              const date = entry.recordedAt ? formatTimestamp(entry.recordedAt) : wk;
+              const historyScores = ['reading', 'writing', 'listening', 'speaking']
+                .map(function (key) { return Number(entry[key] || 0); })
+                .filter(function (value) { return value > 0; });
+              const historyAverage = entry.average || (historyScores.length
+                ? historyScores.reduce(function (sum, value) { return sum + value; }, 0) / historyScores.length
+                : 0);
+              const score = historyAverage ? Math.round(historyAverage) + '%' : 'Not available';
+              return '<span class="history-chip">' + escapeHtml(date) + ': ' + score + '</span>';
+            }).join('') +
+          '</div>'
+        : '<p class="panel-empty" style="font-size:0.8rem;">No history recorded</p>';
+
+      const rowHtml = function (label, value, color) {
+        return (
+          '<div class="grade-score-item">' +
+            '<span class="grade-score__label">' + label + '</span>' +
+            '<div class="progress-track" style="flex:1;"><div class="progress-fill" style="width:' + Math.min(100, value) + '%;background:' + color + ';"></div></div>' +
+            '<span class="progress-label">' + (value ? Math.round(value) + '%' : 'Not available') + '</span>' +
+          '</div>'
+        );
+      };
+
+      panel.innerHTML =
+        '<div class="grades-grid">' +
+          '<div class="grade-card">' +
+            '<div class="grade-card__header">' +
+              '<h4 class="grade-card__course">' + escapeHtml(String(courseId || 'course').toUpperCase()) + '</h4>' +
+              '<span class="grade-card__average">Avg: ' + (avgScore ? Math.round(avgScore) + '%' : 'Not available') + '</span>' +
+            '</div>' +
+            '<div class="grade-card__scores">' +
+              rowHtml('Reading', reading, '#C0392B') +
+              rowHtml('Writing', writing, '#2563EB') +
+              rowHtml('Pronunciation', pronunciation, '#16A34A') +
+              rowHtml('Listening', listening, '#16A34A') +
+              rowHtml('Speaking', speaking, '#F59E0B') +
+            '</div>' +
+            '<div class="grade-card__history">' +
+              '<h5 class="grade-history__title">Recent History</h5>' +
+              historyHtml +
+            '</div>' +
+          '</div>' +
+        '</div>';
+    }
+
+    function statCard(icon, label, value, meta, tone) {
+      return (
+        '<div class="stat-card">' +
+          '<div class="stat-card__icon stat-card__icon--' + tone + '"><iconify-icon icon="' + icon + '"></iconify-icon></div>' +
+          '<div class="stat-card__body">' +
+            '<span class="stat-card__label">' + label + '</span>' +
+            '<span class="stat-card__value">' + value + '</span>' +
+            '<span class="stat-card__meta">' + meta + '</span>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+  </script>
+<script src="assets/global-search.js"></script>
+</body>
+</html>

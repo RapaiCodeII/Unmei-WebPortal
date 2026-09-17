@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unmei Nihongo Center – Instructor Access Portal</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/UNMEIinstructorportal/assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="/UNMEIinstructorportal/instructorportal.css" />
+  <script src="/UNMEIinstructorportal/assets/iconify-icon.min.js"></script>
+  <script src="/UNMEIinstructorportal/assets/unmei-icons.js"></script>
+</head>
+<body class="page-login">
+
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-brand">
+        <img src="/UNMEIinstructorportal/assets/cropped-logo-updated-size-1.png" alt="Unmei Nihongo Center" class="login-logo">
+        <span class="login-portal-label">Instructor Access Portal</span>
+      </div>
+
+      <h1 class="login-title">Instructor Sign In</h1>
+      <p class="login-subtitle">Access your teaching dashboard</p>
+
+      <div class="login-form">
+        <div class="form-group">
+          <label class="form-label" for="email">Instructor Email</label>
+          <input type="email" id="email" class="form-control" placeholder="Enter your email address" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="password-group">
+            <div class="password-input-wrap" style="position:relative;display:flex;align-items:center;">
+              <input type="password" id="password" class="form-control" placeholder="Enter your password" autocomplete="current-password" style="padding-right:42px;width:100%;" />
+              <button type="button" class="password-toggle" onclick="togglePasswordVisibility()" aria-label="Toggle password visibility" style="position:absolute;right:12px;background:none;border:none;cursor:pointer;color:#9ca3af;display:flex;align-items:center;">
+                <iconify-icon icon="mdi:eye-outline" id="eyeIcon" style="font-size:20px;"></iconify-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="login-alert" id="loginAlert"></div>
+        <button class="btn-signin" type="button" onclick="handleSignIn()">
+          <span>Sign In</span>
+        </button>
+      </div>
+
+      <div class="login-footer">
+        <span>&copy; 2026 UNMEI Nihongo Center. All rights reserved.</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="/UNMEIinstructorportal/firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script>
+    const AUTH_KEY = 'instructorAuth';
+    const EMAIL_KEY = 'instructorEmail';
+    const ID_KEY = 'instructorId';
+    const AUTH_UID_KEY = 'instructorAuthUid';
+    const AUTH_MODE_KEY = 'instructorAuthMode';
+    const DISPLAY_NAME_KEY = 'instructorDisplayName';
+    const ACTIVITY_KEY = 'instructorLastActivity';
+    const SESSION_TIMEOUT = 30 * 60 * 1000;
+
+    let isSigningIn = false;
+
+    function normalizeText(value) {
+      return String(value || '').trim().toLowerCase();
+    }
+
+    function togglePasswordVisibility() {
+      var passwordInput = document.getElementById('password');
+      var eyeIcon = document.getElementById('eyeIcon');
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.setAttribute('icon', 'mdi:eye-off-outline');
+      } else {
+        passwordInput.type = 'password';
+        eyeIcon.setAttribute('icon', 'mdi:eye-outline');
+      }
+    }
+
+    function clearLocalInstructorSession() {
+      sessionStorage.removeItem(AUTH_KEY);
+      sessionStorage.removeItem(EMAIL_KEY);
+      sessionStorage.removeItem(ID_KEY);
+      sessionStorage.removeItem(AUTH_UID_KEY);
+      sessionStorage.removeItem(AUTH_MODE_KEY);
+      sessionStorage.removeItem(DISPLAY_NAME_KEY);
+      sessionStorage.removeItem(ACTIVITY_KEY);
+    }
+
+    // Resolve the professor record by email from professors/.
+    function resolveInstructorRecordByEmail(database, emailLower) {
+      return database.ref('professors').once('value').then(function (snapshot) {
+        let found = null;
+        if (snapshot.exists()) {
+          snapshot.forEach(function (child) {
+            if (found) return;
+            const raw = child.val() || {};
+            const candidateEmail = normalizeText(raw.email);
+            if (candidateEmail && candidateEmail === emailLower) {
+              found = {
+                id: child.key,
+                email: candidateEmail,
+                displayName: String(raw.fullName || 'Instructor'),
+                active: raw.active !== false,
+                authUid: raw.authUid || ''
+              };
+            }
+          });
+        }
+        return found;
+      });
+    }
+
+    function persistFirebaseSession(user, record) {
+      sessionStorage.setItem(AUTH_KEY, 'true');
+      sessionStorage.setItem(EMAIL_KEY, normalizeText(user.email || record.email));
+      sessionStorage.setItem(ID_KEY, record.id || '');
+      sessionStorage.setItem(AUTH_UID_KEY, user.uid || '');
+      sessionStorage.setItem(AUTH_MODE_KEY, 'firebase');
+      sessionStorage.setItem(DISPLAY_NAME_KEY, record.displayName || 'Instructor');
+      sessionStorage.setItem(ACTIVITY_KEY, Date.now().toString());
+    }
+
+    function persistPrimarySession(record) {
+      sessionStorage.setItem(AUTH_KEY, 'true');
+      sessionStorage.setItem(EMAIL_KEY, normalizeText(record.email));
+      sessionStorage.setItem(ID_KEY, record.id || '');
+      sessionStorage.setItem(AUTH_UID_KEY, record.id || '');
+      sessionStorage.setItem(AUTH_MODE_KEY, 'primary');
+      sessionStorage.setItem(DISPLAY_NAME_KEY, record.displayName || 'Instructor');
+      sessionStorage.setItem(ACTIVITY_KEY, Date.now().toString());
+    }
+
+    // Skip login when a valid session already exists.
+    (function () {
+      const hasAuth = sessionStorage.getItem(AUTH_KEY) === 'true';
+      const lastActivity = parseInt(sessionStorage.getItem(ACTIVITY_KEY), 10);
+      if (!hasAuth || !lastActivity || (Date.now() - lastActivity > SESSION_TIMEOUT)) {
+        return;
+      }
+
+      const authMode = sessionStorage.getItem(AUTH_MODE_KEY);
+      if (authMode === 'primary') {
+        window.location.replace('/UNMEIinstructorportal/instructor-dashboard.html');
+        return;
+      }
+
+      if (typeof firebase === 'undefined' || !firebase.auth || !firebase.database) {
+        clearLocalInstructorSession();
+        return;
+      }
+
+      firebase.auth().onAuthStateChanged(function (user) {
+        if (!user || !user.email) {
+          clearLocalInstructorSession();
+          return;
+        }
+        resolveInstructorRecordByEmail(firebase.database(), normalizeText(user.email)).then(function (record) {
+          if (!record || record.active === false) {
+            clearLocalInstructorSession();
+            return firebase.auth().signOut();
+          }
+          persistFirebaseSession(user, record);
+          window.location.replace('/UNMEIinstructorportal/instructor-dashboard.html');
+        }).catch(function () {
+          clearLocalInstructorSession();
+        });
+      });
+    })();
+
+    function showLoginAlert(message) {
+      const alertBox = document.getElementById('loginAlert');
+      alertBox.textContent = message;
+      alertBox.classList.add('active');
+    }
+
+    function finishSignIn(record, user) {
+      const database = firebase.database();
+      if (user) persistFirebaseSession(user, record);
+      else persistPrimarySession(record);
+
+      // Keep the linking field and last-login stamp current.
+      const updates = { lastLogin: Date.now() };
+      if (user && user.uid && record.authUid !== user.uid) updates.authUid = user.uid;
+      database.ref('professors/' + record.id).update(updates).catch(function () {});
+
+      window.location.href = '/UNMEIinstructorportal/instructor-dashboard.html';
+    }
+
+    function handleSignIn() {
+      const email = normalizeText(document.getElementById('email').value);
+      const password = document.getElementById('password').value.trim();
+      const alertBox = document.getElementById('loginAlert');
+      const signInButton = document.querySelector('.btn-signin');
+
+      if (isSigningIn) return;
+
+      alertBox.classList.remove('active');
+
+      if (!email || !password) {
+        showLoginAlert('Please enter both email and password.');
+        return;
+      }
+
+      isSigningIn = true;
+      signInButton.disabled = true;
+
+      const hasFirebase = typeof firebase !== 'undefined' && firebase.database;
+      if (!hasFirebase) {
+        showLoginAlert('Connection problem. Please try again.');
+        isSigningIn = false;
+        signInButton.disabled = false;
+        return;
+      }
+
+      const database = firebase.database();
+
+      resolveInstructorRecordByEmail(database, email).then(function (record) {
+        if (!record) {
+          showLoginAlert('No instructor account found for this email.');
+          isSigningIn = false;
+          signInButton.disabled = false;
+          return null;
+        }
+
+        if (record.active === false) {
+          showLoginAlert('This instructor account is deactivated. Please contact the administrator.');
+          isSigningIn = false;
+          signInButton.disabled = false;
+          return null;
+        }
+
+        // Preferred path: Firebase Auth when the account exists there.
+        const tryFirebaseAuth = firebase.auth && firebase.auth().signInWithEmailAndPassword(email, password)
+          .then(function (userCredential) {
+            finishSignIn(record, userCredential.user);
+            return true;
+          })
+          .catch(function (authError) {
+            const code = String((authError && authError.code) || '');
+            // Account not provisioned in Firebase Auth yet (the seeded
+            // professors/ records have no Auth row), or Auth is unreachable:
+            // fall through to the portal key-password verification below.
+            if (code === 'auth/user-not-found' || code === 'auth/invalid-credential' || code === 'auth/network-request-failed' || code === 'auth/operation-not-allowed' || code === 'auth/api-key-not-valid.-please-pass-a-valid-api-key.') {
+              return false;
+            }
+            if (code === 'auth/wrong-password' || code === 'auth/invalid-email' || code === 'auth/too-many-requests') {
+              // Auth account exists but the password did not match: do not
+              // silently fall back to a different password source.
+              throw new Error('AUTH_BAD_PASSWORD');
+            }
+            return false;
+          });
+
+        return tryFirebaseAuth.then(function (signedIn) {
+          if (signedIn === true) return null;
+
+          // PHASE 2: portal credential = the professor's own key in
+          // professors/ (e.g. "prof_001"). The live database itself is the
+          // credential store; no password fields, no hardcoded secrets.
+          if (password !== record.id) {
+            showLoginAlert('Incorrect email or password. Please verify your instructor credentials.');
+            isSigningIn = false;
+            signInButton.disabled = false;
+            return null;
+          }
+
+          finishSignIn(record, null);
+          return null;
+        });
+      }).catch(function (error) {
+        if (String((error && error.message) || '').indexOf('AUTH_BAD_PASSWORD') !== -1) {
+          showLoginAlert('Incorrect email or password. Please verify your instructor credentials.');
+        } else {
+          showLoginAlert('Unable to sign in right now. Please try again.');
+        }
+        isSigningIn = false;
+        signInButton.disabled = false;
+      });
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        handleSignIn();
+      }
+    });
+  </script>
+
+</body>
+</html>

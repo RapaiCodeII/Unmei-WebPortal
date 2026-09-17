@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unmei Nihongo Center - Schedules</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="studentportal.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="assets/iconify-icon.min.js"></script>
+<script src="assets/unmei-icons.js"></script>
+</head>
+<body>
+  <script src="session-guard.js"></script>
+
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="brand-logo">
+        <img src="assets/logo.png" alt="UNMEI" style="width:40px;height:40px;object-fit:contain;">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UNMEI</span>
+        <span class="brand-portal">STUDENT PORTAL</span>
+      </div>
+    </div>
+    <nav class="sidebar__nav">
+      <p class="nav-section-label">OVERVIEW</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="dashboard.html" class="nav-link">
+          <iconify-icon icon="mdi:view-dashboard"></iconify-icon>
+          Dashboard</a></li>
+        <li class="nav-item"><a href="profile.html" class="nav-link">
+          <iconify-icon icon="mdi:account-outline"></iconify-icon>
+          My Profile</a></li>
+        <li class="nav-item"><a href="courses.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+          My Courses</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">RECORDS</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="payments.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+          Payments</a></li>
+        <li class="nav-item"><a href="app-download.html" class="nav-link">
+          <iconify-icon icon="mdi:download-outline"></iconify-icon>
+          App Download</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">STUDENT LIFE</p>
+      <ul class="nav-list">
+        <li class="nav-item nav-item--active"><a href="schedules.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+          Schedules</a></li>
+        <li class="nav-item"><a href="announcements.html" class="nav-link">
+          <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+          Announcements</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">PORTAL SETTINGS</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="settings.html" class="nav-link">
+          <iconify-icon icon="mdi:cog-outline"></iconify-icon>
+          Settings</a></li>
+        <li class="nav-item"><a href="javascript:void(0)" onclick="if(window.__studentSignOut){window.__studentSignOut();}else{location.href='settings.html';}" class="nav-link">
+          <iconify-icon icon="mdi:logout"></iconify-icon>
+          Sign Out</a></li>
+      </ul>
+    </nav>
+    <div class="sidebar__user">
+      <div id="sidebarAvatarText" class="user-avatar user-avatar--dark">--</div>
+      <img id="sidebarAvatarImg" class="user-avatar user-avatar--img" style="display:none;width:36px;height:36px;border-radius:50%;object-fit:cover;" alt="Avatar">
+      <div class="user-meta">
+        <span class="user-name" id="sidebarUserName">Student</span>
+        <span class="user-role">Student</span>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <button class="sidebar-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
+        <div class="topbar__left">
+        <h2 class="topbar__title">Schedule Overview</h2>
+        <nav class="breadcrumb">
+          <a href="dashboard.html" class="breadcrumb__link">Home</a>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current">Schedules</span>
+        </nav>
+      </div>
+      <div class="topbar__center"></div>
+      <div class="topbar__right">
+        <!-- Notification Bell -->
+        <div style="position: relative;">
+          <button class="icon-btn" id="notifBtn" onclick="toggleDropdown('notifDropdown')"><iconify-icon icon="mdi:bell-outline"></iconify-icon><span class="dropdown-badge" id="notifBadge" style="display: none;">0</span></button><div class="header-dropdown" id="notifDropdown"><div class="header-dropdown__header"><span class="header-dropdown__title">Notifications</span><span class="header-dropdown__link" onclick="markAllRead()">Mark all read</span></div><div class="header-dropdown__list" id="notifList"><div class="header-dropdown__empty" id="notifEmpty"><iconify-icon icon="mdi:bell-outline"></iconify-icon><p>No notifications yet</p></div></div></div>
+        </div>
+
+        <!-- Messages -->
+        <div style="position: relative;">
+          <button class="icon-btn" id="msgBtn" onclick="toggleDropdown('msgDropdown')">
+            <iconify-icon icon="mdi:email-outline"></iconify-icon>
+            <span class="dropdown-badge" style="display: none;">0</span>
+          </button>
+          <div class="header-dropdown" id="msgDropdown">
+            <div class="header-dropdown__header">
+              <span class="header-dropdown__title">Messages</span>
+              <span class="header-dropdown__link" onclick="viewAllMessages()">View all</span>
+            </div>
+            <div class="header-dropdown__list"></div>
+          </div>
+        </div>
+
+        <div class="topbar__user">
+          <div id="headerAvatarText" class="user-avatar user-avatar--red">--</div>
+          <img id="headerAvatarImg" class="user-avatar user-avatar--img" style="display:none;width:36px;height:36px;border-radius:50%;object-fit:cover;" alt="Avatar">
+          <div class="user-meta">
+            <span class="user-name" id="headerUserName">Student</span>
+            <span class="user-role">Student</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content schedule-content">
+      <section class="schedule-views" aria-label="Student schedule views">
+        <div class="schedule-view schedule-view--active" id="scheduleOverviewView">
+          <div class="panel schedule-hero-panel">
+            <div class="schedule-hero-left">
+              <div class="schedule-hero">
+                <p class="schedule-hero__eyebrow">Schedules &amp; Academic Timetable</p>
+                <h1 class="schedule-hero__title">Your weekly schedule</h1>
+                <p class="schedule-hero__desc">See your class days, times, room assignments, and upcoming sessions before opening the calendar.</p>
+              </div>
+            </div>
+            <div class="schedule-hero__meta">
+              <div class="schedule-stat">
+                <span>Current day &amp; time</span>
+                <strong id="scheduleHeroTime">--</strong>
+              </div>
+              <div class="schedule-stat">
+                <span>Section</span>
+                <strong id="scheduleHeroSection">--</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel schedule-grid-panel">
+            <div class="panel__header">
+              <div class="panel__title">
+                <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+                Weekly Grid
+              </div>
+              <span class="panel__link">Day and time blocks</span>
+            </div>
+            <!-- Wrap grid in a relative container so the blur paywall can overlay it -->
+            <div class="schedule-grid-blur-wrap" id="scheduleGridWrap" style="overflow-x:auto;overflow-y:visible;position:relative;">
+              <div class="schedule-grid" id="scheduleGrid"></div>
+              <!-- Payment blur overlay — hidden by default, shown when no approved payment -->
+              <div class="schedule-grid-paywall" id="scheduleGridPaywall" style="display:none;">
+                <div class="schedule-grid-paywall__icon">
+                  <iconify-icon icon="mdi:lock-outline"></iconify-icon>
+                </div>
+                <p class="schedule-grid-paywall__text">Schedule locked</p>
+                <p class="schedule-grid-paywall__sub">Complete your payment to view your class timetable.</p>
+                <a href="payments.html" style="margin-top:4px;display:inline-flex;align-items:center;gap:6px;background:var(--red);color:#fff;font-size:0.75rem;font-weight:600;padding:8px 18px;border-radius:8px;text-decoration:none;">Go to Payments</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel schedule-list-panel">
+            <div class="panel__header">
+              <div class="panel__title">
+                <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+                Class Schedule Details
+              </div>
+              <span class="panel__link">Upcoming sessions</span>
+            </div>
+            <div class="schedule-list" id="scheduleList">
+              <div class="schedule-item" id="schedulePlaceholder">
+                <div class="schedule-date"><span class="schedule-date__num">--</span><span class="schedule-date__mon">--</span></div>
+                <div class="schedule-info"><p class="schedule-title">No upcoming class</p><p class="schedule-time">--</p></div>
+                <span class="badge badge--upcoming">--</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="schedule-view-actions schedule-view-actions--next">
+            <button type="button" class="schedule-nav-btn schedule-nav-btn--next" onclick="switchScheduleView('calendar')">Next <iconify-icon icon="mdi:chevron-right"></iconify-icon></button>
+          </div>
+        </div>
+
+        <div class="schedule-view" id="scheduleCalendarView">
+          <div class="panel schedule-calendar-panel">
+            <div class="panel__header schedule-calendar-header">
+              <div class="panel__title">
+                <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+                Calendar
+              </div>
+            </div>
+            <div class="schedule-calendar-toolbar">
+              <button type="button" class="cal-arrow-btn" onclick="changeScheduleMonth(-1)" aria-label="Previous month"><iconify-icon icon="mdi:chevron-left"></iconify-icon></button>
+              <span class="cal-month-label" id="scheduleCalendarLabel">This month</span>
+              <button type="button" class="cal-arrow-btn" onclick="changeScheduleMonth(1)" aria-label="Next month"><iconify-icon icon="mdi:chevron-right"></iconify-icon></button>
+            </div>
+            <div class="schedule-calendar" id="scheduleCalendar"></div>
+            <div class="calendar-day-detail" id="calendarDayDetail">
+              <div class="calendar-day-detail__empty"><iconify-icon icon="mdi:credit-card-outline"></iconify-icon><p>Select a highlighted date to view your schedules.</p></div>
+            </div>
+            <div class="calendar-note" id="scheduleCalendarNote">No schedule selected yet.</div>
+          </div>
+          <div class="schedule-view-actions schedule-view-actions--prev">
+            <button type="button" class="schedule-nav-btn schedule-nav-btn--ghost" onclick="switchScheduleView('overview')"><iconify-icon icon="mdi:chevron-left"></iconify-icon> Back to Schedule</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ---- Dropdown Functions ----
+    function toggleDropdown(id) {
+      const dropdown = document.getElementById(id);
+      const isActive = dropdown.classList.contains('active');
+      document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('active'));
+      document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--active'));
+      if (!isActive) {
+        dropdown.classList.add('active');
+        document.getElementById(id === 'notifDropdown' ? 'notifBtn' : 'msgBtn').classList.add('icon-btn--active');
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.icon-btn') && !e.target.closest('.header-dropdown')) {
+        document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('active'));
+        document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--active'));
+      }
+    });
+
+    function markAllRead() {
+      document.querySelectorAll('.dropdown-item--unread').forEach(item => item.classList.remove('dropdown-item--unread'));
+      document.querySelector('.dropdown-badge').style.display = 'none';
+    }
+
+    function viewNotif(el) {
+      el.classList.remove('dropdown-item--unread');
+      const unreadCount = document.querySelectorAll('.dropdown-item--unread').length;
+      const badge = document.querySelector('.dropdown-badge');
+      badge.style.display = unreadCount === 0 ? 'none' : 'block';
+      if (unreadCount > 0) badge.textContent = unreadCount;
+    }
+
+    function viewAllMessages() { showAlert('Messages', 'No messages yet', 'info'); }
+    function openMessage(user) { showAlert('Messages', 'No messages yet', 'info'); }
+
+    // Load saved avatar from Firebase
+    document.addEventListener('DOMContentLoaded', function() {
+      const database = firebase.database();
+      const studentUid = localStorage.getItem('studentUid');
+      if (!studentUid) return;
+
+      // Load student name
+      database.ref('students/' + studentUid).once('value').then((studentSnap) => {
+        const studentData = studentSnap.val();
+        if (studentData && studentData.profile) {
+          const fullName = studentData.profile.fullName || studentData.profile.name || 'Student';
+          document.getElementById('sidebarUserName').textContent = fullName;
+          document.getElementById('headerUserName').textContent = fullName;
+          
+          // Set welcome name initials
+          const initials = fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+          document.getElementById('sidebarAvatarText').textContent = initials;
+          document.getElementById('headerAvatarText').textContent = initials;
+        }
+      });
+
+      // Load avatar
+      database.ref('students/' + studentUid + '/profile/avatarUrl').once('value').then((snapshot) => {
+        const avatarData = snapshot.val();
+        if (avatarData) {
+          applyAvatar(avatarData);
+        }
+      });
+
+      // Load notifications
+      loadNotifications(database, studentUid);
+
+      // Load schedules + check payment status simultaneously
+      database.ref('students/' + studentUid).once('value').then((studentSnap) => {
+        const studentData = studentSnap.val();
+        if (!studentData) return;
+        const enrollment = studentData.enrollment || {};
+        const sectionId = enrollment.sectionId || '';
+
+        // Check payment before rendering grid
+        database.ref('payments').orderByChild('studentUid').equalTo(studentUid).once('value').then((paymentsSnap) => {
+          let hasApproved = false;
+          if (paymentsSnap.exists()) {
+            paymentsSnap.forEach((child) => {
+              const p = child.val() || {};
+              const st = String(p.adminApprovalStatus || p.verificationStatus || p.status || '').toLowerCase();
+              if (st === 'approved' || st === 'paid') hasApproved = true;
+            });
+          }
+          window._schedulePaymentApproved = hasApproved;
+          loadSchedules(database, enrollment, hasApproved);
+        }).catch(() => {
+          window._schedulePaymentApproved = false;
+          loadSchedules(database, enrollment, false);
+        });
+      });
+    });
+
+    function loadNotifications(database, studentUid) {
+      database.ref('notifications').orderByChild('recipientUid').equalTo(studentUid).limitToLast(10).once('value').then((snapshot) => {
+        const notifList = document.getElementById('notifList');
+        const notifEmpty = document.getElementById('notifEmpty');
+        const notifBadge = document.getElementById('notifBadge');
+        if (!notifList || !snapshot.exists()) {
+          if (notifEmpty) notifEmpty.style.display = 'block';
+          if (notifBadge) notifBadge.style.display = 'none';
+          return;
+        }
+        const typeIcons = {
+          payment: '<iconify-icon icon="mdi:credit-card-outline"></iconify-icon>',
+          schedule: '<iconify-icon icon="mdi:credit-card-outline"></iconify-icon>',
+          announcement: '<iconify-icon icon="mdi:bell-outline"></iconify-icon>',
+          info: '<iconify-icon icon="mdi:information-outline"></iconify-icon>'
+        };
+        const typeColors = { payment: 'red', schedule: 'blue', announcement: 'green', info: 'blue' };
+        let html = '';
+        let unreadCount = 0;
+        const notifications = [];
+        snapshot.forEach((child) => {
+          const n = child.val();
+          n.id = child.key;
+          notifications.push(n);
+        });
+        notifications.reverse();
+        notifications.forEach((n) => {
+          const iconSvg = typeIcons[n.type] || typeIcons.info;
+          const colorClass = typeColors[n.type] || 'blue';
+          const timeAgo = getTimeAgo(n.createdAt);
+          const unreadClass = n.read ? '' : 'dropdown-item--unread';
+          if (!n.read) unreadCount++;
+          html += '<div class="dropdown-item ' + unreadClass + '" onclick="markNotifRead(\'' + n.id + '\', this)"><div class="dropdown-item__icon dropdown-item__icon--' + colorClass + '">' + iconSvg + '</div><div class="dropdown-item__body"><div class="dropdown-item__title">' + (n.title || 'Notification') + '</div><div class="dropdown-item__text">' + (n.message || '') + '</div><div class="dropdown-item__time">' + timeAgo + '</div></div></div>';
+        });
+        notifList.innerHTML = html;
+        if (notifEmpty) notifEmpty.style.display = 'none';
+        if (notifBadge) {
+          if (unreadCount > 0) {
+            notifBadge.textContent = unreadCount;
+            notifBadge.style.display = 'block';
+          } else {
+            notifBadge.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    function markNotifRead(notifId, el) {
+      const database = firebase.database();
+      database.ref('notifications/' + notifId).update({ read: true }).then(() => {
+        if (el) el.classList.remove('dropdown-item--unread');
+        const unreadCount = document.querySelectorAll('#notifList .dropdown-item--unread').length;
+        const notifBadge = document.getElementById('notifBadge');
+        if (notifBadge) {
+          if (unreadCount === 0) notifBadge.style.display = 'none';
+          else notifBadge.textContent = unreadCount;
+        }
+      });
+    }
+
+    function markAllRead() {
+      const database = firebase.database();
+      const studentUid = localStorage.getItem('studentUid');
+      database.ref('notifications').orderByChild('recipientUid').equalTo(studentUid).once('value').then((snapshot) => {
+        const updates = {};
+        snapshot.forEach((child) => { updates[child.key + '/read'] = true; });
+        return database.ref('notifications').update(updates);
+      }).then(() => {
+        document.querySelectorAll('#notifList .dropdown-item--unread').forEach(item => {
+          item.classList.remove('dropdown-item--unread');
+        });
+        document.getElementById('notifBadge').style.display = 'none';
+      });
+    }
+
+    function getTimeAgo(timestamp) {
+      const now = Date.now();
+      const diff = now - timestamp;
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+      if (minutes < 1) return 'Just now';
+      if (minutes < 60) return minutes + ' minutes ago';
+      if (hours < 24) return hours + ' hours ago';
+      return days + ' days ago';
+    }
+
+    function joinScheduleParts(parts) {
+      return parts.filter((part) => String(part || '').trim() !== '').join(' - ');
+    }
+
+    var scheduleViewState = 'overview';
+    var scheduleCalendarOffset = 0;
+    var scheduleCalendarSelectedDate = null;
+    var activeScheduleSection = {};
+    var activeScheduleItems = [];
+
+    function switchScheduleView(view) {
+      scheduleViewState = view === 'calendar' ? 'calendar' : 'overview';
+      document.getElementById('scheduleOverviewView').classList.toggle('schedule-view--active', scheduleViewState === 'overview');
+      document.getElementById('scheduleCalendarView').classList.toggle('schedule-view--active', scheduleViewState === 'calendar');
+    }
+
+    function changeScheduleMonth(step) {
+      scheduleCalendarOffset += step;
+      scheduleCalendarSelectedDate = null;
+      renderScheduleCalendar(activeScheduleSection, activeScheduleItems);
+    }
+
+    function normalizeWeekdayTokens(daysText) {
+      var value = String(daysText || '').toLowerCase();
+      var result = [];
+      if (value.indexOf('mwf') !== -1) result = [1, 3, 5];
+      if (value.indexOf('tth') !== -1 || value.indexOf('tuth') !== -1) result = [2, 4];
+      if (value.indexOf('mon') !== -1 || value.indexOf('monday') !== -1) result.push(1);
+      if (value.indexOf('tue') !== -1 || value.indexOf('tuesday') !== -1) result.push(2);
+      if (value.indexOf('wed') !== -1 || value.indexOf('wednesday') !== -1) result.push(3);
+      if (value.indexOf('thu') !== -1 || value.indexOf('thur') !== -1 || value.indexOf('thurs') !== -1) result.push(4);
+      if (value.indexOf('fri') !== -1 || value.indexOf('friday') !== -1) result.push(5);
+      if (value.indexOf('sat') !== -1 || value.indexOf('saturday') !== -1) result.push(6);
+      if (value.indexOf('sun') !== -1 || value.indexOf('sunday') !== -1) result.push(0);
+      return Array.from(new Set(result));
+    }
+
+    function getMonthContext(offset) {
+      var baseDate = new Date();
+      baseDate.setMonth(baseDate.getMonth() + offset);
+      return baseDate;
+    }
+
+    function formatClock(minutes) {
+      var hours = Math.floor(minutes / 60);
+      var mins = minutes % 60;
+      var suffix = hours >= 12 ? 'PM' : 'AM';
+      var normalizedHours = hours % 12;
+      if (normalizedHours === 0) normalizedHours = 12;
+      return String(normalizedHours).padStart(2, '0') + ':' + String(mins).padStart(2, '0') + ' ' + suffix;
+    }
+
+    function parseClockValue(clockText) {
+      var text = String(clockText || '').trim().toUpperCase();
+      if (!text) return null;
+      // Anchored match: must consume the whole token
+      var match = text.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/);
+      if (!match) return null;
+      var hours = parseInt(match[1], 10);
+      var minutes = parseInt(match[2] || '0', 10);
+      var period = match[3] || '';
+      if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null;
+      if (hours > 23 || minutes > 59) return null;
+      if (period === 'PM' && hours < 12) hours += 12;
+      if (period === 'AM' && hours === 12) hours = 0;
+      // No AM/PM given: treat 1-6 as PM (afternoon classes), 7+ as-is
+      if (!period && hours >= 1 && hours <= 6) hours += 12;
+      return hours * 60 + minutes;
+    }
+
+    function parseTimeRange(timeText) {
+      var value = String(timeText || '').trim();
+      if (!value) return null;
+      // Normalize en-dash and "to" separators, then extract exactly two time tokens
+      var norm = value.replace(/\s*[–—]\s*/g, ' - ').replace(/\s+/g, ' ');
+      // Try: "H:MM AM - H:MM PM" style (with surrounding spaces around dash)
+      var m = norm.match(/^(\d{1,2}(?::\d{2})?\s*(?:AM|PM)?)\s*-\s*(\d{1,2}(?::\d{2})?\s*(?:AM|PM)?)$/i);
+      if (m) {
+        var start = parseClockValue(m[1].trim());
+        var end = parseClockValue(m[2].trim());
+        if (start !== null && end !== null && Number.isFinite(start) && Number.isFinite(end) && end > start) {
+          return { start: start, end: end };
+        }
+      }
+      // Fallback: split on any dash/to
+      var parts = norm.split(/\s*(?:-|to)\s*/i).map(function(p) { return p.trim(); });
+      if (parts.length >= 2) {
+        var start = parseClockValue(parts[0]);
+        var end = parseClockValue(parts[parts.length - 1]);
+        if (start !== null && end !== null && Number.isFinite(start) && Number.isFinite(end) && end > start) {
+          return { start: start, end: end };
+        }
+      }
+      return null;
+    }
+
+    function renderScheduleGrid(section, scheduleItems, hasPayment) {
+      var grid = document.getElementById('scheduleGrid');
+      var paywall = document.getElementById('scheduleGridPaywall');
+      var heroTime = document.getElementById('scheduleHeroTime');
+      var heroSection = document.getElementById('scheduleHeroSection');
+      if (!grid) return;
+
+      var rowsPerHour = 2;
+      var startHour = 7;   // 07:00
+      var endHour = 21;    // 21:00
+      var slotCount = (endHour - startHour) * rowsPerHour; // 28 rows
+
+      var days = [
+        { label: 'Monday',    index: 1 },
+        { label: 'Tuesday',   index: 2 },
+        { label: 'Wednesday', index: 3 },
+        { label: 'Thursday',  index: 4 },
+        { label: 'Friday',    index: 5 },
+        { label: 'Saturday',  index: 6 },
+        { label: 'Sunday',    index: 0 }
+      ];
+
+      var sectionLabel = (section && (section.course || section.name || section.code))
+        ? (section.course || section.name || section.code)
+        : 'JLPT N5 Regular Class';
+
+      if (heroSection) heroSection.textContent = sectionLabel;
+
+      if (heroTime) {
+        var now = new Date();
+        heroTime.textContent = now.toLocaleString('en-PH', {
+          weekday: 'long', hour: '2-digit', minute: '2-digit', hour12: true
+        });
+      }
+
+      // Current time in minutes (for active-now detection)
+      var nowDate = new Date();
+      var nowDay = nowDate.getDay(); // 0=Sun…6=Sat
+      var nowMinutes = nowDate.getHours() * 60 + nowDate.getMinutes();
+
+      // --- Build grid HTML ---
+      // Row 1: corner + day headers (columns 1-8)
+      var html = '<div class="schedule-grid__corner" style="grid-column:1;grid-row:1;">Time</div>';
+      days.forEach(function(day, di) {
+        html += '<div class="schedule-grid__day-head" style="grid-column:' + (di + 2) + ';grid-row:1;">' + day.label + '</div>';
+      });
+
+      // Rows 2…29: time label + 7 blank cells
+      for (var row = 0; row < slotCount; row++) {
+        var gridRow = row + 2; // rows start at 2 (row 1 is header)
+        var slotMinutes = (startHour * 60) + (row * 30);
+        html += '<div class="schedule-grid__time" style="grid-column:1;grid-row:' + gridRow + ';">' + formatClock(slotMinutes) + '</div>';
+        for (var di = 0; di < 7; di++) {
+          html += '<div class="schedule-grid__cell" style="grid-column:' + (di + 2) + ';grid-row:' + gridRow + ';"></div>';
+        }
+      }
+
+      // --- Determine items to render ---
+      var itemsToRender = Array.isArray(scheduleItems) && scheduleItems.length > 0 ? scheduleItems : [];
+      if (itemsToRender.length === 0) {
+        if (section && section.schedule && (section.schedule.timeSlot || section.schedule.time)) {
+          itemsToRender = [section.schedule];
+        } else {
+          // No schedule assigned — render empty grid, no fallback block
+          itemsToRender = [];
+        }
+      }
+
+      // --- Place schedule blocks ---
+      itemsToRender.forEach(function(item, itemIndex) {
+        if (!item) return;
+        var timeText = item.timeSlot || item.time || '';
+        var timeRange = parseTimeRange(timeText);
+        if (!timeRange) return;
+
+        var dayTokens = getScheduleDays(section, item);
+        var startIndex = Math.max(0, Math.floor((timeRange.start - (startHour * 60)) / 30));
+        var span = Math.max(1, Math.round((timeRange.end - timeRange.start) / 30));
+        var blockTitle = item.course || sectionLabel;
+        var roomInstructor = [item.room, item.instructor || (section && section.instructor)]
+          .filter(function(v) { return v && String(v).trim(); })
+          .join(' \u00b7 '); // middle dot separator, no line
+
+        var gridRow = startIndex + 2;
+        var colorClass = 'schedule-grid__block--' + (itemIndex % 4);
+
+        dayTokens.forEach(function(dayToken) {
+          var dayCol = days.findIndex(function(d) { return d.index === dayToken; });
+          if (dayCol === -1) return;
+          var colNum = dayCol + 2;
+
+          // Check if this block is currently happening (today's weekday + time overlap)
+          var isActiveNow = (dayToken === nowDay)
+            && (nowMinutes >= timeRange.start)
+            && (nowMinutes < timeRange.end);
+
+          html += '<div class="schedule-grid__block ' + colorClass
+            + (isActiveNow ? ' schedule-grid__block--active-now' : '')
+            + '" style="grid-column:' + colNum + ';grid-row:' + gridRow + ' / span ' + span + ';">'
+            + '<strong>' + blockTitle + '</strong>'
+            + '<span>' + (timeText || formatClock(timeRange.start) + ' - ' + formatClock(timeRange.end)) + '</span>'
+            + (roomInstructor ? '<em>' + roomInstructor + '</em>' : '')
+            + (isActiveNow ? '<em style="font-weight:700;opacity:1;color:inherit;margin-top:2px;">In session now</em>' : '')
+            + '</div>';
+        });
+      });
+
+      grid.innerHTML = html;
+
+      // Show or hide payment blur overlay
+      if (paywall) {
+        paywall.style.display = (hasPayment === false) ? 'flex' : 'none';
+      }
+
+      // Start a 1-min interval to re-render the grid so active-now updates in real time
+      if (!window._scheduleGridRefreshInterval) {
+        window._scheduleGridRefreshInterval = setInterval(function() {
+          renderScheduleGrid(activeScheduleSection, activeScheduleItems, window._schedulePaymentApproved);
+        }, 60000);
+      }
+      window._schedulePaymentApproved = hasPayment;
+    }
+
+    function getScheduleDays(section, scheduleItem) {
+      var itemDays = normalizeWeekdayTokens(scheduleItem && scheduleItem.days);
+      if (itemDays.length) return itemDays;
+      var sectionDays = normalizeWeekdayTokens(section && section.schedule && section.schedule.days);
+      if (sectionDays.length) return sectionDays;
+      return [1, 2, 3, 4, 5];
+    }
+
+    function getSchedulesForDate(year, month, day, scheduleItems) {
+      var dateObj = new Date(year, month, day);
+      var weekday = dateObj.getDay();
+      var matches = [];
+      (Array.isArray(scheduleItems) ? scheduleItems : []).forEach(function (item) {
+        if (!item) return;
+        var itemDays = normalizeWeekdayTokens(item.days);
+        var dateMatch = false;
+        if (item.startDate) {
+          var iDate = new Date(item.startDate);
+          if (!isNaN(iDate.getTime()) && iDate.getDate() === day && iDate.getMonth() === month && iDate.getFullYear() === year) {
+            dateMatch = true;
+          }
+        }
+        if (dateMatch || itemDays.indexOf(weekday) !== -1) {
+          matches.push(item);
+        }
+      });
+      return matches;
+    }
+
+    function selectCalendarDate(year, month, day) {
+      scheduleCalendarSelectedDate = { year: year, month: month, day: day };
+      document.querySelectorAll('#scheduleCalendar .calendar-day--selected').forEach(function (el) {
+        el.classList.remove('calendar-day--selected');
+      });
+      var targetEl = document.querySelector('#scheduleCalendar .calendar-day[data-day="' + day + '"]');
+      if (targetEl) targetEl.classList.add('calendar-day--selected');
+      showCalendarDayDetail(year, month, day);
+    }
+
+    function showCalendarDayDetail(year, month, day) {
+      var detail = document.getElementById('calendarDayDetail');
+      if (!detail) return;
+      var dayItems = getSchedulesForDate(year, month, day, activeScheduleItems);
+      var dateObj = new Date(year, month, day);
+      var dateLabel = dateObj.toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      if (!dayItems.length) {
+        detail.innerHTML = '<div class="calendar-day-detail__header"><div class="calendar-day-detail__date">' + dateLabel + '</div><span class="calendar-day-detail__badge calendar-day-detail__badge--open">Open</span></div><div class="calendar-day-detail__empty"><p>No classes or events scheduled for this date.</p></div>';
+        return;
+      }
+      var sectionCourse = (activeScheduleSection && (activeScheduleSection.course || activeScheduleSection.name || activeScheduleSection.code)) || 'Class';
+      var html = '<div class="calendar-day-detail__header"><div class="calendar-day-detail__date">' + dateLabel + '</div><span class="calendar-day-detail__badge">' + dayItems.length + (dayItems.length === 1 ? ' item' : ' items') + '</span></div>';
+      html += '<div class="calendar-day-detail__list">';
+      dayItems.forEach(function (item) {
+        var course = item.course || item.title || sectionCourse;
+        var timeSlot = item.timeSlot || item.time || '';
+        var room = item.room || (item.meetingLink ? 'Online' : '');
+        var isActive = item.active !== false;
+        var badgeClass = isActive ? 'badge--upcoming' : 'badge--quiz';
+        var badgeText = isActive ? 'Active' : 'Completed';
+        html += '<div class="calendar-day-detail__item">';
+        html += '<div class="calendar-day-detail__item-icon"><iconify-icon icon="mdi:credit-card-outline"></iconify-icon></div>';
+        html += '<div class="calendar-day-detail__item-body">';
+        html += '<div class="calendar-day-detail__item-title">' + course + '</div>';
+        html += '<div class="calendar-day-detail__item-meta">';
+        if (timeSlot) html += '<span>' + timeSlot + '</span>';
+        if (room) html += '<span class="cal-meta-sep">&bull;</span><span>' + room + '</span>';
+        html += '</div>';
+        html += '</div>';
+        html += '<span class="badge ' + badgeClass + '">' + badgeText + '</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+      detail.innerHTML = html;
+    }
+
+    function renderScheduleCalendar(section, scheduleItems) {
+      var calendar = document.getElementById('scheduleCalendar');
+      var note = document.getElementById('scheduleCalendarNote');
+      var label = document.getElementById('scheduleCalendarLabel');
+      var detail = document.getElementById('calendarDayDetail');
+      if (!calendar) return;
+
+      var now = getMonthContext(scheduleCalendarOffset);
+      var year = now.getFullYear();
+      var month = now.getMonth();
+      var firstDay = new Date(year, month, 1);
+      var daysInMonth = new Date(year, month + 1, 0).getDate();
+      var startOffset = firstDay.getDay();
+      var monthName = now.toLocaleDateString('en-PH', { month: 'long', year: 'numeric' });
+      if (label) label.textContent = monthName;
+
+      var daySchedules = {};
+      var hasAnySchedule = false;
+
+      (Array.isArray(scheduleItems) ? scheduleItems : []).forEach(function (item) {
+        if (!item) return;
+        var itemDays = normalizeWeekdayTokens(item.days);
+        if (item.startDate) {
+          var scheduleDate = new Date(item.startDate);
+          if (!isNaN(scheduleDate.getTime()) && scheduleDate.getMonth() === month && scheduleDate.getFullYear() === year) {
+            var d = scheduleDate.getDate();
+            if (!daySchedules[d]) daySchedules[d] = [];
+            if (daySchedules[d].indexOf(item) === -1) daySchedules[d].push(item);
+            hasAnySchedule = true;
+          }
+        }
+        if (itemDays.length) {
+          for (var day = 1; day <= daysInMonth; day++) {
+            var dateObj = new Date(year, month, day);
+            var weekday = dateObj.getDay();
+            if (itemDays.indexOf(weekday) !== -1) {
+              if (!daySchedules[day]) daySchedules[day] = [];
+              if (daySchedules[day].indexOf(item) === -1) daySchedules[day].push(item);
+              hasAnySchedule = true;
+            }
+          }
+        }
+      });
+
+      var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      var html = days.map(function(day) {
+        return '<div class="calendar-day-label">' + day + '</div>';
+      }).join('');
+
+      for (var i = 0; i < startOffset; i++) {
+        html += '<div class="calendar-day calendar-day--muted"></div>';
+      }
+
+      for (var day = 1; day <= daysInMonth; day++) {
+        var dateObj = new Date(year, month, day);
+        var isToday = now.toDateString() === dateObj.toDateString();
+        var dayItems = daySchedules[day] || [];
+        var isActive = dayItems.length > 0;
+        var classes = ['calendar-day'];
+        if (isToday) classes.push('calendar-day--today');
+        if (isActive) classes.push('calendar-day--active');
+        if (scheduleCalendarSelectedDate && scheduleCalendarSelectedDate.year === year && scheduleCalendarSelectedDate.month === month && scheduleCalendarSelectedDate.day === day) {
+          classes.push('calendar-day--selected');
+        }
+        var metaText = isActive ? (dayItems.length + (dayItems.length === 1 ? ' class' : ' classes')) : '';
+        html += '<div class="' + classes.join(' ') + '" data-day="' + day + '" onclick="selectCalendarDate(' + year + ',' + month + ',' + day + ')"><div class="calendar-day__num">' + day + '</div>' + (metaText ? '<div class="calendar-day__meta">' + metaText + '</div>' : '') + '</div>';
+      }
+
+      calendar.innerHTML = html;
+      if (note) {
+        note.textContent = hasAnySchedule ? 'Tap a highlighted date to view its schedules.' : 'No schedule assigned yet. Ask admin to add your section schedule.';
+      }
+      if (detail && !scheduleCalendarSelectedDate) {
+        detail.innerHTML = '<div class="calendar-day-detail__empty"><iconify-icon icon="mdi:credit-card-outline"></iconify-icon><p>Select a highlighted date to view your schedules.</p></div>';
+      }
+    }
+
+    function loadSchedules(database, enrollment, hasPayment) {
+      const list = document.getElementById('scheduleList');
+      enrollment = enrollment || {};
+      const sectionId = enrollment.sectionId || '';
+      if (!sectionId) {
+        const enrollDays = String(enrollment.scheduleDays || '').trim();
+        const enrollSlot = String(enrollment.scheduleTimeSlot || '').trim();
+        if (enrollDays || enrollSlot) {
+          const syntheticSection = {
+            course: enrollment.course || 'Class',
+            name: enrollment.course || 'Class',
+            instructor: '',
+            status: 'active',
+            schedule: {
+              days: enrollDays,
+              timeSlot: enrollSlot,
+              classSetup: enrollment.classSetup || ''
+            }
+          };
+          activeScheduleSection = syntheticSection;
+          const schedule = syntheticSection.schedule;
+          const startDate = new Date();
+          const dateNum = String(startDate.getDate()).padStart(2, '0');
+          const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+          const dateMon = months[startDate.getMonth()];
+          const scheduleText = joinScheduleParts([schedule.days, schedule.timeSlot, 'TBA', '']);
+          list.innerHTML = '<div class="schedule-item"><div class="schedule-date"><span class="schedule-date__num">' + dateNum + '</span><span class="schedule-date__mon">' + dateMon + '</span></div><div class="schedule-info"><p class="schedule-title">' + syntheticSection.course + '</p><p class="schedule-time">' + (scheduleText || 'Schedule TBD') + '</p></div><span class="badge badge--upcoming">Regular Class</span></div>';
+          activeScheduleItems = [schedule];
+          renderScheduleGrid(syntheticSection, [schedule], hasPayment);
+          renderScheduleCalendar(syntheticSection, [schedule]);
+          return;
+        }
+        list.innerHTML = '<div class="schedule-item"><div class="schedule-info"><p class="schedule-title">No schedule assigned</p><p class="schedule-time">Contact admin for section assignment</p></div></div>';
+        activeScheduleSection = {};
+        activeScheduleItems = [];
+        renderScheduleGrid({}, [], hasPayment);
+        renderScheduleCalendar({}, []);
+        return;
+      }
+      database.ref('sections/' + sectionId).once('value').then((sectionSnapshot) => {
+        const section = sectionSnapshot.val() || {};
+        const schedule = section.schedule || null;
+        activeScheduleSection = section;
+
+        if (schedule) {
+          const startDate = schedule.startDate ? new Date(schedule.startDate) : new Date();
+          const dateNum = String(startDate.getDate()).padStart(2, '0');
+          const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+          const dateMon = months[startDate.getMonth()];
+          const days = schedule.days || '';
+          const timeSlot = schedule.timeSlot || schedule.time || '';
+          const room = schedule.room || (schedule.meetingLink ? 'Online' : '');
+          const instructor = section.instructor || '';
+          const scheduleText = joinScheduleParts([days, timeSlot, room || 'TBA', instructor || '']);
+          const isActive = String(section.status || 'active').toLowerCase() !== 'inactive';
+          const badgeClass = isActive ? 'badge--upcoming' : 'badge--quiz';
+          const badgeText = isActive ? 'Regular Class' : 'Completed';
+          const course = section.course || section.name || 'Class';
+
+          list.innerHTML = '<div class="schedule-item"><div class="schedule-date"><span class="schedule-date__num">' + dateNum + '</span><span class="schedule-date__mon">' + dateMon + '</span></div><div class="schedule-info"><p class="schedule-title">' + course + '</p><p class="schedule-time">' + (scheduleText || 'Schedule TBD') + '</p></div><span class="badge ' + badgeClass + '">' + badgeText + '</span></div>';
+          activeScheduleItems = [schedule];
+          renderScheduleGrid(section, [schedule], hasPayment);
+          renderScheduleCalendar(section, [schedule]);
+          return null;
+        }
+
+        return database.ref('schedules').orderByChild('sectionId').equalTo(sectionId).once('value');
+      }).then((snapshot) => {
+        if (!snapshot) return;
+        if (!snapshot.exists()) {
+          list.innerHTML = '<div class="schedule-item"><div class="schedule-info"><p class="schedule-title">No schedules found</p><p class="schedule-time">Schedules will appear once assigned by admin</p></div></div>';
+          activeScheduleItems = [];
+          renderScheduleGrid({}, [], hasPayment);
+          renderScheduleCalendar({}, []);
+          return;
+        }
+        let html = '';
+        const scheduleItems = [];
+        snapshot.forEach((child) => {
+          const sched = child.val() || {};
+          scheduleItems.push(sched);
+          const days = sched.days || '';
+          const timeSlot = sched.timeSlot || sched.time || '';
+          const course = sched.course || 'Class';
+          const instructor = sched.instructor || '';
+          const room = sched.room || (sched.meetingLink ? 'Online' : '');
+          const isActive = sched.active !== false;
+          const badgeClass = isActive ? 'badge--upcoming' : 'badge--quiz';
+          const badgeText = isActive ? 'Regular Class' : 'Completed';
+          const startDate = sched.startDate ? new Date(sched.startDate) : new Date();
+          const dateNum = String(startDate.getDate()).padStart(2, '0');
+          const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+          const dateMon = months[startDate.getMonth()];
+          const scheduleText = joinScheduleParts([days, timeSlot, room || 'TBA', instructor]);
+          html += '<div class="schedule-item"><div class="schedule-date"><span class="schedule-date__num">' + dateNum + '</span><span class="schedule-date__mon">' + dateMon + '</span></div><div class="schedule-info"><p class="schedule-title">' + course + '</p><p class="schedule-time">' + (scheduleText || 'Schedule TBD') + '</p></div><span class="badge ' + badgeClass + '">' + badgeText + '</span></div>';
+        });
+        list.innerHTML = html;
+        activeScheduleItems = scheduleItems;
+        renderScheduleGrid(section, scheduleItems, hasPayment);
+        database.ref('sections/' + sectionId).once('value').then((sectionSnap) => {
+          renderScheduleCalendar(sectionSnap.val() || {}, scheduleItems);
+        });
+      });
+    }
+
+    function applyAvatar(avatarData) {
+      document.getElementById('headerAvatarImg').src = avatarData;
+      document.getElementById('headerAvatarImg').style.display = 'block';
+      document.getElementById('headerAvatarText').style.display = 'none';
+      document.getElementById('sidebarAvatarImg').src = avatarData;
+      document.getElementById('sidebarAvatarImg').style.display = 'block';
+      document.getElementById('sidebarAvatarText').style.display = 'none';
+    }
+
+    function showAlert(title, message, type) {
+      const existing = document.querySelector('.custom-alert');
+      if (existing) existing.remove();
+      const alertEl = document.createElement('div');
+      alertEl.className = 'custom-alert custom-alert--' + type;
+      let iconSvg;
+      if (type === 'danger' || type === 'warning') {
+        iconSvg = '<iconify-icon icon="mdi:information-outline"></iconify-icon>';
+      } else if (type === 'success') {
+        iconSvg = '<iconify-icon icon="mdi:check-circle-outline"></iconify-icon>';
+      } else {
+        iconSvg = '<iconify-icon icon="mdi:information-outline"></iconify-icon>';
+      }
+      alertEl.innerHTML = '<div class="custom-alert__icon">' + iconSvg + '</div><div class="custom-alert__body"><strong class="custom-alert__title">' + title + '</strong><p class="custom-alert__message">' + message + '</p></div><button class="custom-alert__close" onclick="this.parentElement.remove()"><iconify-icon icon="mdi:close"></iconify-icon></button>';
+      document.body.appendChild(alertEl);
+      setTimeout(() => alertEl.classList.add('custom-alert--show'), 10);
+      setTimeout(() => { alertEl.classList.remove('custom-alert--show'); setTimeout(() => alertEl.remove(), 300); }, 5000);
+    }
+
+    let toastTimer;
+    function showToast(msg) {
+      const t = document.getElementById('studentToast');
+      if (t) {
+        t.textContent = msg;
+        t.classList.add('settings-toast--show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(()=>t.classList.remove('settings-toast--show'), 2800);
+      }
+    }
+
+    function showConfirm(t,m,cb){var o=document.getElementById('confirmOverlay');o.querySelector('.confirm-title').textContent=t;o.querySelector('.confirm-message').textContent=m;o.classList.add('active');o.querySelector('.confirm-btn--cancel').onclick=function(){o.classList.remove('active');};o.querySelector('.confirm-btn--confirm').onclick=function(){o.classList.remove('active');cb();};}
+
+  </script>
+  <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><div class="confirm-icon confirm-icon--warning"><iconify-icon icon="mdi:alert-outline"></iconify-icon></div><div class="confirm-title"></div><div class="confirm-message"></div><div class="confirm-actions"><button class="confirm-btn confirm-btn--cancel">Cancel</button><button class="confirm-btn confirm-btn--confirm">Confirm</button></div></div></div>
+  <div class="settings-toast" id="studentToast"></div>
+<script>
+function toggleMobileSidebar(){var s=document.querySelector('.sidebar'),b=document.getElementById('sidebarBackdrop');if(s.classList.contains('sidebar--mobile-open')){closeMobileSidebar();}else{s.classList.add('sidebar--mobile-open');b.classList.add('active');document.body.style.overflow='hidden';}}
+function closeMobileSidebar(){var s=document.querySelector('.sidebar');var b=document.getElementById('sidebarBackdrop');s.classList.remove('sidebar--mobile-open');b.classList.remove('active');document.body.style.overflow='';}
+window.addEventListener('resize',function(){if(window.innerWidth>700)closeMobileSidebar();});
+</script>
+<script src="student-header-sync.js"></script>
+<script src="assets/global-search.js"></script>
+</body>
+</html>
+
+
+
+
+

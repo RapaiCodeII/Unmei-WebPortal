@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unmei – Portal Settings</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="adminportal.css" />
+  <script src="assets/iconify-icon.min.js"></script>
+<script src="assets/unmei-icons.js"></script>
+</head>
+<body>
+  <script src="session-guard.js"></script>
+
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="brand-logo">
+        <img src="assets/logo.png" alt="UNMEI" style="width:40px;height:40px;object-fit:contain;">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UNMEI</span>
+        <span class="brand-portal">ADMIN PORTAL</span>
+      </div>
+    </div>
+    <nav class="sidebar__nav">
+      <p class="nav-section-label">OVERVIEW</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-dashboard.html" class="nav-link">
+          <iconify-icon icon="mdi:view-dashboard"></iconify-icon>
+          Dashboard</a></li>
+        <li class="nav-item"><a href="admin-students.html" class="nav-link">
+          <iconify-icon icon="mdi:account-outline"></iconify-icon>
+          Students<span class="nav-badge" id="studentBadge">0</span></a></li>
+        <li class="nav-item"><a href="admin-enrollments.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+          Recent Enrollments</a></li>
+        <li class="nav-item"><a href="admin-payments.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+          Payments</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">COURSES</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-courses.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+          Course List</a></li>
+        <li class="nav-item"><a href="admin-build-course.html" class="nav-link">
+          <iconify-icon icon="mdi:plus-circle-outline"></iconify-icon>
+          Build New Course</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">QUICK ACTIONS</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-add-student.html" class="nav-link">
+          <iconify-icon icon="mdi:account-plus-outline"></iconify-icon>
+          Add Student</a></li>
+        <li class="nav-item"><a href="admin-new-enrollment.html" class="nav-link">
+          <iconify-icon icon="mdi:plus-circle-outline"></iconify-icon>
+          New Enrollment</a></li>
+        <li class="nav-item"><a href="admin-post-notice.html" class="nav-link">
+          <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+          Post Notice</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">SYSTEM</p>
+      <ul class="nav-list">
+        <li class="nav-item nav-item--active"><a href="admin-portal-settings.html" class="nav-link">
+          <iconify-icon icon="mdi:cog-outline"></iconify-icon>
+          Portal Settings</a></li>
+        <li class="nav-item"><a href="javascript:void(0)" onclick="if(window.__adminSignOut){window.__adminSignOut();}else{handleSignOut();}" class="nav-link">
+          <iconify-icon icon="mdi:logout"></iconify-icon>
+          Sign Out</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar__user">
+      <div class="user-avatar user-avatar--dark">AD</div>
+      <div class="user-meta">
+        <span class="user-name">Admin</span>
+        <span class="user-role">Administrator</span>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <button class="sidebar-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
+        <div class="topbar__left">
+        <h2 class="topbar__title">Portal Settings</h2>
+        <nav class="breadcrumb">
+          <a href="admin-dashboard.html" class="breadcrumb__link">Home</a>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current">Portal Settings</span>
+        </nav>
+      </div>
+      <div class="topbar__right">
+        <button class="icon-btn">
+          <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+        </button>
+        <button class="icon-btn">
+          <iconify-icon icon="mdi:email-outline"></iconify-icon>
+        </button>
+        <div class="topbar__user">
+          <div class="user-avatar user-avatar--red">AD</div>
+          <div class="user-meta">
+            <span class="user-name">Admin</span>
+            <span class="user-role">Administrator</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--green">
+            <iconify-icon icon="mdi:check"></iconify-icon>
+          </div>
+          <div class="stat-card__body">
+            <span class="stat-card__label">ACTIVE COURSES</span>
+            <span class="stat-card__value" id="statSections">--</span>
+            <span class="stat-card__trend stat-card__trend--up">Active</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--yellow">
+            <iconify-icon icon="mdi:alert-circle-outline"></iconify-icon>
+          </div>
+          <div class="stat-card__body">
+            <span class="stat-card__label">PENDING APPROVALS</span>
+            <span class="stat-card__value" id="statPending">--</span>
+            <span class="stat-card__trend stat-card__trend--down">Need review</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--blue">
+            <iconify-icon icon="mdi:share-variant-outline"></iconify-icon>
+          </div>
+          <div class="stat-card__body">
+            <span class="stat-card__label">TOTAL STUDENTS</span>
+            <span class="stat-card__value" id="statStudents">--</span>
+            <span class="stat-card__trend stat-card__trend--up">Enrolled</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel__header">
+            <div class="panel__title">
+              <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+              Admissions Workflow
+            </div>
+          </div>
+          <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;font-size:0.82rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Initial review</p><p style="font-size:0.74rem;color:var(--gray-400);">Assess requirements within 48h</p></div>
+              <span class="enroll-badge enroll-badge--active">On</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Interview slot</p><p style="font-size:0.74rem;color:var(--gray-400);">Auto email calendar invite</p></div>
+              <span class="enroll-badge enroll-badge--active">On</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Compliance upload</p><p style="font-size:0.74rem;color:var(--gray-400);">Requires guardian consent</p></div>
+              <span class="enroll-badge enroll-badge--pending">Off</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__header">
+            <div class="panel__title">
+              <iconify-icon icon="mdi:contrast"></iconify-icon>
+              Appearance
+            </div>
+          </div>
+          <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;font-size:0.82rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Theme mode</p><p style="font-size:0.74rem;color:var(--gray-400);">Admin portal is fixed to light mode for consistency</p></div>
+              <span class="enroll-badge enroll-badge--active">Light only</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Active theme</p><p style="font-size:0.74rem;color:var(--gray-400);">Applied globally to all admin pages including login</p></div>
+              <span class="enroll-badge enroll-badge--active">Light</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel__header">
+            <div class="panel__title">
+              <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+              Notification Matrix
+            </div>
+          </div>
+          <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;font-size:0.82rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Finance alerts</p><p style="font-size:0.74rem;color:var(--gray-400);">Email + SMS</p></div>
+              <span class="enroll-badge enroll-badge--active">Synced</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Academic notices</p><p style="font-size:0.74rem;color:var(--gray-400);">Email + Portal banner</p></div>
+              <span class="enroll-badge enroll-badge--pending">Draft</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Emergency broadcast</p><p style="font-size:0.74rem;color:var(--gray-400);">SMS + Voice call tree</p></div>
+              <span class="enroll-badge enroll-badge--inactive">Test Soon</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__header">
+            <div class="panel__title">
+              <iconify-icon icon="mdi:shield-check-outline"></iconify-icon>
+              Role Permissions
+            </div>
+          </div>
+          <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;font-size:0.82rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Registrar</p><p style="font-size:0.74rem;color:var(--gray-400);">Manage enrollment + billing</p></div>
+              <span class="enroll-badge enroll-badge--active">Full</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Sensei</p><p style="font-size:0.74rem;color:var(--gray-400);">Grade + contact students</p></div>
+              <span class="enroll-badge enroll-badge--pending">Limited</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Finance</p><p style="font-size:0.74rem;color:var(--gray-400);">Payments + refunds only</p></div>
+              <span class="enroll-badge enroll-badge--pending">Review</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel__header">
+            <div class="panel__title">
+              <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+              Payment Verification
+            </div>
+          </div>
+          <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;font-size:0.82rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Receipt upload</p><p style="font-size:0.74rem;color:var(--gray-400);">Students attach payment proof (JPG, PNG, PDF)</p></div>
+              <span class="enroll-badge enroll-badge--active">Enabled</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Admin approval</p><p style="font-size:0.74rem;color:var(--gray-400);">Verify receipt image &amp; approve/reject</p></div>
+              <span class="enroll-badge enroll-badge--active">Required</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Supported formats</p><p style="font-size:0.74rem;color:var(--gray-400);">JPG, JPEG, PNG, PDF (max 5MB)</p></div>
+              <span class="enroll-badge enroll-badge--pending">Configured</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Storage path</p><p style="font-size:0.74rem;color:var(--gray-400);">Firebase Storage: payment_receipts/&lt;uid&gt;/</p></div>
+              <span class="enroll-badge enroll-badge--active">Live</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__header">
+            <div class="panel__title">
+              <iconify-icon icon="mdi:share-variant-outline"></iconify-icon>
+              Integrations &amp; Storage
+            </div>
+          </div>
+          <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;font-size:0.82rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Google Workspace</p><p style="font-size:0.74rem;color:var(--gray-400);">Calendars + shared drive</p></div>
+              <span class="enroll-badge enroll-badge--active">Connected</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Firebase Storage</p><p style="font-size:0.74rem;color:var(--gray-400);">Receipt image hosting</p></div>
+              <span class="enroll-badge enroll-badge--active">Active</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Firebase Realtime DB</p><p style="font-size:0.74rem;color:var(--gray-400);">Payment records &amp; approvals</p></div>
+              <span class="enroll-badge enroll-badge--active">Live</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><p style="font-weight:600;color:var(--gray-700);">Analytics board</p><p style="font-size:0.74rem;color:var(--gray-400);">Payment analytics planned</p></div>
+              <span class="enroll-badge enroll-badge--inactive">Soon</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Sign Out Panel -->
+      <div class="panel" style="border: 1px solid var(--red-light);">
+        <div class="panel__header">
+          <div class="panel__title">
+            <iconify-icon icon="mdi:logout"></iconify-icon>
+            Sign Out
+          </div>
+        </div>
+        <div style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:0.82rem;">
+          <div><p style="font-weight:600;color:var(--gray-700);">End admin session</p><p style="font-size:0.74rem;color:var(--gray-400);">Sign out and return to admin login page</p></div>
+          <button class="s-edit-btn" style="color: var(--red); border-color: var(--red); padding: 8px 18px; font-size: 0.78rem;" onclick="logout()">Sign Out</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="adm-toast" id="admToast"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script>
+  const database = firebase.database();
+
+  function loadPortalConfig() {
+    database.ref('portal_config').once('value').then((snapshot) => {
+      const config = snapshot.val();
+      if (!config) return;
+
+      if (config.branding) {
+        const b = config.branding;
+        const colorEl = document.querySelector('.brand-color-val');
+        if (colorEl) colorEl.textContent = b.primaryColor || '#E31B23';
+        const titleEl = document.querySelector('.brand-title-val');
+        if (titleEl) titleEl.textContent = b.portalTitle || 'UNMEI Nihongo Center';
+        const taglineEl = document.querySelector('.brand-tagline-val');
+        if (taglineEl) taglineEl.textContent = b.tagline || 'Nihongo for Global Careers';
+      }
+
+      if (config.admissions) {
+        const a = config.admissions;
+        const reviewEl = document.querySelector('.admissions-review-status');
+        if (reviewEl) {
+          reviewEl.textContent = a.initialReviewEnabled ? 'On' : 'Off';
+          reviewEl.className = 'enroll-badge ' + (a.initialReviewEnabled ? 'enroll-badge--active' : 'enroll-badge--inactive');
+        }
+      }
+
+      if (config.notifications) {
+        const n = config.notifications;
+        if (n.financeAlerts) {
+          const finEl = document.querySelector('.notif-finance-status');
+          if (finEl) finEl.textContent = n.financeAlerts.synced ? 'Synced' : 'Pending';
+        }
+        if (n.academicNotices) {
+          const acadEl = document.querySelector('.notif-academic-status');
+          if (acadEl) acadEl.textContent = n.academicNotices.status || 'Draft';
+        }
+      }
+
+      if (config.billing) {
+        const bl = config.billing;
+        const cycleEl = document.querySelector('.billing-cycle-val');
+        if (cycleEl) cycleEl.textContent = (bl.cycle || 'quarterly').charAt(0).toUpperCase() + (bl.cycle || 'quarterly').slice(1);
+        const lateFeeEl = document.querySelector('.billing-latefee-val');
+        if (lateFeeEl) lateFeeEl.textContent = (bl.lateFeePercent || 2) + '% after ' + (bl.lateFeeGraceDays || 7) + ' days';
+        const poolEl = document.querySelector('.billing-pool-val');
+        if (poolEl) poolEl.textContent = '₱' + (bl.scholarshipPoolRemaining || 0).toLocaleString();
+      }
+
+      if (config.integrations) {
+        const i = config.integrations;
+        if (i.googleWorkspace) {
+          const gwEl = document.querySelector('.integ-gw-status');
+          if (gwEl) {
+            gwEl.textContent = i.googleWorkspace.enabled ? 'Connected' : 'Disconnected';
+            gwEl.className = 'enroll-badge ' + (i.googleWorkspace.enabled ? 'enroll-badge--active' : 'enroll-badge--inactive');
+          }
+        }
+        if (i.paymentsApi) {
+          const paEl = document.querySelector('.integ-pa-status');
+          if (paEl) {
+            paEl.textContent = i.paymentsApi.enabled ? (i.paymentsApi.mode === 'sandbox' ? 'Sandbox' : 'Live') : 'Disabled';
+          }
+        }
+      }
+    });
+
+    database.ref('students').once('value').then((snap) => {
+      const count = snap.exists() ? Object.keys(snap.val()).length : 0;
+      const statEl = document.querySelector('.stat-students');
+      if (statEl) statEl.textContent = count;
+      var badge = document.getElementById('studentBadge');
+      if (badge) badge.textContent = count;
+    });
+
+    database.ref('announcements').once('value').then((snap) => {
+      const count = snap.exists() ? Object.keys(snap.val()).length : 0;
+      const statEl = document.querySelector('.stat-announcements');
+      if (statEl) statEl.textContent = count;
+    });
+
+    database.ref('courses').once('value').then((snap) => {
+      const count = snap.exists() ? Object.keys(snap.val()).length : 0;
+      const statEl = document.getElementById('statSections');
+      if (statEl) statEl.textContent = count;
+    });
+  }
+
+  function logout() {
+    showConfirm('Sign Out','Are you sure you want to sign out?',function(){
+      showToast('Signing out');
+      setTimeout(function(){sessionStorage.clear();window.location.href='admin-login.html';},1200);
+    });
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('admToast');
+    t.textContent = msg;
+    t.classList.add('adm-toast--show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('adm-toast--show'), 2800);
+  }
+
+  function showConfirm(t,m,cb){var o=document.getElementById('confirmOverlay');o.querySelector('.confirm-title').textContent=t;o.querySelector('.confirm-message').textContent=m;o.classList.add('active');o.querySelector('.confirm-btn--cancel').onclick=function(){o.classList.remove('active');};o.querySelector('.confirm-btn--confirm').onclick=function(){o.classList.remove('active');cb();};}
+
+  loadPortalConfig();
+  // BUG-09 FIX: Admin account management functions
+  var adminEmail = sessionStorage.getItem('adminEmail') || '';
+  var adminName = sessionStorage.getItem('adminDisplayName') || 'Administrator';
+  var adminEmailEl = document.getElementById('adminEmailDisplay');
+  var adminNameEl = document.getElementById('adminNameDisplay');
+  if (adminEmailEl) adminEmailEl.textContent = adminEmail;
+  if (adminNameEl) adminNameEl.textContent = adminName;
+
+  // Load system config from Firebase
+  database.ref('config').once('value').then(function(snap) {
+    var config = snap.val() || {};
+    var enrollToggle = document.getElementById('enrollmentToggle');
+    var maintToggle = document.getElementById('maintenanceToggle');
+    if (enrollToggle && config.enrollmentOpen !== undefined) enrollToggle.checked = config.enrollmentOpen;
+    if (maintToggle && config.maintenanceMode !== undefined) maintToggle.checked = config.maintenanceMode;
+  });
+
+  function openInputModal(title, message, type, initial, onOk) {
+    var overlay = document.getElementById('inputOverlay');
+    var field = document.getElementById('inputModalField');
+    document.getElementById('inputModalTitle').textContent = title;
+    document.getElementById('inputModalMessage').textContent = message || '';
+    field.value = initial || '';
+    field.type = type || 'text';
+    overlay.querySelector('.confirm-btn--cancel').onclick = closeInputModal;
+    document.getElementById('inputModalOkBtn').onclick = function() {
+      var value = field.value;
+      if (!value) { showToast('Value is required'); return; }
+      closeInputModal();
+      onOk(value);
+    };
+    overlay.classList.add('active');
+    setTimeout(function() { field.focus(); }, 50);
+  }
+
+  function closeInputModal() {
+    document.getElementById('inputOverlay').classList.remove('active');
+  }
+
+  function editAdminName() {
+    openInputModal('Edit Display Name', 'Enter the administrator display name.', 'text', adminName, function(newName) {
+      newName = newName.trim();
+      if (!newName) return;
+      var adminId = sessionStorage.getItem('adminId');
+      if (adminId) {
+        database.ref('admins/' + adminId).update({ name: newName });
+        sessionStorage.setItem('adminDisplayName', newName);
+        document.getElementById('adminNameDisplay').textContent = newName;
+        showToast('Display name updated');
+      }
+    });
+  }
+
+  function changeAdminPassword() {
+    if (typeof firebase !== 'undefined' && firebase.auth().currentUser) {
+      openInputModal('Change Password', 'Minimum 8 characters with uppercase, lowercase, and a number.', 'password', '', function(newPass) {
+        var isStrong = newPass && newPass.length >= 8 && /[A-Z]/.test(newPass) && /[a-z]/.test(newPass) && /[0-9]/.test(newPass);
+        if (!isStrong) { showToast('Password must be 8+ chars with uppercase, lowercase, and number'); return; }
+        firebase.auth().currentUser.updatePassword(newPass).then(function() {
+          showToast('Password updated successfully');
+        }).catch(function(err) {
+          if (err.code === 'auth/requires-recent-login') {
+            showToast('Please log out and log back in before changing password');
+          } else {
+            showToast('Failed to update password: ' + err.message);
+          }
+        });
+      });
+    } else {
+      showToast('Please log in with Firebase Auth to change password');
+    }
+  }
+
+  function toggleEnrollment(isOpen) {
+    database.ref('config').update({ enrollmentOpen: isOpen });
+    showToast('Enrollment ' + (isOpen ? 'opened' : 'closed'));
+  }
+
+  function toggleMaintenance(isOn) {
+    database.ref('config').update({ maintenanceMode: isOn });
+    showToast('Maintenance mode ' + (isOn ? 'enabled' : 'disabled'));
+  }
+
+  // Load dynamic stats for portal settings page
+  database.ref('courses').once('value').then(function(snap) {
+    var count = snap.exists() ? snap.numChildren() : 0;
+    var el = document.getElementById('statSections');
+    if (el) el.textContent = count;
+  });
+
+  database.ref('payments').once('value').then(function(snap) {
+    var pending = 0;
+    if (snap.exists()) {
+      snap.forEach(function(child) {
+        var p = child.val();
+        if (p.adminApprovalStatus === 'pending' || p.status === 'pending') pending++;
+      });
+    }
+    var el = document.getElementById('statPending');
+    if (el) el.textContent = pending;
+  });
+
+  database.ref('students').once('value').then(function(snap) {
+    var count = snap.exists() ? snap.numChildren() : 0;
+    var el = document.getElementById('statStudents');
+    if (el) el.textContent = count;
+    var badge = document.getElementById('studentBadge');
+    if (badge) badge.textContent = count;
+  });
+  </script>
+  <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><div class="confirm-icon confirm-icon--warning"><iconify-icon icon="mdi:alert-outline"></iconify-icon></div><div class="confirm-title"></div><div class="confirm-message"></div><div class="confirm-actions"><button class="confirm-btn confirm-btn--cancel">Cancel</button><button class="confirm-btn confirm-btn--confirm">Confirm</button></div></div></div>
+  <div class="confirm-overlay" id="inputOverlay"><div class="confirm-box"><div class="confirm-title" id="inputModalTitle">Edit</div><div class="confirm-message" id="inputModalMessage"></div><input type="text" class="mf-input" id="inputModalField" style="width:100%;margin-top:10px;padding:10px 12px;border:1px solid var(--gray-300);border-radius:8px;font-size:0.9rem;" autocomplete="off"/><div class="confirm-actions"><button class="confirm-btn confirm-btn--cancel" onclick="closeInputModal()">Cancel</button><button class="confirm-btn confirm-btn--confirm" id="inputModalOkBtn">Save</button></div></div></div>
+<script>
+function toggleMobileSidebar(){var s=document.querySelector('.sidebar'),b=document.getElementById('sidebarBackdrop');if(s.classList.contains('sidebar--mobile-open')){closeMobileSidebar();}else{s.classList.add('sidebar--mobile-open');b.classList.add('active');document.body.style.overflow='hidden';}}
+function closeMobileSidebar(){var s=document.querySelector('.sidebar');var b=document.getElementById('sidebarBackdrop');s.classList.remove('sidebar--mobile-open');b.classList.remove('active');document.body.style.overflow='';}
+window.addEventListener('resize',function(){if(window.innerWidth>700)closeMobileSidebar();});
+</script>
+<script src="admin-header-sync.js"></script>
+<script src="assets/global-search.js"></script>
+</body>
+</html>
+
+

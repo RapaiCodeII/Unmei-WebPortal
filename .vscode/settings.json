@@ -1,0 +1,12 @@
+{
+  "css.lint.unknownAtRules": "ignore",
+  "css.lint.vendorPrefix": "ignore",
+  "css.lint.propertyIgnoredDueToDisplay": "ignore",
+  "less.lint.vendorPrefix": "ignore",
+  "less.lint.propertyIgnoredDueToDisplay": "ignore",
+  "scss.lint.vendorPrefix": "ignore",
+  "scss.lint.propertyIgnoredDueToDisplay": "ignore",
+  "html.format.enable": false,
+  "liveServer.settings.rootPath": "./",
+  "liveServer.settings.CustomBrowser": "chrome"
+}

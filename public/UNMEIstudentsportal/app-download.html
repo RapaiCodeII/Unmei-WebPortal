@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unmei Nihongo Center - App Download</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="studentportal.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="assets/iconify-icon.min.js"></script>
+<script src="assets/unmei-icons.js"></script>
+</head>
+<body>
+  <script src="session-guard.js"></script>
+
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="brand-logo">
+        <img src="assets/logo.png" alt="UNMEI" style="width:40px;height:40px;object-fit:contain;">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UNMEI</span>
+        <span class="brand-portal">STUDENT PORTAL</span>
+      </div>
+    </div>
+    <nav class="sidebar__nav">
+      <p class="nav-section-label">OVERVIEW</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="dashboard.html" class="nav-link">
+          <iconify-icon icon="mdi:view-dashboard"></iconify-icon>
+          Dashboard</a></li>
+        <li class="nav-item"><a href="profile.html" class="nav-link">
+          <iconify-icon icon="mdi:account-outline"></iconify-icon>
+          My Profile</a></li>
+        <li class="nav-item"><a href="courses.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+          My Courses</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">RECORDS</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="payments.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+          Payments</a></li>
+        <li class="nav-item nav-item--active"><a href="app-download.html" class="nav-link">
+          <iconify-icon icon="mdi:download-outline"></iconify-icon>
+          App Download</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">STUDENT LIFE</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="schedules.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+          Schedules</a></li>
+        <li class="nav-item"><a href="announcements.html" class="nav-link">
+          <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+          Announcements</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">PORTAL SETTINGS</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="settings.html" class="nav-link">
+          <iconify-icon icon="mdi:cog-outline"></iconify-icon>
+          Settings</a></li>
+        <li class="nav-item"><a href="javascript:void(0)" onclick="if(window.__studentSignOut){window.__studentSignOut();}else{location.href='settings.html';}" class="nav-link">
+          <iconify-icon icon="mdi:logout"></iconify-icon>
+          Sign Out</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar__user">
+      <div id="sidebarAvatarText" class="user-avatar user-avatar--dark">--</div>
+      <img id="sidebarAvatarImg" class="user-avatar user-avatar--img" style="display:none;width:36px;height:36px;border-radius:50%;object-fit:cover;" alt="Avatar">
+      <div class="user-meta">
+        <span class="user-name" id="sidebarUserName">Student</span>
+        <span class="user-role">Student</span>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <button class="sidebar-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
+        <div class="topbar__left">
+        <h2 class="topbar__title">App Download</h2>
+        <nav class="breadcrumb">
+          <a href="dashboard.html" class="breadcrumb__link">Home</a>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current">App Download</span>
+        </nav>
+      </div>
+      <div class="topbar__center"></div>
+      <div class="topbar__right">
+        <div style="position: relative;">
+          <button class="icon-btn" id="notifBtn" onclick="toggleDropdown('notifDropdown')"><iconify-icon icon="mdi:bell-outline"></iconify-icon><span class="dropdown-badge" id="notifBadge" style="display: none;">0</span></button><div class="header-dropdown" id="notifDropdown"><div class="header-dropdown__header"><span class="header-dropdown__title">Notifications</span><span class="header-dropdown__link" onclick="markAllRead()">Mark all read</span></div><div class="header-dropdown__list" id="notifList"><div class="header-dropdown__empty" id="notifEmpty"><iconify-icon icon="mdi:bell-outline"></iconify-icon><p>No notifications yet</p></div></div></div>
+        </div>
+
+        <div style="position: relative;">
+          <button class="icon-btn" id="msgBtn" onclick="toggleDropdown('msgDropdown')">
+            <iconify-icon icon="mdi:email-outline"></iconify-icon>
+            <span class="dropdown-badge" style="display: none;">0</span>
+          </button>
+          <div class="header-dropdown" id="msgDropdown">
+            <div class="header-dropdown__header">
+              <span class="header-dropdown__title">Messages</span>
+              <span class="header-dropdown__link" onclick="viewAllMessages()">View all</span>
+            </div>
+            <div class="header-dropdown__list" id="msgDropdownList">
+              <div class="dropdown-item">
+                <div class="dropdown-item__body">
+                  <div class="dropdown-item__title">No messages</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="topbar__user">
+          <div id="headerAvatarText" class="user-avatar user-avatar--red">--</div>
+          <img id="headerAvatarImg" class="user-avatar user-avatar--img" style="display:none;width:36px;height:36px;border-radius:50%;object-fit:cover;" alt="Avatar">
+          <div class="user-meta">
+            <span class="user-name" id="headerUserName">Student</span>
+            <span class="user-role">Student</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="banner" style="background:linear-gradient(135deg,#c0392b 0%,#a93226 100%);">
+        <div class="banner__text">
+          <p class="banner__greeting">UNMEI Learning App</p>
+          <h1 class="banner__name">Download for Android</h1>
+          <p class="banner__sub">Access your Japanese language courses anytime, anywhere. Practice kanji, review vocabulary, and track your progress from your mobile device.</p>
+        </div>
+        <div class="banner__deco banner__deco--1"></div>
+        <div class="banner__deco banner__deco--2"></div>
+      </section>
+
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel__header">
+            <div class="panel__title">
+              <iconify-icon icon="mdi:download-outline"></iconify-icon>
+              About the App
+            </div>
+          </div>
+          <div class="schedule-list">
+            <div class="schedule-item">
+              <div class="schedule-info" style="flex:1;">
+                <p class="schedule-title" style="font-size:0.72rem;color:var(--gray-400);">App Name</p>
+                <p class="schedule-time" style="font-weight:600;color:var(--gray-900);">UNMEI Learning</p>
+              </div>
+            </div>
+            <div class="schedule-item">
+              <div class="schedule-info" style="flex:1;">
+                <p class="schedule-title" style="font-size:0.72rem;color:var(--gray-400);">Version</p>
+                <p class="schedule-time" style="font-weight:600;color:var(--gray-900);">1.2.0</p>
+              </div>
+            </div>
+            <div class="schedule-item">
+              <div class="schedule-info" style="flex:1;">
+                <p class="schedule-title" style="font-size:0.72rem;color:var(--gray-400);">File Size</p>
+                <p class="schedule-time" style="font-weight:600;color:var(--gray-900);">45.6 MB</p>
+              </div>
+            </div>
+            <div class="schedule-item">
+              <div class="schedule-info" style="flex:1;">
+                <p class="schedule-title" style="font-size:0.72rem;color:var(--gray-400);">Platform</p>
+                <p class="schedule-time" style="font-weight:600;color:var(--gray-900);">Android (APK)</p>
+              </div>
+            </div>
+            <div class="schedule-item">
+              <div class="schedule-info" style="flex:1;">
+                <p class="schedule-title" style="font-size:0.72rem;color:var(--gray-400);">Requires</p>
+                <p class="schedule-time" style="font-weight:600;color:var(--gray-900);">Android 8.0+</p>
+              </div>
+            </div>
+            <div class="schedule-item">
+              <div class="schedule-info" style="flex:1;">
+                <p class="schedule-title" style="font-size:0.72rem;color:var(--gray-400);">Hardware Required</p>
+                <p class="schedule-time" style="font-weight:600;color:var(--gray-900);"><iconify-icon icon="mdi:fountain-pen-tip" style="color:var(--red);"></iconify-icon> Stylus pen required for Kanji stroke practice</p>
+              </div>
+            </div>
+            <div class="schedule-item">
+              <div class="schedule-info" style="flex:1;">
+                <p class="schedule-title" style="font-size:0.72rem;color:var(--gray-400);">Last Updated</p>
+                <p class="schedule-time" style="font-weight:600;color:var(--gray-900);" id="appLastUpdated">--</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__header">
+            <div class="panel__title">
+              <iconify-icon icon="mdi:file-document-outline"></iconify-icon>
+              Installation Guide
+            </div>
+          </div>
+          <div class="announcement-list">
+            <div class="announcement-item">
+              <span class="announcement-dot announcement-dot--red"></span>
+              <div class="announcement-body">
+                <p class="announcement-title">Step 1: Download the APK</p>
+                <p class="announcement-desc">Tap the download button below to save the APK file to your device.</p>
+              </div>
+            </div>
+            <div class="announcement-item">
+              <span class="announcement-dot announcement-dot--blue"></span>
+              <div class="announcement-body">
+                <p class="announcement-title">Step 2: Enable Unknown Sources</p>
+                <p class="announcement-desc">Go to Settings ? Security ? enable "Install from Unknown Sources."</p>
+              </div>
+            </div>
+            <div class="announcement-item">
+              <span class="announcement-dot announcement-dot--green"></span>
+              <div class="announcement-body">
+                <p class="announcement-title">Step 3: Install &amp; Sign In</p>
+                <p class="announcement-desc">Open the APK file and install. Sign in with your student portal credentials.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Payment Lock Warning Banner (Shown if unpaid) -->
+          <div id="paymentLockBanner" style="display:none; margin: 16px 20px 0; padding: 16px; background: #fef2f2; border: 1.5px solid #fecaca; border-radius: var(--radius-md); text-align: left;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+              <div style="width: 32px; height: 32px; background: #fee2e2; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--red); font-size: 1.1rem;"><iconify-icon icon="mdi:lock-outline" style="display:inline;vertical-align:middle;"></iconify-icon></div>
+              <div>
+                <h4 style="font-size: 0.88rem; font-weight: 700; color: #991b1b; margin: 0;">APK Download Locked</h4>
+                <span style="font-size: 0.72rem; color: #b91c1c; font-weight: 600;">Payment Verification Required</span>
+              </div>
+            </div>
+            <p style="font-size: 0.8rem; color: #7f1d1d; line-height: 1.4; margin-bottom: 12px;">Unity mobile app download is reserved for students with verified tuition payments. Please submit your payment slip on the Payments page to unlock access.</p>
+            <a href="payments.html" style="display: inline-block; padding: 8px 16px; background: var(--red); color: white; border-radius: 6px; font-size: 0.78rem; font-weight: 600; text-decoration: none; transition: background 0.2s;">Go to Payments Page <iconify-icon icon="mdi:arrow-right" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-left:4px;"></iconify-icon></a>
+          </div>
+
+          <div style="padding:16px 20px;">
+            <button id="downloadBtn" style="width:100%;padding:12px;background:var(--red);color:#fff;border:none;border-radius:var(--radius-md);font-family:var(--font-body);font-size:0.88rem;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(192,57,43,0.28);transition:all 0.2s;">
+              Download APK v1.2.0
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--red">
+            <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+          </div>
+          <div class="stat-card__body">
+            <span class="stat-card__label">FEATURE</span>
+            <span class="stat-card__value" style="font-size:0.9rem;">Course Access</span>
+            <span class="stat-card__meta">View lessons &amp; materials on mobile</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--blue">
+            <iconify-icon icon="mdi:chart-line"></iconify-icon>
+          </div>
+          <div class="stat-card__body">
+            <span class="stat-card__label">FEATURE</span>
+            <span class="stat-card__value" style="font-size:0.9rem;">Progress Tracking</span>
+            <span class="stat-card__meta">Real-time stats &amp; insights</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--green">
+            <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+          </div>
+          <div class="stat-card__body">
+            <span class="stat-card__label">FEATURE</span>
+            <span class="stat-card__value" style="font-size:0.9rem;">Notifications</span>
+            <span class="stat-card__meta">Class &amp; payment alerts</span>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    function toggleDropdown(id) {
+      const dropdown = document.getElementById(id);
+      const isActive = dropdown.classList.contains('active');
+      document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('active'));
+      document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--active'));
+      if (!isActive) {
+        dropdown.classList.add('active');
+        document.getElementById(id === 'notifDropdown' ? 'notifBtn' : 'msgBtn').classList.add('icon-btn--active');
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.icon-btn') && !e.target.closest('.header-dropdown')) {
+        document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('active'));
+        document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--active'));
+      }
+    });
+
+    function markAllRead() {
+      document.querySelectorAll('.dropdown-item--unread').forEach(item => item.classList.remove('dropdown-item--unread'));
+      document.querySelector('.dropdown-badge').style.display = 'none';
+    }
+
+    function viewNotif(el) {
+      el.classList.remove('dropdown-item--unread');
+      const unreadCount = document.querySelectorAll('.dropdown-item--unread').length;
+      const badge = document.querySelector('.dropdown-badge');
+      badge.style.display = unreadCount === 0 ? 'none' : 'block';
+      if (unreadCount > 0) badge.textContent = unreadCount;
+    }
+
+    function viewAllMessages() { showAlert('Messages', 'No messages yet', 'info'); }
+    function openMessage(user) { showAlert('Messages', 'No messages yet', 'info'); }
+
+    function getInitials(name) {
+      return (name || 'Student').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'ST';
+    }
+
+    function setUserIdentity(profile) {
+      const fullName = (profile && profile.fullName) || 'Student';
+      document.getElementById('sidebarUserName').textContent = fullName;
+      document.getElementById('headerUserName').textContent = fullName;
+      const initials = getInitials(fullName);
+      document.getElementById('sidebarAvatarText').textContent = initials;
+      document.getElementById('headerAvatarText').textContent = initials;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const database = firebase.database();
+      const studentUid = localStorage.getItem('studentUid');
+      if (!studentUid) return;
+
+      setUserIdentity({
+        fullName: localStorage.getItem('studentEmail') ? localStorage.getItem('studentEmail').split('@')[0] : 'Student'
+      });
+
+      database.ref('students/' + studentUid).once('value').then((snapshot) => {
+        const studentData = snapshot.val() || {};
+        const profile = studentData.profile || {};
+        setUserIdentity(profile);
+        if (profile.avatarUrl) {
+          applyAvatar(profile.avatarUrl);
+        }
+      }).catch(() => {
+        setUserIdentity({ fullName: 'Student' });
+      });
+
+      let hasApprovedPayment = false;
+      const demoUids = ['student_001', 'student_002', 'student_003'];
+
+      if (demoUids.includes(studentUid)) {
+        hasApprovedPayment = true;
+        updateDownloadAccess(true);
+      } else {
+        database.ref('payments').orderByChild('studentUid').equalTo(studentUid).once('value').then((snapshot) => {
+          let approved = false;
+          if (snapshot.exists()) {
+            snapshot.forEach((child) => {
+              const p = child.val() || {};
+              if (p.status === 'approved' || p.validationStatus === 'approved' || p.isPaid === true) {
+                approved = true;
+              }
+            });
+          }
+          hasApprovedPayment = approved;
+          updateDownloadAccess(approved);
+        }).catch(() => {
+          updateDownloadAccess(false);
+        });
+      }
+
+      const downloadBtn = document.getElementById('downloadBtn');
+      if (downloadBtn) {
+        downloadBtn.addEventListener('click', function() {
+          if (!hasApprovedPayment) {
+            showAlert('APK Download Locked', 'Payment verification required. Please submit your tuition payment on the Payments page to unlock your download.', 'warning');
+            return;
+          }
+          showToast('Starting UNMEI Learning APK Download...');
+          // Trigger file download
+          setTimeout(function() {
+            var a = document.createElement('a');
+            a.href = 'assets/unmei-learning-v1.2.0.apk';
+            a.download = 'UNMEI_Learning_v1.2.0.apk';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+          }, 600);
+        });
+      }
+
+      database.ref('app_download/android').once('value').then((snapshot) => {
+        const androidData = snapshot.val();
+        if (androidData && androidData.enabled) {
+          document.getElementById('appLastUpdated').textContent = androidData.updatedAt ? new Date(androidData.updatedAt).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
+        } else {
+          document.getElementById('appLastUpdated').textContent = 'N/A';
+        }
+      }).catch(() => {
+        document.getElementById('appLastUpdated').textContent = 'N/A';
+      });
+    });
+
+    function updateDownloadAccess(isUnlocked) {
+      const banner = document.getElementById('paymentLockBanner');
+      const btn = document.getElementById('downloadBtn');
+      if (!btn) return;
+
+      if (isUnlocked) {
+        if (banner) banner.style.display = 'none';
+        btn.style.background = 'var(--red)';
+        btn.style.boxShadow = '0 3px 12px rgba(192,57,43,0.28)';
+        btn.style.cursor = 'pointer';
+        btn.innerHTML = '<span>Download APK v1.2.0 (Unlocked)</span>';
+      } else {
+        if (banner) banner.style.display = 'block';
+        btn.style.background = '#9ca3af';
+        btn.style.boxShadow = 'none';
+        btn.style.cursor = 'not-allowed';
+        btn.innerHTML = '<span><iconify-icon icon="mdi:lock-outline" style="display:inline;vertical-align:middle;"></iconify-icon> Download Locked (Payment Required)</span>';
+      }
+    }
+
+    function applyAvatar(avatarData) {
+      document.getElementById('headerAvatarImg').src = avatarData;
+      document.getElementById('headerAvatarImg').style.display = 'block';
+      document.getElementById('headerAvatarText').style.display = 'none';
+      document.getElementById('sidebarAvatarImg').src = avatarData;
+      document.getElementById('sidebarAvatarImg').style.display = 'block';
+      document.getElementById('sidebarAvatarText').style.display = 'none';
+    }
+
+    function showAlert(title, message, type) {
+      const existing = document.querySelector('.custom-alert');
+      if (existing) existing.remove();
+      const alertEl = document.createElement('div');
+      alertEl.className = 'custom-alert custom-alert--' + type;
+      let iconSvg;
+      if (type === 'danger' || type === 'warning') {
+        iconSvg = '<iconify-icon icon="mdi:information-outline"></iconify-icon>';
+      } else if (type === 'success') {
+        iconSvg = '<iconify-icon icon="mdi:check-circle-outline"></iconify-icon>';
+      } else {
+        iconSvg = '<iconify-icon icon="mdi:information-outline"></iconify-icon>';
+      }
+      alertEl.innerHTML = '<div class="custom-alert__icon">' + iconSvg + '</div><div class="custom-alert__body"><strong class="custom-alert__title">' + title + '</strong><p class="custom-alert__message">' + message + '</p></div><button class="custom-alert__close" onclick="this.parentElement.remove()"><iconify-icon icon="mdi:close"></iconify-icon></button>';
+      document.body.appendChild(alertEl);
+      setTimeout(() => alertEl.classList.add('custom-alert--show'), 10);
+      setTimeout(() => { alertEl.classList.remove('custom-alert--show'); setTimeout(() => alertEl.remove(), 300); }, 5000);
+    }
+
+    let toastTimer;
+    function showToast(msg) {
+      const t = document.getElementById('studentToast');
+      if (t) {
+        t.textContent = msg;
+        t.classList.add('settings-toast--show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(()=>t.classList.remove('settings-toast--show'), 2800);
+      }
+    }
+
+    function showConfirm(t,m,cb){var o=document.getElementById('confirmOverlay');o.querySelector('.confirm-title').textContent=t;o.querySelector('.confirm-message').textContent=m;o.classList.add('active');o.querySelector('.confirm-btn--cancel').onclick=function(){o.classList.remove('active');};o.querySelector('.confirm-btn--confirm').onclick=function(){o.classList.remove('active');cb();};}
+
+  </script>
+  <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><div class="confirm-icon confirm-icon--warning"><iconify-icon icon="mdi:alert-outline"></iconify-icon></div><div class="confirm-title"></div><div class="confirm-message"></div><div class="confirm-actions"><button class="confirm-btn confirm-btn--cancel">Cancel</button><button class="confirm-btn confirm-btn--confirm">Confirm</button></div></div></div>
+  <div class="settings-toast" id="studentToast"></div>
+<script>
+function toggleMobileSidebar(){var s=document.querySelector('.sidebar'),b=document.getElementById('sidebarBackdrop');if(s.classList.contains('sidebar--mobile-open')){closeMobileSidebar();}else{s.classList.add('sidebar--mobile-open');b.classList.add('active');document.body.style.overflow='hidden';}}
+function closeMobileSidebar(){var s=document.querySelector('.sidebar');var b=document.getElementById('sidebarBackdrop');s.classList.remove('sidebar--mobile-open');b.classList.remove('active');document.body.style.overflow='';}
+window.addEventListener('resize',function(){if(window.innerWidth>700)closeMobileSidebar();});
+</script>
+<script src="student-header-sync.js"></script>
+<script src="assets/global-search.js"></script>
+</body>
+</html>
+
+
+
+
+

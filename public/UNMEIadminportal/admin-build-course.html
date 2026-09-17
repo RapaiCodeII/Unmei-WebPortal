@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unmei – Build New Course</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="adminportal.css" />
+  <script src="assets/iconify-icon.min.js"></script>
+  <script src="assets/unmei-icons.js"></script>
+</head>
+<body>
+  <script src="session-guard.js"></script>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="brand-logo">
+        <img src="assets/logo.png" alt="UNMEI" style="width:40px;height:40px;object-fit:contain;">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UNMEI</span>
+        <span class="brand-portal">ADMIN PORTAL</span>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <p class="nav-section-label">OVERVIEW</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-dashboard.html" class="nav-link">
+          <iconify-icon icon="mdi:view-dashboard"></iconify-icon>Dashboard</a></li>
+        <li class="nav-item"><a href="admin-students.html" class="nav-link">
+          <iconify-icon icon="mdi:account-outline"></iconify-icon>Students<span class="nav-badge" id="studentBadge">0</span></a></li>
+        <li class="nav-item"><a href="admin-enrollments.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>Recent Enrollments</a></li>
+        <li class="nav-item"><a href="admin-payments.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>Payments</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">COURSES</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-courses.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>Course List</a></li>
+        <li class="nav-item nav-item--active"><a href="admin-build-course.html" class="nav-link">
+          <iconify-icon icon="mdi:plus-circle-outline"></iconify-icon>Build New Course</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">QUICK ACTIONS</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-add-student.html" class="nav-link">
+          <iconify-icon icon="mdi:account-plus-outline"></iconify-icon>Add Student</a></li>
+        <li class="nav-item"><a href="admin-new-enrollment.html" class="nav-link">
+          <iconify-icon icon="mdi:plus-circle-outline"></iconify-icon>New Enrollment</a></li>
+        <li class="nav-item"><a href="admin-post-notice.html" class="nav-link">
+          <iconify-icon icon="mdi:bell-outline"></iconify-icon>Post Notice</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">SYSTEM</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-portal-settings.html" class="nav-link">
+          <iconify-icon icon="mdi:cog-outline"></iconify-icon>Portal Settings</a></li>
+        <li class="nav-item"><a href="javascript:void(0)" onclick="if(window.__adminSignOut){window.__adminSignOut();}else{location.href='admin-portal-settings.html';}" class="nav-link">
+          <iconify-icon icon="mdi:logout"></iconify-icon>Sign Out</a></li>
+      </ul>
+    </nav>
+    <div class="sidebar__user">
+      <div class="user-avatar user-avatar--dark">AD</div>
+      <div class="user-meta"><span class="user-name">Admin</span><span class="user-role">Administrator</span></div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <!-- MAIN -->
+  <div class="main-wrapper">
+    <header class="topbar">
+      <button class="sidebar-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
+      <div class="topbar__left">
+        <h2 class="topbar__title">Build New Course</h2>
+        <nav class="breadcrumb">
+          <a href="admin-dashboard.html" class="breadcrumb__link">Home</a>
+          <span class="breadcrumb__sep">/</span>
+          <a href="admin-courses.html" class="breadcrumb__link">Courses</a>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current">New Course</span>
+        </nav>
+      </div>
+      <div class="topbar__right">
+        <div class="topbar__user">
+          <div class="user-avatar user-avatar--red">AD</div>
+          <div class="user-meta"><span class="user-name">Admin</span><span class="user-role">Administrator</span></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="form-page-wrap">
+        <div class="form-card">
+
+          <div class="form-card__header">
+            <div class="form-card__icon">
+              <iconify-icon icon="mdi:book-plus-outline"></iconify-icon>
+            </div>
+            <div>
+              <h3 class="form-card__title">Course Curriculum Details</h3>
+              <p class="form-card__sub">Register a new Japanese language course offering.</p>
+            </div>
+          </div>
+
+          <div class="form-card__body">
+            <div class="fp-group fp-group--full">
+              <label class="fp-label">Course Key / ID</label>
+              <input type="text" class="fp-input" id="fp_course_key" placeholder="e.g. jlpt_n1, conversational_japanese" />
+            </div>
+
+            <div class="fp-group fp-group--full">
+              <label class="fp-label">Course Title</label>
+              <input type="text" class="fp-input" id="fp_course_name" placeholder="e.g. JLPT N1 (Mastery Level)" />
+            </div>
+
+            <div class="fp-group fp-group--full">
+              <label class="fp-label">Description</label>
+              <textarea class="fp-input" id="fp_course_desc" rows="3" placeholder="Course objectives, target proficiency, and materials covered..."></textarea>
+            </div>
+
+            <div class="fp-row">
+              <div class="fp-group">
+                <label class="fp-label">Program Duration</label>
+                <input type="text" class="fp-input" id="fp_duration" placeholder="e.g. 4 months (120 hours)" />
+              </div>
+              <div class="fp-group">
+                <label class="fp-label">Tuition Fee (PHP)</label>
+                <input type="number" class="fp-input" id="fp_price" placeholder="12000" />
+              </div>
+            </div>
+
+            <div class="fp-row">
+              <div class="fp-group">
+                <label class="fp-label">Primary Assigned Instructor</label>
+                <select class="fp-input" id="fp_instructor"></select>
+              </div>
+              <div class="fp-group">
+                <label class="fp-label">Requires Placement Assessment</label>
+                <select class="fp-input" id="fp_req_assessment">
+                  <option value="false">No (Direct Enrollment)</option>
+                  <option value="true">Yes (Pre-Assessment Required)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-card__footer">
+            <button class="fp-btn fp-btn--ghost" onclick="window.location.href='admin-courses.html'">Cancel</button>
+            <button class="fp-btn fp-btn--primary" onclick="buildCourse()">Publish Course</button>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="adm-toast" id="admToast"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script>
+  const database = firebase.database();
+
+  document.addEventListener('DOMContentLoaded', () => {
+    database.ref('students').once('value').then((snapshot) => {
+      var count = snapshot.exists() ? snapshot.numChildren() : 0;
+      var badge = document.getElementById('studentBadge');
+      if (badge) badge.textContent = count;
+    });
+
+    database.ref('professors').once('value').then(snap => {
+      const select = document.getElementById('fp_instructor');
+      if (!select) return;
+      const insts = snap.val() || {};
+      select.innerHTML = Object.keys(insts).map(k => `
+        <option value="${k}">${insts[k].fullName} — ${insts[k].specialization || 'Sensei'}</option>
+      `).join('');
+    });
+  });
+
+  function buildCourse() {
+    const rawKey = document.getElementById('fp_course_key').value.trim();
+    const name = document.getElementById('fp_course_name').value.trim();
+    const desc = document.getElementById('fp_course_desc').value.trim();
+    const duration = document.getElementById('fp_duration').value.trim() || '3 months';
+    const price = Number(document.getElementById('fp_price').value) || 10000;
+    const instructorId = document.getElementById('fp_instructor').value;
+    const requiresAssessment = document.getElementById('fp_req_assessment').value === 'true';
+
+    if (!name) { showToast('Course title is required'); return; }
+    const key = (rawKey || name.toLowerCase().replace(/[^a-z0-9]+/g, '_').slice(0, 30)).replace(/^_+|_+$/g, '');
+
+    database.ref('courses/' + key).set({
+      name: name,
+      description: desc || 'Official UNMEI Japanese curriculum program.',
+      duration: duration,
+      price: price,
+      instructorId: instructorId,
+      instructorIds: [instructorId],
+      requiresAssessment: requiresAssessment,
+      active: true,
+      createdAt: Date.now()
+    }).then(() => {
+      showToast('Course "' + name + '" successfully created!');
+      setTimeout(() => window.location.href = 'admin-courses.html', 1200);
+    }).catch(() => {
+      showToast('Failed to create course. Please try again.');
+    });
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('admToast');
+    if (t) { t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+  }
+  </script>
+<script src="assets/global-search.js"></script>
+</body>
+</html>

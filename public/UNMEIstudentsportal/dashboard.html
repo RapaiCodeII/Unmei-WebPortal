@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unmei Nihongo Center - Dashboard</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="studentportal.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <!-- D3 chart engine (self-hosted, offline-safe) -->
+  <script src="assets/d3.v7.min.js"></script>
+  <script src="assets/unmei-charts.js"></script>
+  <script src="assets/iconify-icon.min.js"></script>
+<script src="assets/unmei-icons.js"></script>
+</head>
+<body>
+  <script src="session-guard.js"></script>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="brand-logo">
+        <img src="assets/logo.png" alt="UNMEI" style="width:40px;height:40px;object-fit:contain;">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UNMEI</span>
+        <span class="brand-portal">STUDENT PORTAL</span>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <p class="nav-section-label">OVERVIEW</p>
+      <ul class="nav-list">
+        <li class="nav-item nav-item--active"><a href="dashboard.html" class="nav-link">
+          <iconify-icon icon="mdi:view-dashboard"></iconify-icon>
+          Dashboard</a></li>
+        <li class="nav-item"><a href="profile.html" class="nav-link">
+          <iconify-icon icon="mdi:account-outline"></iconify-icon>
+          My Profile</a></li>
+        <li class="nav-item"><a href="courses.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+          My Courses</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">RECORDS</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="payments.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+          Payments</a></li>
+        <li class="nav-item"><a href="app-download.html" class="nav-link">
+          <iconify-icon icon="mdi:download-outline"></iconify-icon>
+          App Download</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">STUDENT LIFE</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="schedules.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+          Schedules</a></li>
+        <li class="nav-item"><a href="announcements.html" class="nav-link">
+          <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+          Announcements</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">PORTAL SETTINGS</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="settings.html" class="nav-link">
+          <iconify-icon icon="mdi:cog-outline"></iconify-icon>
+          Settings</a></li>
+        <li class="nav-item"><a href="javascript:void(0)" onclick="if(window.__studentSignOut){window.__studentSignOut();}else{location.href='settings.html';}" class="nav-link">
+          <iconify-icon icon="mdi:logout"></iconify-icon>
+          Sign Out</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar__user">
+      <div id="sidebarAvatarText" class="user-avatar user-avatar--dark">--</div>
+      <img id="sidebarAvatarImg" class="user-avatar user-avatar--img" style="display:none;width:36px;height:36px;border-radius:50%;object-fit:cover;" alt="Avatar">
+      <div class="user-meta">
+        <span class="user-name" id="sidebarUserName">Student</span>
+        <span class="user-role">Student</span>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="main-wrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="sidebar-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
+      <div class="topbar__left">
+        <h2 class="topbar__title">Dashboard</h2>
+        <nav class="breadcrumb">
+          <a href="#" class="breadcrumb__link">Home</a>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current">Dashboard</span>
+        </nav>
+      </div>
+      <div class="topbar__center" style="position:relative;"></div>
+      <div class="topbar__right">
+        <!-- Notification Bell -->
+        <div style="position: relative;">
+          <button class="icon-btn" id="notifBtn" onclick="toggleDropdown('notifDropdown')">
+            <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+            <span class="dropdown-badge" id="notifBadge" style="display: none;">0</span>
+          </button>
+          <div class="header-dropdown" id="notifDropdown">
+            <div class="header-dropdown__header">
+              <span class="header-dropdown__title">Notifications</span>
+              <span class="header-dropdown__link" onclick="markAllRead()">Mark all read</span>
+            </div>
+            <div class="header-dropdown__list" id="notifList">
+              <div class="header-dropdown__empty" id="notifEmpty">
+                <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+                <p>No notifications yet</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div style="position: relative;">
+          <button class="icon-btn" id="msgBtn" onclick="toggleDropdown('msgDropdown')">
+            <iconify-icon icon="mdi:email-outline"></iconify-icon>
+            <span class="dropdown-badge" id="msgBadge" style="display: none;">0</span>
+          </button>
+          <div class="header-dropdown" id="msgDropdown">
+            <div class="header-dropdown__header">
+              <span class="header-dropdown__title">Messages</span>
+              <span class="header-dropdown__link" onclick="viewAllMessages()">View all</span>
+            </div>
+            <div class="header-dropdown__list" id="msgList">
+              <div class="header-dropdown__empty" id="msgEmpty">
+                <iconify-icon icon="mdi:email-outline"></iconify-icon>
+                <p>No messages</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="topbar__user">
+          <div id="headerAvatarText" class="user-avatar user-avatar--red">--</div>
+          <img id="headerAvatarImg" class="user-avatar user-avatar--img" style="display:none;width:36px;height:36px;border-radius:50%;object-fit:cover;" alt="Avatar">
+          <div class="user-meta">
+            <span class="user-name" id="headerUserName">Student</span>
+            <span class="user-role">Student</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content">
+
+      <!-- Welcome Banner -->
+      <section class="banner banner--compact">
+        <div class="banner__text">
+          <p class="banner__greeting">Good morning,</p>
+          <h1 class="banner__name" id="welcomeName">Welcome</h1>
+          <p class="banner__sub">Welcome back to your learning portal. You're making great progress in your Japanese studies!</p>
+        </div>
+        <div class="banner__avatar" id="bannerAvatar">--</div>
+        <div class="banner__deco banner__deco--1"></div>
+        <div class="banner__deco banner__deco--2"></div>
+      </section>
+
+      <!-- First-Time Welcome Banner (Hidden by default) -->
+      <section class="banner banner--welcome" id="firstTimeBanner" style="display:none;">
+        <div class="banner__text">
+          <p class="banner__greeting">Congratulations!</p>
+          <h1 class="banner__name" id="firstTimeWelcomeName">Welcome to Unmei Nihongo Center</h1>
+          <p class="banner__sub">Your Japanese language learning journey starts here. Explore your dashboard, track your progress, and achieve your goals!</p>
+          <button class="btn-get-started" onclick="openGetStartedDialog()">
+            <span>Get Started</span>
+            <iconify-icon icon="mdi:arrow-right"></iconify-icon>
+          </button>
+        </div>
+        <div class="banner__deco banner__deco--1"></div>
+        <div class="banner__deco banner__deco--2"></div>
+      </section>
+
+      <!-- Stats Row -->
+      <div class="stats-grid">
+        <div class="stat-card stat-card--clickable" onclick="navigateTo('courses.html')">
+          <iconify-icon icon="mdi:chevron-right" class="stat-card__arrow"></iconify-icon>
+          <div class="stat-card__icon stat-card__icon--red">
+            <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+          </div>
+          <div class="stat-card__body">
+            <span class="stat-card__label">ENROLLED COURSE</span>
+            <span class="stat-card__value" id="enrolledCourse">JLPT N5</span>
+            <span class="stat-card__meta" id="courseLevel">Beginner Level</span>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card--clickable" onclick="navigateTo('schedules.html')">
+          <iconify-icon icon="mdi:chevron-right" class="stat-card__arrow"></iconify-icon>
+          <div class="stat-card__icon stat-card__icon--blue">
+            <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+          </div>
+          <div class="stat-card__body">
+            <span class="stat-card__label">SCHEDULE</span>
+            <span class="stat-card__value" id="scheduleValue">Mon / Wed</span>
+            <span class="stat-card__meta" id="scheduleTime">6:00 PM - 7:30 PM</span>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card--clickable" onclick="navigateTo('courses.html')">
+          <iconify-icon icon="mdi:chevron-right" class="stat-card__arrow"></iconify-icon>
+          <div class="stat-card__icon stat-card__icon--green">
+            <iconify-icon icon="mdi:chart-line"></iconify-icon>
+          </div>
+          <div class="stat-card__body">
+            <span class="stat-card__label">COURSE PROGRESS</span>
+            <span class="stat-card__value" id="progressValue">0%</span>
+            <div class="progress-bar">
+              <div class="progress-bar__fill" id="progressFill" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card--clickable" onclick="navigateTo('payments.html')">
+          <iconify-icon icon="mdi:chevron-right" class="stat-card__arrow"></iconify-icon>
+          <div class="stat-card__icon stat-card__icon--yellow">
+            <iconify-icon icon="mdi:clock-outline"></iconify-icon>
+          </div>
+          <div class="stat-card__body">
+            <span class="stat-card__label">NEXT PAYMENT</span>
+            <span class="stat-card__value" id="paymentValue">â‚±0.00</span>
+            <span class="stat-card__meta stat-card__meta--red" id="paymentDue">No Dues Pending</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- DATA VISUALIZATION PORTAL -->
+      <div id="dataVizSection" class="viz-section" style="display:none;">
+        
+        <!-- 1. Main Line Chart (Reading, Writing, Pronunciation) -->
+        <div class="viz-card">
+          <div class="viz-card__header">
+            <div class="viz-card__title">
+              <iconify-icon icon="mdi:chart-line"></iconify-icon>
+              Learning Progress
+            </div>
+            <span class="badge badge--upcoming">Last 12 Weeks</span>
+          </div>
+          <div class="chart-container" style="position: relative; height:300px; width:100%;">
+            <canvas id="skillProgressionChart"></canvas>
+          </div>
+        </div>
+
+        <div class="viz-grid-2">
+          <!-- 2. Character Mastery Radial Gauges -->
+          <div class="viz-card">
+            <div class="viz-card__header">
+              <div class="viz-card__title">
+                <iconify-icon icon="mdi:text"></iconify-icon>
+                Character Mastery
+              </div>
+              <span class="viz-card__sub">Unity App Sync</span>
+            </div>
+            <div class="gauge-row">
+              <div class="gauge-item">
+                <div class="gauge-canvas-wrap">
+                  <canvas id="hiraganaGauge" width="96" height="96"></canvas>
+                  <div class="gauge-center-val"><span id="hiraganaTextVal">0</span><span class="gauge-center-sub">/46</span></div>
+                </div>
+                <span class="gauge-label">Hiragana</span>
+                <span class="gauge-badge gauge-badge--hiragana">Kana</span>
+              </div>
+              <div class="gauge-item">
+                <div class="gauge-canvas-wrap">
+                  <canvas id="katakanaGauge" width="96" height="96"></canvas>
+                  <div class="gauge-center-val"><span id="katakanaTextVal">0</span><span class="gauge-center-sub">/46</span></div>
+                </div>
+                <span class="gauge-label">Katakana</span>
+                <span class="gauge-badge gauge-badge--katakana">Kana</span>
+              </div>
+              <div class="gauge-item">
+                <div class="gauge-canvas-wrap">
+                  <canvas id="kanjiGauge" width="96" height="96"></canvas>
+                  <div class="gauge-center-val"><span id="kanjiTextVal">0</span><span class="gauge-center-sub">/80</span></div>
+                </div>
+                <span class="gauge-label">Kanji</span>
+                <span class="gauge-badge gauge-badge--kanji">N5 Level</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Practice Activity Heatmap Card -->
+          <div class="viz-card">
+            <div class="viz-card__header">
+              <div class="viz-card__title">
+                <iconify-icon icon="mdi:view-grid-outline"></iconify-icon>
+                Practice Activity
+              </div>
+              <span class="viz-card__sub">28 Days History</span>
+            </div>
+            <div class="heatmap-card">
+              <div class="streak-summary">
+                <div class="streak-item">
+                  <span class="streak-item__val" id="streakDaysVal">18 Days</span>
+                  <span class="streak-item__lbl">Current Streak</span>
+                </div>
+                <div class="streak-item">
+                  <span class="streak-item__val" id="practiceTimeVal">20.6 hrs</span>
+                  <span class="streak-item__lbl">Practice Time</span>
+                </div>
+                <div class="streak-item">
+                  <span class="streak-item__val" id="totalSessionsVal">67</span>
+                  <span class="streak-item__lbl">Sessions</span>
+                </div>
+              </div>
+              <div class="heatmap-grid" id="heatmapGrid"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 4. Module Completion & Skill Breakdown Grid -->
+        <div class="viz-grid-2">
+          <div class="viz-card">
+            <div class="viz-card__header">
+              <div class="viz-card__title">
+                <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+                Course Completion
+              </div>
+              <span class="viz-card__sub" id="moduleProgressPercent">0% Complete</span>
+            </div>
+            <div class="chart-container" style="position: relative; height:180px; width:100%;">
+              <canvas id="moduleCompletionChart"></canvas>
+            </div>
+          </div>
+
+          <div class="viz-card">
+            <div class="viz-card__header">
+              <div class="viz-card__title">
+                <iconify-icon icon="mdi:radar"></iconify-icon>
+                Skill Radar
+              </div>
+              <span class="viz-card__sub">6 skill axes Â· latest scores</span>
+            </div>
+            <div class="chart-container" style="position: relative; height:190px; width:100%;">
+              <canvas id="scoreBreakdownChart"></canvas>
+            </div>
+          </div>
+
+          <div class="viz-card">
+            <div class="viz-card__header">
+              <div class="viz-card__title">
+                <iconify-icon icon="mdi:trending-up"></iconify-icon>
+                Grade Trend
+              </div>
+              <span class="viz-card__sub">Instructor-recorded weekly grades</span>
+            </div>
+            <div class="chart-container" style="position: relative; height:180px; width:100%;">
+              <canvas id="gradeTrendChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Empty State / Fallback -->
+      <div id="dataVizEmpty" class="viz-empty-card" style="display:none;">
+        <div class="viz-empty-icon">
+          <iconify-icon icon="mdi:download-outline"></iconify-icon>
+        </div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--gray-900); margin-bottom: 6px;">Payment Required to Unlock App</h3>
+        <p style="font-size: 0.85rem; color: var(--gray-500); max-width: 440px; margin: 0 auto 20px; line-height: 1.5;">Complete your tuition payment to unlock the UNMEI Learning mobile app. Your practice scores and character mastery will sync here automatically.</p>
+        <button class="btn-get-started" style="margin: 0 auto;" onclick="navigateTo('payments.html')">
+          <span>Settle Payment to Unlock</span>
+          <iconify-icon icon="mdi:arrow-right"></iconify-icon>
+        </button>
+      </div>
+
+      <!-- Two Column -->
+      <div class="two-col">
+
+        <div class="panel">
+          <div class="panel__header">
+            <div class="panel__title">
+              <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+              Upcoming Schedule
+            </div>
+            <a href="schedules.html" class="panel__link">View All</a>
+          </div>
+          <div class="schedule-list" id="upcomingScheduleList">
+            <div class="schedule-item">
+              <div class="schedule-info">
+                <p class="schedule-title">Orientation &amp; Class Setup</p>
+                <p class="schedule-time">Mon / Wed Â· 6:00 PM - 7:30 PM</p>
+              </div>
+              <span class="badge badge--upcoming">Regular Class</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__header">
+            <div class="panel__title">
+              <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+              Announcements
+            </div>
+            <a href="announcements.html" class="panel__link">See All</a>
+          </div>
+          <div class="announcement-list" id="announcementList">
+            <div class="announcement-item">
+              <span class="announcement-dot announcement-dot--green"></span>
+              <div class="announcement-body">
+                <p class="announcement-title">Welcome to Unmei Nihongo Center!</p>
+                <p class="announcement-desc">Welcome to your learning portal! Check your schedules, practice scores, and course materials here.</p>
+                <span class="announcement-time">Just now</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const database = firebase.database();
+    const storage = firebase.storage();
+
+    // Search functionality
+    function handleSearch(query) {
+      const results = document.getElementById('searchResults');
+      const items = results.querySelectorAll('.search-result-item');
+      const lowerQuery = query.toLowerCase();
+      
+      items.forEach(item => {
+        const titleEl = item.querySelector('.search-result-title');
+        const descEl = item.querySelector('.search-result-desc');
+        
+        if (!titleEl.dataset.orig) titleEl.dataset.orig = titleEl.textContent;
+        if (!descEl.dataset.orig) descEl.dataset.orig = descEl.textContent;
+        
+        const origTitle = titleEl.dataset.orig;
+        const origDesc = descEl.dataset.orig;
+        
+        if (query.trim() === '') {
+          titleEl.innerHTML = origTitle;
+          descEl.innerHTML = origDesc;
+          item.style.display = 'flex';
+          return;
+        }
+
+        if (origTitle.toLowerCase().includes(lowerQuery) || origDesc.toLowerCase().includes(lowerQuery)) {
+          item.style.display = 'flex';
+          const safeQuery = query.replace(/[.*+?^$\{}()|[\]\\]/g, '\\$&');
+          const highlightRegex = new RegExp('(' + safeQuery + ')', 'gi');
+          titleEl.innerHTML = origTitle.replace(highlightRegex, '<span class="search-highlight">$1</span>');
+          descEl.innerHTML = origDesc.replace(highlightRegex, '<span class="search-highlight">$1</span>');
+        } else {
+          item.style.display = 'none';
+        }
+      });
+      
+      results.classList.add('active');
+    }
+
+    function showSearchResults() {
+      document.getElementById('searchResults').classList.add('active');
+    }
+
+    function navigateTo(url) {
+      window.location.href = url;
+    }
+
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('.search-bar') || e.target.closest('.search-results')) {
+        return;
+      }
+      const searchResults = document.getElementById('searchResults');
+      if (searchResults) {
+        searchResults.classList.remove('active');
+      }
+    });
+
+    function toggleDropdown(id) {
+      const dropdown = document.getElementById(id);
+      const isActive = dropdown.classList.contains('active');
+      
+      document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('active'));
+      document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--active'));
+      
+      if (!isActive) {
+        dropdown.classList.add('active');
+        document.getElementById(id === 'notifDropdown' ? 'notifBtn' : 'msgBtn').classList.add('icon-btn--active');
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.icon-btn') && !e.target.closest('.header-dropdown')) {
+        document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('active'));
+        document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--active'));
+      }
+    });
+
+    function markAllRead() {
+      document.querySelectorAll('.dropdown-item--unread').forEach(item => {
+        item.classList.remove('dropdown-item--unread');
+      });
+      document.querySelector('.dropdown-badge').style.display = 'none';
+    }
+
+    function viewNotif(el) {
+      el.classList.remove('dropdown-item--unread');
+      const unreadCount = document.querySelectorAll('.dropdown-item--unread').length;
+      const badge = document.querySelector('.dropdown-badge');
+      if (unreadCount === 0) {
+        badge.style.display = 'none';
+      } else {
+        badge.textContent = unreadCount;
+      }
+    }
+
+    function viewAllMessages() {
+      showAlert('Messages', 'No messages yet', 'info');
+    }
+
+    function openMessage(user) {
+      showAlert('Messages', 'No messages yet', 'info');
+    }
+
+    function loadNotifications(database, studentUid) {
+      database.ref('notifications').orderByChild('recipientUid').equalTo(studentUid).limitToLast(10).once('value').then((snapshot) => {
+        const notifList = document.getElementById('notifList');
+        const notifEmpty = document.getElementById('notifEmpty');
+        const notifBadge = document.getElementById('notifBadge');
+        if (!notifList || !snapshot.exists()) {
+          if (notifEmpty) notifEmpty.style.display = 'block';
+          if (notifBadge) notifBadge.style.display = 'none';
+          return;
+        }
+        const typeIcons = {
+          payment: '<iconify-icon icon="mdi:credit-card-outline"></iconify-icon>',
+          schedule: '<iconify-icon icon="mdi:credit-card-outline"></iconify-icon>',
+          announcement: '<iconify-icon icon="mdi:bell-outline"></iconify-icon>',
+          info: '<iconify-icon icon="mdi:information-outline"></iconify-icon>'
+        };
+        const typeColors = { payment: 'red', schedule: 'blue', announcement: 'green', info: 'blue' };
+        let html = '';
+        let unreadCount = 0;
+        const notifications = [];
+        snapshot.forEach((child) => {
+          const n = child.val();
+          n.id = child.key;
+          notifications.push(n);
+        });
+        notifications.reverse();
+        notifications.forEach((n) => {
+          const iconSvg = typeIcons[n.type] || typeIcons.info;
+          const colorClass = typeColors[n.type] || 'blue';
+          const timeAgoStr = getTimeAgo(n.createdAt);
+          const unreadClass = n.read ? '' : 'dropdown-item--unread';
+          if (!n.read) unreadCount++;
+          html += '<div class="dropdown-item ' + unreadClass + '" onclick="markNotifRead(\'' + n.id + '\', this)"><div class="dropdown-item__icon dropdown-item__icon--' + colorClass + '">' + iconSvg + '</div><div class="dropdown-item__body"><div class="dropdown-item__title">' + (n.title || 'Notification') + '</div><div class="dropdown-item__text">' + (n.message || '') + '</div><div class="dropdown-item__time">' + timeAgoStr + '</div></div></div>';
+        });
+        notifList.innerHTML = html;
+        if (notifEmpty) notifEmpty.style.display = 'none';
+        if (notifBadge) {
+          if (unreadCount > 0) {
+            notifBadge.textContent = unreadCount;
+            notifBadge.style.display = 'block';
+          } else {
+            notifBadge.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    function markNotifRead(notifId, el) {
+      database.ref('notifications/' + notifId).update({ read: true }).then(() => {
+        if (el) el.classList.remove('dropdown-item--unread');
+        const unreadCount = document.querySelectorAll('#notifList .dropdown-item--unread').length;
+        const notifBadge = document.getElementById('notifBadge');
+        if (notifBadge) {
+          if (unreadCount === 0) notifBadge.style.display = 'none';
+          else notifBadge.textContent = unreadCount;
+        }
+      });
+    }
+
+    function getTimeAgo(timestamp) {
+      if (!timestamp) return 'N/A';
+      const seconds = Math.floor((Date.now() - timestamp) / 1000);
+      if (seconds < 60) return 'Just now';
+      if (seconds < 3600) return Math.floor(seconds / 60) + ' minutes ago';
+      if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
+      return Math.floor(seconds / 86400) + ' days ago';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const studentUid = localStorage.getItem('studentUid');
+      if (!studentUid) return;
+      const studentRef = database.ref('students/' + studentUid);
+
+      var isFirstLogin = localStorage.getItem('firstDashboardVisit') === 'true';
+
+      studentRef.on('value', (snapshot) => {
+        const studentData = snapshot.val() || {};
+        const profile = studentData.profile || {};
+        const enrollment = studentData.enrollment || {};
+        const fullName = profile.fullName || 'Student';
+        const firstName = fullName.split(' ')[0];
+
+        if (isFirstLogin) {
+          // Handle the first-visit flow once: the live listener fires again on every
+          // data change (including the agreement acceptance write), and re-running
+          // this branch would keep bringing back the onboarding banner.
+          isFirstLogin = false;
+          document.getElementById('welcomeName').textContent = firstName;
+          document.getElementById('firstTimeWelcomeName').textContent = 'Welcome, ' + firstName + '!';
+          document.getElementById('firstTimeBanner').style.display = 'block';
+          document.querySelector('.banner').style.display = 'none';
+          localStorage.removeItem('firstDashboardVisit');
+          var agreementUid = localStorage.getItem('studentUid') || '';
+          if (!agreementUid || localStorage.getItem('portalAgreementAccepted_' + agreementUid) !== null) {
+            // already accepted before â€” no prompt needed
+          } else {
+            openGetStartedDialog();
+          }
+        } else {
+          document.getElementById('welcomeName').textContent = firstName;
+          document.getElementById('firstTimeBanner').style.display = 'none';
+          document.querySelector('.banner').style.display = 'block';
+        }
+
+        document.getElementById('sidebarUserName').textContent = fullName;
+        document.getElementById('headerUserName').textContent = fullName;
+        const initials = getInitials(fullName);
+        document.getElementById('sidebarAvatarText').textContent = initials;
+        document.getElementById('headerAvatarText').textContent = initials;
+        var bannerAvatar = document.getElementById('bannerAvatar');
+        if (bannerAvatar) {
+          bannerAvatar.style.backgroundImage = '';
+          bannerAvatar.style.color = '';
+          bannerAvatar.textContent = initials;
+        }
+        if (profile.avatarUrl) {
+          applyAvatar(profile.avatarUrl);
+        }
+
+        // Stats fallbacks
+        if (enrollment.course) {
+          document.getElementById('enrolledCourse').textContent = enrollment.course.split('(')[0].trim() || enrollment.course;
+          const levelMatch = enrollment.course.match(/\(([^)]+)\)/);
+          document.getElementById('courseLevel').textContent = levelMatch ? levelMatch[1] + ' Level' : 'Beginner Level';
+        } else {
+          document.getElementById('enrolledCourse').textContent = 'JLPT N5';
+          document.getElementById('courseLevel').textContent = 'Beginner Level';
+        }
+
+        if (enrollment.scheduleDays && enrollment.scheduleTimeSlot) {
+          document.getElementById('scheduleValue').textContent = enrollment.scheduleDays;
+          document.getElementById('scheduleTime').textContent = enrollment.scheduleTimeSlot;
+        } else {
+          document.getElementById('scheduleValue').textContent = 'Mon / Wed';
+          document.getElementById('scheduleTime').textContent = '6:00 PM - 7:30 PM';
+        }
+
+        // Calculate course progress from Firebase realtime data
+        var completedMap = studentData.completedModules || {};
+        var appSyncModules = (studentData.appSyncData && Array.isArray(studentData.appSyncData.modulesCompleted))
+          ? studentData.appSyncData.modulesCompleted
+          : [];
+        var totalModules = (studentData.appSyncData && studentData.appSyncData.totalModules) || 12;
+        var completedCount = Object.keys(completedMap).length > 0
+          ? Object.keys(completedMap).filter(function(k) { return completedMap[k] === true; }).length
+          : appSyncModules.length;
+        var progressPct = totalModules > 0 ? Math.round((completedCount / totalModules) * 100) : 0;
+        var progressValEl = document.getElementById('progressValue');
+        var progressFillEl = document.getElementById('progressFill');
+        if (progressValEl) progressValEl.textContent = progressPct + '%';
+        if (progressFillEl) progressFillEl.style.width = progressPct + '%';
+
+        loadDashboardSchedules(enrollment);
+        loadDashboardAnnouncements(enrollment.sectionId || '', profile, studentUid);
+        loadDashboardPaymentSummary(studentUid);
+        loadNotifications(database, studentUid);
+        
+        // INIT DATA VIZ
+        initDataViz(studentData.progressHistory, studentData.appSyncData, studentData.scores, (studentData.enrollment || {}).courseId || '', studentUid);
+      });
+
+      window.addEventListener('beforeunload', function() {
+        studentRef.off('value');
+      });
+    });
+
+    function getInitials(name) {
+      return (name || 'Student').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'ST';
+    }
+
+    function applyAvatar(avatarData) {
+      const hImg = document.getElementById('headerAvatarImg');
+      const hTxt = document.getElementById('headerAvatarText');
+      const sImg = document.getElementById('sidebarAvatarImg');
+      const sTxt = document.getElementById('sidebarAvatarText');
+      if (hImg && hTxt) { hImg.src = avatarData; hImg.style.display = 'block'; hTxt.style.display = 'none'; }
+      if (sImg && sTxt) { sImg.src = avatarData; sImg.style.display = 'block'; sTxt.style.display = 'none'; }
+      var bannerAvatar = document.getElementById('bannerAvatar');
+      if (bannerAvatar) {
+        bannerAvatar.textContent = '';
+        bannerAvatar.style.backgroundImage = 'url("' + avatarData + '")';
+        bannerAvatar.style.backgroundSize = 'cover';
+        bannerAvatar.style.backgroundPosition = 'center';
+      }
+    }
+
+    function loadDashboardSchedules(enrollment) {
+      const list = document.getElementById('upcomingScheduleList');
+      if (!list) return;
+
+      enrollment = enrollment || {};
+      const sectionId = enrollment.sectionId || '';
+      const enrollDays = String(enrollment.scheduleDays || '').trim();
+      const enrollSlot = String(enrollment.scheduleTimeSlot || '').trim();
+
+      if (!sectionId && (enrollDays || enrollSlot)) {
+        const courseTitle = enrollment.course || 'Regular Class';
+        const scheduleText = [enrollDays, enrollSlot].filter(Boolean).join(' Â· ');
+        list.innerHTML = '<div class="schedule-item"><div class="schedule-info"><p class="schedule-title">' + courseTitle + '</p><p class="schedule-time">' + scheduleText + '</p></div><span class="badge badge--upcoming">Regular Class</span></div>';
+        return;
+      }
+
+      if (!sectionId) {
+        list.innerHTML = '<div class="schedule-item"><div class="schedule-info"><p class="schedule-title">Orientation &amp; Class Setup</p><p class="schedule-time">Mon / Wed Â· 6:00 PM - 7:30 PM</p></div><span class="badge badge--upcoming">Regular Class</span></div>';
+        return;
+      }
+
+      database.ref('sections/' + sectionId).once('value').then((snapshot) => {
+        const section = snapshot.val() || {};
+        if (!section || !section.schedule) {
+          if (enrollDays || enrollSlot) {
+            const fallbackTitle = enrollment.course || section.course || section.name || 'Regular Class';
+            const fallbackText = [enrollDays, enrollSlot].filter(Boolean).join(' Â· ');
+            list.innerHTML = '<div class="schedule-item"><div class="schedule-info"><p class="schedule-title">' + fallbackTitle + '</p><p class="schedule-time">' + fallbackText + '</p></div><span class="badge badge--upcoming">Regular Class</span></div>';
+            return;
+          }
+        }
+        const schedule = section.schedule || {};
+        const days = schedule.days || enrollDays || 'Mon / Wed';
+        const timeSlot = schedule.timeSlot || enrollSlot || '6:00 PM - 7:30 PM';
+        const courseTitle = section.course || section.name || enrollment.course || 'JLPT N5 Regular Class';
+
+        list.innerHTML = '<div class="schedule-item"><div class="schedule-info"><p class="schedule-title">' + courseTitle + '</p><p class="schedule-time">' + days + ' Â· ' + timeSlot + '</p></div><span class="badge badge--upcoming">Regular Class</span></div>';
+      }).catch(() => {
+        list.innerHTML = '<div class="schedule-item"><div class="schedule-info"><p class="schedule-title">Orientation &amp; Class Setup</p><p class="schedule-time">Mon / Wed Â· 6:00 PM - 7:30 PM</p></div><span class="badge badge--upcoming">Regular Class</span></div>';
+      });
+    }
+
+    function loadDashboardAnnouncements(sectionId, profile, studentUid) {
+      const list = document.getElementById('announcementList');
+      if (!list) return;
+
+      // announcement_seed_* records are demo showcase content; only the built-in
+      // demo accounts (student_001..student_030) should see them on the dashboard.
+      const isDemoAccount = /^student_\d+$/.test(String(studentUid || ''));
+
+      database.ref('announcements').limitToLast(10).once('value').then((snapshot) => {
+        const rows = [];
+        const studentFirstName = profile && profile.fullName ? profile.fullName.split(' ')[0] : 'Student';
+
+        // Always include welcome announcement
+        rows.push({
+          title: 'Welcome to Unmei, ' + studentFirstName + '!',
+          message: 'Welcome to your official Japanese learning portal! Check your schedules, track your practice scores, and access learning materials here.',
+          dotClass: 'announcement-dot--green',
+          timestamp: Date.now()
+        });
+
+        if (snapshot.exists()) {
+          snapshot.forEach((child) => {
+            const ann = child.val() || {};
+            const isSeed = String(child.key || '').indexOf('announcement_seed_') === 0;
+            if (isSeed && !isDemoAccount) return;
+            if (ann.active !== false && !ann.deleted && ann.title && ann.title.trim() !== '') {
+              rows.push({
+                title: ann.title,
+                message: ann.message || '',
+                dotClass: ann.priority === 'high' ? 'announcement-dot--red' : 'announcement-dot--blue',
+                timestamp: ann.createdAt || Date.now() - 3600000
+              });
+            }
+          });
+        }
+
+        const html = rows.slice(0, 3).map((item) => {
+          const cleanMessage = item.message.length > 90 ? item.message.substring(0, 90) + '...' : item.message;
+          return '<div class="announcement-item"><span class="announcement-dot ' + item.dotClass + '"></span><div class="announcement-body"><p class="announcement-title">' + item.title + '</p><p class="announcement-desc">' + cleanMessage + '</p></div></div>';
+        }).join('');
+
+        list.innerHTML = html;
+      }).catch(() => {
+        const studentFirstName = profile && profile.fullName ? profile.fullName.split(' ')[0] : 'Student';
+        list.innerHTML = '<div class="announcement-item"><span class="announcement-dot announcement-dot--green"></span><div class="announcement-body"><p class="announcement-title">Welcome to Unmei, ' + studentFirstName + '!</p><p class="announcement-desc">Welcome to your learning portal! Explore your dashboard, schedules, and course modules.</p></div></div>';
+      });
+    }
+
+    function loadDashboardPaymentSummary(studentUid) {
+      database.ref('payments').orderByChild('studentUid').equalTo(studentUid).once('value').then((snapshot) => {
+        let nextDue = null;
+        let nextDueAmount = 0;
+        if (snapshot.exists()) {
+          snapshot.forEach((child) => {
+            const payment = child.val();
+            if (payment.status === 'pending' && payment.dueDate) {
+              if (!nextDue || payment.dueDate < nextDue) {
+                nextDue = payment.dueDate;
+                nextDueAmount = payment.amount || 0;
+              }
+            }
+          });
+        }
+        if (nextDue) {
+          const dueDate = new Date(nextDue);
+          document.getElementById('paymentValue').textContent = 'â‚±' + nextDueAmount.toLocaleString();
+          document.getElementById('paymentDue').textContent = 'Due: ' + dueDate.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+        } else {
+          document.getElementById('paymentValue').textContent = 'â‚±0.00';
+          document.getElementById('paymentDue').textContent = 'No Dues Pending';
+        }
+      });
+    }
+
+    // Charts are rendered through UnmeiCharts (D3) and re-draw on resize.
+
+    document.addEventListener('keydown', function(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('globalSearch') && document.getElementById('globalSearch').focus();
+        if (window.__unmeiOpenGlobalSearch) window.__unmeiOpenGlobalSearch();
+      }
+    });
+
+    function renderGauges(charactersMastered) {
+      const data = [
+        { id: 'hiraganaGauge', valEl: 'hiraganaTextVal', val: charactersMastered.hiragana || 0, max: 46, color: '#C0392B' },
+        { id: 'katakanaGauge', valEl: 'katakanaTextVal', val: charactersMastered.katakana || 0, max: 46, color: '#2563EB' },
+        { id: 'kanjiGauge', valEl: 'kanjiTextVal', val: charactersMastered.kanji || 0, max: 80, color: '#16A34A' }
+      ];
+
+      data.forEach(item => {
+        const valText = document.getElementById(item.valEl);
+        if (valText) valText.textContent = item.val;
+        UnmeiCharts.radialGauge(item.id, { value: item.val, max: item.max, color: item.color, size: 92, stroke: 10 });
+      });
+    }
+
+    function renderHeatmapGrid(appSyncData, uid) {
+      const grid = document.getElementById('heatmapGrid');
+      if (!grid) return;
+      
+      const streak = appSyncData ? (appSyncData.streakDays || 0) : 0;
+      const mins = appSyncData ? (appSyncData.totalPracticeMinutes || 0) : 0;
+      const sessions = appSyncData ? (appSyncData.totalSessionsCompleted || 0) : 0;
+      
+      const streakVal = document.getElementById('streakDaysVal');
+      const timeVal = document.getElementById('practiceTimeVal');
+      const sessionsVal = document.getElementById('totalSessionsVal');
+      
+      if (streakVal) streakVal.textContent = '' + streak + ' Days';
+      if (timeVal) timeVal.textContent = (mins / 60).toFixed(1) + ' hrs';
+      if (sessionsVal) sessionsVal.textContent = sessions;
+
+      const dayHeaders = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+      let html = '<div class="heatmap-header-row" style="grid-column: 1 / -1;">';
+      dayHeaders.forEach(dh => {
+        html += '<span class="heatmap-day-head">' + dh + '</span>';
+      });
+      html += '</div>';
+
+      // PHASE 3: real per-day study log from activityCalendar/{uid}.
+      // Each cell = one of the last 28 days; depth = minutes studied.
+      const database = firebase.database();
+      database.ref('activityCalendar/' + uid).once('value').then(function (calSnap) {
+        const cal = (calSnap && calSnap.exists()) ? calSnap.val() : {};
+        const fmt = function (d) {
+          return d.getFullYear() + '-' +
+            String(d.getMonth() + 1).padStart(2, '0') + '-' +
+            String(d.getDate()).padStart(2, '0');
+        };
+        const today = new Date();
+        let cells = '';
+        for (let i = 27; i >= 0; i--) {
+          const day = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+          const key = fmt(day);
+          const entry = cal[key];
+          const studied = !!(entry && entry.studied);
+          let level = 0;
+          if (studied) {
+            const m = entry.minutesStudied || 0;
+            level = m >= 30 ? 4 : m >= 20 ? 3 : m >= 10 ? 2 : 1;
+          }
+          const tip = entry
+            ? key + ' â€” ' + (entry.minutesStudied || 0) + ' min Â· ' + (entry.sessionsCompleted || 0) + ' sessions Â· ' + (entry.kanjiReviewed || 0) + ' kanji'
+            : key + ' â€” No study logged';
+          cells += '<div class="heatmap-day-cell" data-level="' + level + '" title="' + tip + '"><div class="heatmap-ring"><div class="heatmap-dot"></div></div></div>';
+        }
+        grid.innerHTML = html + cells;
+      }).catch(function () {
+        // Read failed: render a neutral grid so the layout never breaks.
+        let cells = '';
+        for (let i = 0; i < 28; i++) {
+          cells += '<div class="heatmap-day-cell" data-level="0"><div class="heatmap-ring"><div class="heatmap-dot"></div></div></div>';
+        }
+        grid.innerHTML = html + cells;
+      });
+    }
+
+    function initDataViz(progressHistory, appSyncData, scores, courseId, uid) {
+      if (!progressHistory) {
+        document.getElementById('dataVizSection').style.display = 'none';
+        document.getElementById('dataVizEmpty').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('dataVizSection').style.display = 'flex';
+      document.getElementById('dataVizEmpty').style.display = 'none';
+
+      const weeks = Object.keys(progressHistory).sort();
+      const labels = weeks.map((w, i) => 'W' + (i + 1));
+      
+      const readingData = weeks.map(w => progressHistory[w].reading);
+      const writingData = weeks.map(w => progressHistory[w].writing);
+      const pronunciationData = weeks.map(w => progressHistory[w].pronunciation);
+      
+
+      UnmeiCharts.multiLine('skillProgressionChart', {
+        labels: labels,
+        height: 256,
+        yMax: 100,
+        series: [
+          { name: 'Reading', data: readingData, color: '#C0392B', fill: true },
+          { name: 'Writing', data: writingData, color: '#2563EB' },
+          { name: 'Pronunciation', data: pronunciationData, color: '#16A34A' }
+        ]
+      });
+
+      // PHASE 3 chart: 6-axis Skill Radar from students/{uid}/scores
+      // (grammar, kanji, listening, reading, speaking, vocabulary).
+      const sc = scores || {};
+      UnmeiCharts.radarChart('scoreBreakdownChart', {
+        axes: [
+          { label: 'Grammar', value: sc.grammar || 0 },
+          { label: 'Kanji', value: sc.kanji || 0 },
+          { label: 'Listening', value: sc.listening || 0 },
+          { label: 'Reading', value: sc.reading || 0 },
+          { label: 'Speaking', value: sc.speaking || 0 },
+          { label: 'Vocab', value: sc.vocabulary || 0 }
+        ],
+        color: '#C0392B',
+        size: 190
+      });
+
+      if (appSyncData) {
+        const completed = (appSyncData.modulesCompleted || []).length;
+        const total = appSyncData.totalModules || 12;
+        const remaining = Math.max(0, total - completed);
+        const percent = Math.round((completed / total) * 100);
+
+        const pctEl = document.getElementById('moduleProgressPercent');
+        if (pctEl) pctEl.textContent = percent + '% Complete';
+
+        UnmeiCharts.horizontalStackedBar('moduleCompletionChart', {
+          segments: [
+            { label: 'Completed', value: completed, color: '#16A34A' },
+            { label: 'Remaining', value: remaining, color: '#e5e7eb' }
+          ],
+          max: total,
+          height: 64
+        });
+
+        if (appSyncData.charactersMastered) {
+          renderGauges(appSyncData.charactersMastered);
+        }
+        renderHeatmapGrid(appSyncData, uid);
+      }
+
+      // PHASE 3 chart: Grade Trend from grades/{courseLevel}/{uid}/history
+      // (instructor-recorded weekly listening/reading/speaking/writing).
+      const trendEl = document.getElementById('gradeTrendChart');
+      if (trendEl && courseId && uid) {
+        firebase.database().ref('grades/' + courseId + '/' + uid + '/history').once('value').then(function (histSnap) {
+          if (!histSnap.exists()) {
+            trendEl.innerHTML = '<p style="text-align:center;padding:26px 14px;color:var(--gray-400);font-size:0.82rem;margin:0;">No graded history yet â€” your instructor\'s weekly assessments will appear here.</p>';
+            return;
+          }
+          const hist = histSnap.val() || {};
+          const gWeeks = Object.keys(hist).sort();
+          const pick = function (field) {
+            return gWeeks.map(function (w) {
+              const row = hist[w] || {};
+              return row[field] == null ? 0 : row[field];
+            });
+          };
+          UnmeiCharts.multiLine('gradeTrendChart', {
+            labels: gWeeks.map(function (w) { return w.replace('week_', 'W'); }),
+            height: 180,
+            yMax: 100,
+            series: [
+              { name: 'Listening', data: pick('listening'), color: '#2563EB' },
+              { name: 'Reading', data: pick('reading'), color: '#C0392B' },
+              { name: 'Speaking', data: pick('speaking'), color: '#16A34A' },
+              { name: 'Writing', data: pick('writing'), color: '#F59E0B' }
+            ]
+          });
+        }).catch(function () {
+          trendEl.innerHTML = '<p style="text-align:center;padding:26px 14px;color:var(--gray-400);font-size:0.82rem;margin:0;">Grade history is unavailable right now.</p>';
+        });
+      } else if (trendEl) {
+        trendEl.innerHTML = '<p style="text-align:center;padding:26px 14px;color:var(--gray-400);font-size:0.82rem;margin:0;">Enroll in a course to start building your grade trend.</p>';
+      }
+    }
+  </script>
+
+  <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><div class="confirm-icon confirm-icon--warning"><iconify-icon icon="mdi:alert-outline"></iconify-icon></div><div class="confirm-title"></div><div class="confirm-message"></div><div class="confirm-actions"><button class="confirm-btn confirm-btn--cancel">Cancel</button><button class="confirm-btn confirm-btn--confirm">Confirm</button></div></div></div>
+  <div class="settings-toast" id="studentToast"></div>
+
+  <!-- Get Started Onboarding Modal -->
+  <div class="modal-overlay" id="getStartedModal">
+    <div class="modal-card">
+      <div class="get-started-hero">
+        <button class="modal-close" onclick="declinePortalAgreement()" aria-label="Close">&times;</button>
+        <p class="get-started-hero__eyebrow">UNMEI Student Portal &amp; Mobile App</p>
+        <h3 class="get-started-hero__title">Portal Usage Agreement</h3>
+        <p class="get-started-hero__sub">Please read this Agreement carefully. It sets out the terms under which your Student Account, the Student Portal, and the UNMEI Learning mobile application operate. Acceptance is required before account features are activated.</p>
+      </div>
+      <div class="modal-body">
+        <div class="portal-agreement-box" id="portalAgreementBox" tabindex="0" aria-label="Portal usage agreement">
+          <p class="agreement-intro">This Portal Usage Agreement explains how your Unmei Nihongo Center Student Account works across the web portal and the UNMEI Learning mobile application. Please read it before accepting below.</p>
+
+          <h4>1. Your Account</h4>
+          <p>Your account was created from your enrollment details and stays connected to your registered course. It is for your personal use only, so please keep your password private and let the office know if anything looks unusual with your sign-ins.</p>
+
+          <h4>2. Course Access</h4>
+          <p>Course materials, schedules, and the mobile app become available once your payment has been verified by the administration. Your enrolled level determines the lessons, sections, and schedules shown to you.</p>
+
+          <h4>3. Payments and Fees</h4>
+          <p>You may settle tuition through bank transfer, GCash, other accredited channels, or over-the-counter at the school office. Submitted payments are marked pending until reviewed by the administration, and installment due dates appear on your Payment page. The registration fee is non-refundable.</p>
+
+          <h4>4. Portal and Mobile App</h4>
+          <p>The portal and the mobile app share the same student record. Practice activities completed in the app sync to your dashboard so your instructors can follow your progress. Syncing happens online at regular intervals, so recently finished work may take a few minutes to appear.</p>
+
+          <h4>5. Academic Honesty</h4>
+          <p>Attend your scheduled classes, do your own work, and use the portal respectfully. Quiz and assessment results recorded here form part of your class standing. If you have concerns about any record, coordinate with your instructor or the office.</p>
+
+          <h4>6. Learning Materials</h4>
+          <p>Lessons, quizzes, recordings, and other resources remain the property of Unmei Nihongo Center. They are for your personal study only, so please do not copy, share, or post them elsewhere without permission.</p>
+
+          <h4>7. Your Privacy</h4>
+          <p>The portal keeps only what your classes need: your name, contact details, enrollment and payment records, and learning progress. These are stored securely and seen only by staff and instructors involved in your course. They are never sold or shared outside the school. You may ask the office for a copy of your records or request corrections at any time.</p>
+
+          <h4>8. Service Availability</h4>
+          <p>We work to keep the portal reliable and will announce maintenance ahead of time whenever possible. Like any online service, brief interruptions can happen â€” for example during power or internet outages â€” and these are outside the school's control.</p>
+
+          <h4>9. Account Status</h4>
+          <p>Accounts may be paused for unsettled balances or misuse of the platform, and long-inactive accounts may be retired. If your account is affected, contact the office to settle requirements or request copies of your records before it is removed.</p>
+
+          <h4>10. Withdrawing from a Program</h4>
+          <p>If you need to withdraw, simply inform the school office in writing. Refunds of prepaid tuition follow the school's refund policy, and a completion certificate is released to students who finish their program in good standing.</p>
+
+          <h4>11. Updates and Contact</h4>
+          <p>This agreement may be updated as features or school policies change, and the portal will show you the latest version when that happens. Continuing to use the portal means you accept the current terms. For questions, visit the front desk during office hours, Mondays to Saturdays, or email admin@unmei-ph.com.</p>
+        </div>
+        <label class="agreement-consent">
+          <input type="checkbox" id="portalAgreementConsent" onchange="updateAgreementAcceptState()" />
+          <span>I have read and accept the Portal Usage Agreement.</span>
+        </label>
+        <div class="agreement-actions">
+          <button type="button" class="agreement-btn agreement-btn--ghost" onclick="declinePortalAgreement()">Not Now</button>
+          <button type="button" class="agreement-btn agreement-btn--primary" id="portalAgreementAcceptBtn" onclick="acceptPortalAgreement()" disabled>Accept &amp; Get Started</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guided Tour Overlay (first-time onboarding, after agreement acceptance) -->
+  <div class="tour-overlay" id="guidedTourOverlay" aria-hidden="true">
+    <div class="tour-dim" id="tourDim"></div>
+    <div class="tour-spot" id="tourSpot"></div>
+    <div class="tour-card" id="tourCard" role="dialog" aria-live="polite">
+      <div class="tour-card__head">
+        <span class="tour-card__step" id="tourStepLabel">Step 1 of 4</span>
+        <button type="button" class="tour-card__skip" onclick="skipGuidedTour()">Skip Tour</button>
+      </div>
+      <h3 class="tour-card__title" id="tourTitle"></h3>
+      <p class="tour-card__body" id="tourBody"></p>
+      <div class="tour-card__dots" id="tourDots"></div>
+      <div class="tour-card__actions">
+        <button type="button" class="tour-btn tour-btn--ghost" id="tourPrevBtn" onclick="tourStep(-1)">Back</button>
+        <button type="button" class="tour-btn tour-btn--primary" id="tourNextBtn" onclick="tourNext()">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openGetStartedDialog() {
+      var modal = document.getElementById('getStartedModal');
+      if (!modal) return;
+      var consent = document.getElementById('portalAgreementConsent');
+      if (consent) consent.checked = false;
+      updateAgreementAcceptState();
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeGetStartedDialog() {
+      var modal = document.getElementById('getStartedModal');
+      if (modal) modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    function updateAgreementAcceptState() {
+      var consent = document.getElementById('portalAgreementConsent');
+      var btn = document.getElementById('portalAgreementAcceptBtn');
+      if (btn) btn.disabled = !(consent && consent.checked);
+    }
+    function acceptPortalAgreement() {
+      var consent = document.getElementById('portalAgreementConsent');
+      if (!consent || !consent.checked) return;
+      var uid = localStorage.getItem('studentUid') || '';
+      var acceptedAt = Date.now();
+      if (uid) {
+        localStorage.setItem('portalAgreementAccepted_' + uid, String(acceptedAt));
+        try {
+          database.ref('students/' + uid + '/profile/portalAgreement').update({ accepted: true, acceptedAt: acceptedAt });
+          database.ref('students/' + uid + '/onboardingComplete').set(true);
+        } catch (e) { /* acceptance still recorded locally */ }
+      }
+      closeGetStartedDialog();
+      // Onboarding is done: switch back to the regular dashboard banner immediately.
+      var firstBanner = document.getElementById('firstTimeBanner');
+      var regularBanner = document.querySelector('.banner');
+      if (firstBanner) firstBanner.style.display = 'none';
+      if (regularBanner) regularBanner.style.display = 'block';
+      // Guided tour follows the agreement on the first sign-in.
+      openGuidedTour();
+    }
+    function declinePortalAgreement() {
+      closeGetStartedDialog();
+      var toast = document.getElementById('studentToast');
+      if (toast) {
+        toast.textContent = 'No problem. Open Get Started again whenever you are ready to review the agreement.';
+        toast.classList.add('active');
+        setTimeout(function () { toast.classList.remove('active'); }, 4000);
+      }
+    }
+    function toggleMobileSidebar(){var s=document.querySelector('.sidebar'),b=document.getElementById('sidebarBackdrop');if(s.classList.contains('sidebar--mobile-open')){closeMobileSidebar();}else{s.classList.add('sidebar--mobile-open');b.classList.add('active');document.body.style.overflow='hidden';}}
+    function closeMobileSidebar(){var s=document.querySelector('.sidebar');var b=document.getElementById('sidebarBackdrop');s.classList.remove('sidebar--mobile-open');b.classList.remove('active');document.body.style.overflow='';}
+    window.addEventListener('resize',function(){if(window.innerWidth>700)closeMobileSidebar();});
+  </script>
+  <script src="student-header-sync.js"></script>
+<script src="assets/global-search.js"></script>
+  <script>
+    // =====================
+    //   GUIDED TOUR (PHASE 7)
+    // =====================
+    var TOUR_STEPS = [
+      { title: 'Your Dashboard', body: 'This is your dashboard. The cards across the top summarize your enrolled course, schedule, course progress, and next payment. Below them you will find charts that track your learning and progress over time.', selector: '.stats-grid', side: 'bottom' },
+      { title: 'Your Courses', body: 'Open My Courses to view your course modules, kanji reference, and grade history for your enrolled level.', selector: 'a[href="courses.html"]', side: 'right' },
+      { title: 'Your Schedule', body: 'Your class schedule and section details live under Schedules. Check it regularly so you never miss a session.', selector: 'a[href="schedules.html"]', side: 'right' },
+      { title: 'Download the App', body: 'The UNMEI Learning mobile app is where you take practice activities and assessments. Your work there syncs back to this portal automatically. Find the download links under App Download.', selector: 'a[href="app-download.html"]', side: 'right' }
+    ];
+
+    var tourIndex = 0;
+    var tourActive = false;
+
+    function openGuidedTour() {
+      var overlay = document.getElementById('guidedTourOverlay');
+      if (!overlay) return;
+      var uid = localStorage.getItem('studentUid') || '';
+      if (uid && localStorage.getItem('portalTourShown_' + uid) === 'true') {
+        return; // tour only shows once per account
+      }
+      tourIndex = 0;
+      tourActive = true;
+      overlay.setAttribute('aria-hidden', 'false');
+      overlay.classList.add('active');
+      renderTourStep();
+    }
+
+    function closeGuidedTour() {
+      var overlay = document.getElementById('guidedTourOverlay');
+      if (!overlay) return;
+      var uid = localStorage.getItem('studentUid') || '';
+      if (uid) {
+        localStorage.setItem('portalTourShown_' + uid, 'true');
+        try {
+          database.ref('students/' + uid + '/onboardingComplete').set(true);
+        } catch (e) { /* ignored */ }
+      }
+      tourActive = false;
+      overlay.classList.remove('active');
+      overlay.setAttribute('aria-hidden', 'true');
+      clearTourSpot();
+      document.body.style.overflow = '';
+    }
+
+    function skipGuidedTour() {
+      closeGuidedTour();
+    }
+
+    function renderTourStep() {
+      var step = TOUR_STEPS[tourIndex];
+      if (!step) return;
+      var stepLabel = document.getElementById('tourStepLabel');
+      var title = document.getElementById('tourTitle');
+      var body = document.getElementById('tourBody');
+      var nextBtn = document.getElementById('tourNextBtn');
+      var prevBtn = document.getElementById('tourPrevBtn');
+      var dotsHost = document.getElementById('tourDots');
+      if (stepLabel) stepLabel.textContent = 'Step ' + (tourIndex + 1) + ' of ' + TOUR_STEPS.length;
+      if (title) title.textContent = step.title;
+      if (body) body.textContent = step.body;
+      if (nextBtn) nextBtn.textContent = (tourIndex === TOUR_STEPS.length - 1) ? 'Finish' : 'Next';
+      if (prevBtn) prevBtn.style.visibility = (tourIndex === 0) ? 'hidden' : 'visible';
+      if (dotsHost) {
+        dotsHost.innerHTML = TOUR_STEPS.map(function (_, i) {
+          return '<span class="tour-dot' + (i === tourIndex ? ' tour-dot--active' : '') + '"></span>';
+        }).join('');
+      }
+      positionTourOn(step.selector, step.side);
+    }
+
+    function tourStep(dir) {
+      var next = tourIndex + dir;
+      if (next < 0) return;
+      if (next >= TOUR_STEPS.length) {
+        closeGuidedTour();
+        return;
+      }
+      tourIndex = next;
+      renderTourStep();
+    }
+
+    function tourNext() {
+      tourStep(1);
+    }
+
+    function positionTourOn(selector, side) {
+      var el = document.querySelector(selector);
+      var spot = document.getElementById('tourSpot');
+      var card = document.getElementById('tourCard');
+      var dim = document.getElementById('tourDim');
+      if (!el || !spot || !card) {
+        if (card) { card.style.top = '25%'; card.style.left = '50%'; card.style.transform = 'translateX(-50%)'; }
+        return;
+      }
+      var rect = el.getBoundingClientRect();
+      var pad = 8;
+      spot.style.display = 'block';
+      spot.style.top = (window.scrollY + rect.top - pad) + 'px';
+      spot.style.left = (rect.left - pad) + 'px';
+      spot.style.width = (rect.width + pad * 2) + 'px';
+      spot.style.height = (rect.height + pad * 2) + 'px';
+      if (dim) dim.style.opacity = '1';
+      var cardW = 300;
+      var viewportW = window.innerWidth;
+      var left = rect.left + rect.width / 2 - cardW / 2;
+      left = Math.max(12, Math.min(viewportW - cardW - 12, left));
+      var top;
+      if (side === 'bottom') {
+        top = window.scrollY + rect.bottom + 16;
+      } else {
+        top = (rect.right + 16 + cardW > viewportW) ? window.scrollY + rect.top - 70 : window.scrollY + rect.top;
+      }
+      card.style.top = top + 'px';
+      card.style.left = left + 'px';
+      card.style.transform = 'none';
+    }
+
+    function clearTourSpot() {
+      var spot = document.getElementById('tourSpot');
+      var dim = document.getElementById('tourDim');
+      if (spot) spot.style.display = 'none';
+      if (dim) dim.style.opacity = '0';
+    }
+
+    window.addEventListener('resize', function () {
+      if (tourActive && TOUR_STEPS[tourIndex]) {
+        positionTourOn(TOUR_STEPS[tourIndex].selector, TOUR_STEPS[tourIndex].side);
+      }
+    });
+  </script>
+</body>
+</html>

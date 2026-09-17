@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings – UNMEI Instructor Portal</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="instructorportal.css" />
+  <script src="assets/iconify-icon.min.js"></script>
+  <script src="assets/unmei-icons.js"></script>
+</head>
+<body>
+  <script src="session-guard.js"></script>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="brand-logo">
+        <img src="assets/logo.png" alt="UNMEI" style="width:40px;height:40px;object-fit:contain;">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UNMEI</span>
+        <span class="brand-portal">INSTRUCTOR PORTAL</span>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <p class="nav-section-label">OVERVIEW</p>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="instructor-dashboard.html" class="nav-link">
+            <iconify-icon icon="mdi:view-dashboard"></iconify-icon>
+            Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="instructor-students.html" class="nav-link">
+            <iconify-icon icon="mdi:account-multiple-outline"></iconify-icon>
+            My Students
+            <span class="nav-badge" id="studentBadge">0</span>
+          </a>
+        </li>
+      </ul>
+
+      <p class="nav-section-label" style="margin-top:20px;">ACADEMIC</p>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="instructor-ratings.html" class="nav-link">
+            <iconify-icon icon="mdi:star-outline"></iconify-icon>
+            Ratings and Feedback
+          </a>
+        </li>
+      </ul>
+
+      <p class="nav-section-label" style="margin-top:20px;">PORTAL SETTINGS</p>
+      <ul class="nav-list">
+        <li class="nav-item nav-item--active">
+          <a href="instructor-settings.html" class="nav-link">
+            <iconify-icon icon="mdi:cog-outline"></iconify-icon>
+            Settings
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="javascript:void(0)" onclick="if(window.instructorSignOut){window.instructorSignOut();}else{handleSignOut();}" class="nav-link">
+            <iconify-icon icon="mdi:logout"></iconify-icon>
+            Sign Out
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar__user">
+      <div class="user-avatar user-avatar--dark" id="sidebarAvatar">IN</div>
+      <div class="user-meta">
+        <span class="user-name" id="sidebarUserName">Instructor</span>
+        <span class="user-role">Instructor</span>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <!-- MAIN -->
+  <div class="main-wrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="sidebar-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
+      <div class="topbar__left">
+        <h2 class="topbar__title">Settings</h2>
+        <nav class="breadcrumb">
+          <a href="instructor-dashboard.html" class="breadcrumb__link">Home</a>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current">Settings</span>
+        </nav>
+      </div>
+      <div class="topbar__center"></div>
+      <div class="topbar__right">
+        <div class="avatar-btn" onclick="toggleAvatarMenu(event)">
+          <div class="user-avatar" id="headerAvatar">IN</div>
+          <div class="avatar-btn__meta">
+            <span class="avatar-btn__name" id="headerUserName">Instructor</span>
+            <span class="avatar-btn__role">Instructor</span>
+          </div>
+          <iconify-icon icon="mdi:chevron-down" class="avatar-btn__caret"></iconify-icon>
+          <div class="avatar-menu" id="avatarMenu">
+            <div class="avatar-menu__header">
+              <div class="user-avatar" id="menuAvatar">IN</div>
+              <div>
+                <div class="avatar-menu__name" id="menuName">Instructor</div>
+                <div class="avatar-menu__email" id="menuEmail"></div>
+              </div>
+            </div>
+            <a class="avatar-menu__item" href="instructor-settings.html#profile">
+              <iconify-icon icon="mdi:account-circle-outline"></iconify-icon>
+              View Profile
+            </a>
+            <a class="avatar-menu__item" href="instructor-settings.html">
+              <iconify-icon icon="mdi:cog-outline"></iconify-icon>
+              Settings
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content">
+
+      <!-- Profile -->
+      <section class="panel" id="profile">
+        <div class="panel__header">
+          <h3 class="panel__title"><iconify-icon icon="mdi:account-circle-outline"></iconify-icon> Instructor Profile</h3>
+          <span class="panel__meta">Managed by the administrator</span>
+        </div>
+        <div class="panel__body" id="profileBody">
+          <p class="panel-loading">Loading profile...</p>
+        </div>
+      </section>
+
+      <!-- Credentials + courses -->
+      <section class="two-col">
+        <div class="panel">
+          <div class="panel__header">
+            <h3 class="panel__title"><iconify-icon icon="mdi:certificate-outline"></iconify-icon> Credentials</h3>
+          </div>
+          <div class="panel__body" id="credentialsBody">
+            <p class="panel-loading">Loading credentials...</p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__header">
+            <h3 class="panel__title"><iconify-icon icon="mdi:school-outline"></iconify-icon> Assigned Courses</h3>
+          </div>
+          <div class="panel__body" id="assignedBody">
+            <p class="panel-loading">Loading courses...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Session + sign out -->
+      <section class="panel">
+        <div class="panel__header">
+          <h3 class="panel__title"><iconify-icon icon="mdi:shield-lock-outline"></iconify-icon> Session</h3>
+        </div>
+        <div class="panel__body">
+          <div class="session-row">
+            <div class="session-row__info">
+              <p class="session-row__title">Active session</p>
+              <p class="session-row__meta">Sessions expire after 30 minutes of inactivity. Sign out when finished, especially on shared devices.</p>
+            </div>
+            <button class="signout-btn" type="button" onclick="requestSignOut()">
+              <iconify-icon icon="mdi:logout"></iconify-icon>
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Sign out confirmation -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+      <div class="confirm-icon confirm-icon--danger"><iconify-icon icon="mdi:logout"></iconify-icon></div>
+      <h3 class="confirm-title" id="confirmTitle">Sign Out</h3>
+      <p class="confirm-message" id="confirmMessage">Are you sure you want to sign out?</p>
+      <div class="confirm-actions">
+        <button class="confirm-btn confirm-btn--cancel" type="button" onclick="confirmNo()">Cancel</button>
+        <button class="confirm-btn confirm-btn--confirm" type="button" onclick="confirmYes()">Sign Out</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="instructor-header-sync.js?v=20260907"></script>
+  <script>
+    const database = firebase.database();
+    const instructorId = sessionStorage.getItem('instructorId') || '';
+    const instructorEmail = sessionStorage.getItem('instructorEmail') || '';
+    if (window.syncInstructorStudentBadge) window.syncInstructorStudentBadge();
+
+    // ---------- avatar menu ----------
+    function toggleAvatarMenu(event) {
+      event.stopPropagation();
+      document.getElementById('avatarMenu').classList.toggle('active');
+    }
+    document.addEventListener('click', function (e) {
+      const menu = document.getElementById('avatarMenu');
+      if (menu && !e.target.closest('.avatar-btn')) menu.classList.remove('active');
+    });
+    function applyMenuIdentity(name) {
+      const display = String(name || 'Instructor');
+      const parts = display.trim().split(/\s+/).filter(Boolean);
+      const ini = parts.length >= 2
+        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+        : (display.slice(0, 2) || 'IN').toUpperCase();
+      ['headerAvatar', 'menuAvatar'].forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = ini;
+      });
+      const nameEl = document.getElementById('menuName');
+      if (nameEl) nameEl.textContent = display;
+      const emailEl = document.getElementById('menuEmail');
+      if (emailEl) emailEl.textContent = instructorEmail;
+    }
+
+    function listOf(value) {
+      if (Array.isArray(value)) return value.filter(Boolean);
+      if (value && typeof value === 'object') return Object.values(value).filter(Boolean);
+      return [];
+    }
+
+    function normalizeCourseId(value) {
+      return String(value || '').trim().toLowerCase().replace(/\s+/g, '_');
+    }
+
+    Promise.all([
+      database.ref('professors/' + instructorId).once('value'),
+      database.ref('courses').once('value')
+    ]).then(function (results) {
+      const data = results[0].val() || {};
+      const coursesSnap = results[1];
+
+      applyMenuIdentity(data.fullName || sessionStorage.getItem('instructorDisplayName'));
+      renderProfile(data);
+      renderCredentials(data);
+      renderAssigned(data, coursesSnap);
+    }).catch(function () {
+      document.getElementById('profileBody').innerHTML = '<p class="panel-empty">Unable to load profile.</p>';
+    });
+
+    function initialsOf(name) {
+      const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+      if (!parts.length) return 'IN';
+      return parts.map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+    }
+
+    function renderProfile(data) {
+      const name = data.fullName || 'Instructor';
+      const avg = Number(data.averageRating || 0);
+      const total = Number(data.totalRatings || 0);
+      document.getElementById('profileBody').innerHTML = (
+        '<div class="profile-block">' +
+          '<div class="profile-block__avatar">' + escapeHtml(initialsOf(name)) + '</div>' +
+          '<div class="profile-block__body">' +
+            '<h2 class="profile-block__name">' + escapeHtml(name) + '</h2>' +
+            '<p class="profile-block__role">' + escapeHtml(data.specialization || 'Instructor') + '</p>' +
+            (data.bio ? '<p class="profile-block__bio">' + escapeHtml(data.bio) + '</p>' : '') +
+            '<div class="profile-block__facts">' +
+              '<span class="profile-fact"><iconify-icon icon="mdi:email-outline"></iconify-icon> ' + escapeHtml(data.email || instructorEmail) + '</span>' +
+              '<span class="profile-fact"><iconify-icon icon="mdi:star-outline"></iconify-icon> ' + (avg ? avg.toFixed(1) + ' average rating' : 'No ratings yet') + '</span>' +
+              '<span class="profile-fact"><iconify-icon icon="mdi:message-star-outline"></iconify-icon> ' + total + ' evaluation' + (total === 1 ? '' : 's') + ' received</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    function renderCredentials(data) {
+      const cred = data.credentials || {};
+      const certifications = listOf(cred.certifications);
+      const languages = listOf(cred.languagesSpoken);
+      const items = [];
+      if (cred.education) items.push({ icon: 'mdi:school-outline', label: 'Education', value: String(cred.education) });
+      if (cred.yearsExperience) items.push({ icon: 'mdi:briefcase-outline', label: 'Experience', value: cred.yearsExperience + ' year' + (Number(cred.yearsExperience) === 1 ? '' : 's') + ' teaching' });
+      if (languages.length) items.push({ icon: 'mdi:translate', label: 'Languages', value: languages.map(String).join(', ') });
+
+      let html = items.map(function (item) {
+        return (
+          '<div class="cred-row">' +
+            '<div class="cred-row__icon"><iconify-icon icon="' + item.icon + '"></iconify-icon></div>' +
+            '<div><p class="cred-row__label">' + item.label + '</p><p class="cred-row__value">' + escapeHtml(item.value) + '</p></div>' +
+          '</div>'
+        );
+      }).join('');
+
+      if (certifications.length) {
+        html += '<p class="cred-certs-label">Certifications</p>';
+        html += '<div class="chip-row">' + certifications.map(function (cert) {
+          return '<span class="improve-chip" style="color:var(--red);">' + escapeHtml(String(cert)) + '</span>';
+        }).join('') + '</div>';
+      }
+
+      document.getElementById('credentialsBody').innerHTML = html || '<p class="panel-empty">No education, certification, or language credentials are recorded in the instructor profile. Contact the administrator to update this record.</p>';
+    }
+
+    function renderAssigned(data, coursesSnap) {
+      const assignedIds = [];
+      listOf(data.coursesAssigned).forEach(function (v) { assignedIds.push(normalizeCourseId(v)); });
+
+      const names = [];
+      if (coursesSnap.exists()) {
+        coursesSnap.forEach(function (child) {
+          const course = child.val() || {};
+          const ids = listOf(course.instructorIds).map(String);
+          if (course.instructorId) ids.push(String(course.instructorId));
+          const key = normalizeCourseId(child.key);
+          if (ids.indexOf(instructorId) !== -1 || assignedIds.indexOf(key) !== -1) {
+            names.push(String(course.name || course.title || child.key));
+          }
+        });
+      }
+
+      const unique = names.filter(function (n, i) { return names.indexOf(n) === i; });
+      document.getElementById('assignedBody').innerHTML = unique.length
+        ? '<div class="chip-row">' + unique.map(function (n) { return '<span class="improve-chip">' + escapeHtml(n) + '</span>'; }).join('') + '</div>'
+        : '<p class="panel-empty">No courses assigned yet.</p>';
+    }
+
+    function requestSignOut() {
+      showConfirm('Sign Out', 'Are you sure you want to sign out of the instructor portal?', function () {
+        instructorSignOut();
+      });
+    }
+
+    // Scroll to profile when opened via "View Profile"
+    if (window.location.hash === '#profile') {
+      document.addEventListener('DOMContentLoaded', function () {
+        const target = document.getElementById('profile');
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+  </script>
+<script src="assets/global-search.js"></script>
+</body>
+</html>

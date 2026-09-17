@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unmei Nihongo Center - Settings</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="studentportal.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="assets/iconify-icon.min.js"></script>
+<script src="assets/unmei-icons.js"></script>
+</head>
+<body>
+  <script src="session-guard.js"></script>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="brand-logo">
+        <img src="assets/logo.png" alt="UNMEI" style="width:40px;height:40px;object-fit:contain;">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UNMEI</span>
+        <span class="brand-portal">STUDENT PORTAL</span>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <p class="nav-section-label">OVERVIEW</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="dashboard.html" class="nav-link">
+          <iconify-icon icon="mdi:view-dashboard"></iconify-icon>
+          Dashboard</a></li>
+        <li class="nav-item"><a href="profile.html" class="nav-link">
+          <iconify-icon icon="mdi:account-outline"></iconify-icon>
+          My Profile</a></li>
+        <li class="nav-item"><a href="courses.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+          My Courses</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">RECORDS</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="payments.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+          Payments</a></li>
+        <li class="nav-item"><a href="app-download.html" class="nav-link">
+          <iconify-icon icon="mdi:download-outline"></iconify-icon>
+          App Download</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">STUDENT LIFE</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="schedules.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+          Schedules</a></li>
+        <li class="nav-item"><a href="announcements.html" class="nav-link">
+          <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+          Announcements</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">PORTAL SETTINGS</p>
+      <ul class="nav-list">
+        <li class="nav-item nav-item--active"><a href="settings.html" class="nav-link">
+          <iconify-icon icon="mdi:cog-outline"></iconify-icon>
+          Settings</a></li>
+        <li class="nav-item"><a href="javascript:void(0)" onclick="if(window.__studentSignOut){window.__studentSignOut();}else{logout();}" class="nav-link">
+          <iconify-icon icon="mdi:logout"></iconify-icon>
+          Sign Out</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar__user">
+      <div id="sidebarAvatarText" class="user-avatar user-avatar--dark">--</div>
+      <img id="sidebarAvatarImg" class="user-avatar user-avatar--img" style="display:none;width:36px;height:36px;border-radius:50%;object-fit:cover;" alt="Avatar">
+      <div class="user-meta">
+        <span class="user-name" id="sidebarUserName">Student</span>
+        <span class="user-role">Student</span>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="main-wrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="sidebar-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
+        <div class="topbar__left">
+        <h2 class="topbar__title">Settings</h2>
+        <nav class="breadcrumb">
+          <a href="dashboard.html" class="breadcrumb__link">Home</a>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current">Settings</span>
+        </nav>
+      </div>
+      <div class="topbar__center"></div>
+      <div class="topbar__right">
+        <!-- Notification Bell -->
+        <div style="position: relative;">
+          <button class="icon-btn" id="notifBtn" onclick="toggleDropdown('notifDropdown')"><iconify-icon icon="mdi:bell-outline"></iconify-icon><span class="dropdown-badge" id="notifBadge" style="display: none;">0</span></button><div class="header-dropdown" id="notifDropdown"><div class="header-dropdown__header"><span class="header-dropdown__title">Notifications</span><span class="header-dropdown__link" onclick="markAllRead()">Mark all read</span></div><div class="header-dropdown__list" id="notifList"><div class="header-dropdown__empty" id="notifEmpty"><iconify-icon icon="mdi:bell-outline"></iconify-icon><p>No notifications yet</p></div></div></div>
+        </div>
+
+        <!-- Messages -->
+        <div style="position: relative;">
+          <button class="icon-btn" id="msgBtn" onclick="toggleDropdown('msgDropdown')">
+            <iconify-icon icon="mdi:email-outline"></iconify-icon>
+            <span class="dropdown-badge" id="msgBadge" style="display: none;">0</span>
+          </button>
+          <div class="header-dropdown" id="msgDropdown">
+            <div class="header-dropdown__header">
+              <span class="header-dropdown__title">Messages</span>
+              <span class="header-dropdown__link" onclick="viewAllMessages()">View all</span>
+            </div>
+            <div class="header-dropdown__list" id="msgList">
+              <div class="header-dropdown__empty" id="msgEmpty">
+                <iconify-icon icon="mdi:email-outline"></iconify-icon>
+                <p>No messages</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="topbar__user">
+          <div id="headerAvatarText" class="user-avatar user-avatar--red">--</div>
+          <img id="headerAvatarImg" class="user-avatar user-avatar--img" style="display:none;width:36px;height:36px;border-radius:50%;object-fit:cover;" alt="Avatar">
+          <div class="user-meta">
+            <span class="user-name" id="headerUserName">Student</span>
+            <span class="user-role">Student</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content">
+
+      <!-- Page Hero -->
+      <div class="settings-hero">
+        <div class="settings-hero__left">
+          <h1 class="settings-hero__title">Personalize your Nihongo experience</h1>
+          <p class="settings-hero__sub">Manage your account, notifications, preferences and security settings below.</p>
+        </div>
+        <div class="settings-hero__stats">
+          <div class="hero-stat">
+          <span class="hero-stat__num" id="profilesLinked">0</span>
+          <span class="hero-stat__label">PROFILES LINKED</span>
+          <span class="hero-stat__note" id="profilesLinkedNote">Waiting for sync</span>
+        </div>
+        <div class="hero-stat hero-stat--divider">
+          <span class="hero-stat__num" id="lastUpdated">--</span>
+          <span class="hero-stat__label">LAST UPDATED</span>
+          <span class="hero-stat__note" id="lastUpdatedNote">No updates yet</span>
+        </div>
+        </div>
+      </div>
+
+      <!-- Settings Cards Grid -->
+      <div class="settings-grid" id="settingsGrid">
+
+        <!-- 1. Account Identity -->
+        <div class="s-card" data-keywords="account identity name kana guardian email">
+          <h3 class="s-card__title">Account Identity</h3>
+          <p class="s-card__desc">Update legal name, kana, and guardian info.</p>
+          <div class="s-field-list">
+            <div class="s-field">
+              <span class="s-field__label">Full Name</span>
+              <div class="s-field__editable">
+                <input type="text" class="s-input" id="fullNameInput" value="" placeholder="Not set" readonly />
+                <button class="s-edit-btn" onclick="toggleEdit('fullNameInput', this)">Edit</button>
+              </div>
+            </div>
+            <div class="s-field">
+              <span class="s-field__label">Kana</span>
+              <div class="s-field__editable">
+                <input type="text" class="s-input" id="kanaInput" value="" placeholder="Not set" readonly />
+                <button class="s-edit-btn" onclick="toggleEdit('kanaInput', this)">Edit</button>
+              </div>
+            </div>
+            <div class="s-field">
+              <span class="s-field__label">Guardian Contact</span>
+              <div class="s-field__editable">
+                <input type="text" class="s-input" id="guardianInput" value="" placeholder="Not set" readonly />
+                <button class="s-edit-btn" onclick="toggleEdit('guardianInput', this)">Edit</button>
+              </div>
+            </div>
+            <div class="s-field">
+              <span class="s-field__label">Primary Email</span>
+              <div class="s-field__editable">
+                <input type="email" class="s-input" id="emailInput" value="" placeholder="Not set" readonly />
+                <button class="s-edit-btn" onclick="toggleEdit('emailInput', this)">Edit</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Notifications -->
+        <div class="s-card" data-keywords="notifications email sms line alerts digest push">
+          <h3 class="s-card__title">Notifications</h3>
+          <p class="s-card__desc">Choose how UNMEI reaches you.</p>
+          <div class="s-toggle-list">
+            <div class="s-toggle-row">
+              <div class="s-toggle-info">
+                <p class="s-toggle-name">Email digest</p>
+                <p class="s-toggle-sub">Weekly summary in English &amp; Nihongo</p>
+              </div>
+              <label class="toggle" title="Email digest">
+                <input type="checkbox" id="emailDigestToggle" checked onchange="onToggle(this, 'Email digest')"/>
+                <span class="toggle__track"><span class="toggle__thumb"></span></span>
+              </label>
+            </div>
+            <div class="s-toggle-row">
+              <div class="s-toggle-info">
+                <p class="s-toggle-name">SMS alerts</p>
+                <p class="s-toggle-sub">Tuition reminders and emergency advisories</p>
+              </div>
+              <label class="toggle" title="SMS alerts">
+                <input type="checkbox" id="smsAlertsToggle" onchange="onToggle(this, 'SMS alerts')"/>
+                <span class="toggle__track"><span class="toggle__thumb"></span></span>
+              </label>
+            </div>
+            <div class="s-toggle-row">
+              <div class="s-toggle-info">
+                <p class="s-toggle-name">LINE mini-app</p>
+                <p class="s-toggle-sub">Receive pushes via LINE bot</p>
+              </div>
+              <label class="toggle" title="LINE mini-app">
+                <input type="checkbox" id="lineMiniAppToggle" checked onchange="onToggle(this, 'LINE mini-app')"/>
+                <span class="toggle__track"><span class="toggle__thumb"></span></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Learning Preferences -->
+        <div class="s-card" data-keywords="learning preferences grammar listening kanji conversation culture cadence practice">
+          <h3 class="s-card__title">Learning Preferences</h3>
+          <p class="s-card__desc">Highlight areas you need extra focus on.</p>
+          <div class="s-chip-group" id="learningChips">
+            <button class="s-chip s-chip--active" onclick="toggleChip(this)">Grammar</button>
+            <button class="s-chip s-chip--active" onclick="toggleChip(this)">Listening</button>
+            <button class="s-chip s-chip--active s-chip--kanji" onclick="toggleChip(this)">Kanji</button>
+            <button class="s-chip" onclick="toggleChip(this)">Conversation</button>
+            <button class="s-chip" onclick="toggleChip(this)">Culture</button>
+            <button class="s-chip" onclick="toggleChip(this)">Reading</button>
+            <button class="s-chip" onclick="toggleChip(this)">Writing</button>
+          </div>
+          <div class="s-field" style="margin-top:14px;">
+            <span class="s-field__label">Practice cadence</span>
+            <div class="s-field__editable">
+              <input type="text" class="s-input" id="cadenceInput" value="MWF · 45 minutes daily target" readonly />
+              <button class="s-edit-btn s-edit-btn--teal" onclick="toggleEdit('cadenceInput', this)">Editable</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Appearance -->
+        <div class="s-card" data-keywords="appearance theme light mode display">
+          <h3 class="s-card__title">Appearance</h3>
+          <p class="s-card__desc">Student portal is now fixed to light mode for consistent readability.</p>
+          <div class="s-field" style="margin-top:12px;">
+            <span class="s-field__label">Active theme</span>
+            <div class="s-field__editable">
+              <span class="s-value">Light</span>
+              <span class="s-chip-badge s-chip-badge--gray">Locked</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Devices & Security -->
+        <div class="s-card" data-keywords="devices security login trusted sign out session">
+          <h3 class="s-card__title">Devices &amp; Security</h3>
+          <p class="s-card__desc">Your current active session.</p>
+          <div class="s-device-list">
+            <div class="s-device">
+              <div class="s-device__info">
+                <p class="s-device__name" id="currentDeviceName">Current Browser</p>
+                <p class="s-device__sub" id="currentDeviceDetail">This device &middot; Active now</p>
+              </div>
+              <span class="s-chip-badge s-chip-badge--green">Active</span>
+            </div>
+          </div>
+        </div>
+
+                <!-- 6. Honorific Level -->
+        <div class="s-card" data-keywords="honorific formal polite casual speech level">
+          <h3 class="s-card__title">Honorific Level</h3>
+          <p class="s-card__desc">Set your preferred speech formality for class materials and prompts.</p>
+          <div class="s-field-list">
+            <div class="s-field">
+              <span class="s-field__label">Honorific level</span>
+              <div class="s-field__editable">
+                <select class="s-input s-select" id="honorificSelect" onchange="onSelectChange('Honorific level', this.value)">
+                  <option value="Polite">Polite (formal, -desu/-masu)</option>
+                  <option value="Casual">Casual (informal, -da/-ru)</option>
+                  <option value="Formal">Formal (keigo)</option>
+                </select>
+                <span class="s-chip-badge s-chip-badge--teal" id="honorificBadge">Polite</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. Billing & Receipts -->
+        <div class="s-card" data-keywords="billing receipts payer receipt installment payment dues">
+          <h3 class="s-card__title">Billing &amp; Receipts</h3>
+          <p class="s-card__desc">Display upcoming dues and recipients.</p>
+          <div class="s-field-list">
+            <div class="s-field">
+              <span class="s-field__label">Primary payer</span>
+              <div class="s-field__editable">
+                <span class="s-value" id="primaryPayer">--</span>
+                <span class="s-chip-badge s-chip-badge--gray">Default</span>
+              </div>
+            </div>
+            <div class="s-field">
+              <span class="s-field__label">Send receipt to</span>
+              <div class="s-field__editable">
+                <input type="email" class="s-input" id="receiptEmail" value="" placeholder="Not set" readonly />
+                <button class="s-chip-badge s-chip-badge--blue" onclick="copyReceiptEmail()">CC</button>
+              </div>
+            </div>
+            <div class="s-field">
+              <span class="s-field__label">Installment mode</span>
+              <div class="s-field__editable">
+                <span class="s-value" id="installmentMode">--</span>
+                <a href="payments.html" class="s-chip-badge s-chip-badge--yellow">Track</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      <!-- 8. Data & Storage -->
+        <div class="s-card" data-keywords="data storage sync unity app cache local">
+          <h3 class="s-card__title">Data &amp; Storage</h3>
+          <p class="s-card__desc">Manage local cache and Unity app sync.</p>
+          <div class="s-field-list">
+            <div class="s-field">
+              <span class="s-field__label">App Sync Status</span>
+              <div class="s-field__editable">
+                <span class="s-value" id="appSyncStatus">Connected</span>
+                <span class="s-chip-badge s-chip-badge--green" id="appSyncTime">Just now</span>
+              </div>
+            </div>
+            <div class="s-field">
+              <span class="s-field__label">Local Cache</span>
+              <div class="s-field__editable">
+                <span class="s-value">24.5 MB used</span>
+                <button class="s-edit-btn" onclick="showToast('Cache cleared successfully')">Clear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 9. About -->
+        <div class="s-card" data-keywords="about terms privacy policy version">
+          <h3 class="s-card__title">About Unmei</h3>
+          <p class="s-card__desc">Legal information and app version.</p>
+          <div class="s-field-list">
+            <div class="s-field" style="cursor: pointer;" onclick="showToast('Opening Terms of Service...')">
+              <span class="s-field__label">Terms of Service</span>
+              <div class="s-field__editable">
+                <iconify-icon icon="mdi:chevron-right" style="width: 16px; height: 16px; color: var(--gray-400);"></iconify-icon>
+              </div>
+            </div>
+            <div class="s-field" style="cursor: pointer;" onclick="showToast('Opening Privacy Policy...')">
+              <span class="s-field__label">Privacy Policy</span>
+              <div class="s-field__editable">
+                <iconify-icon icon="mdi:chevron-right" style="width: 16px; height: 16px; color: var(--gray-400);"></iconify-icon>
+              </div>
+            </div>
+            <div class="s-field">
+              <span class="s-field__label">App Version</span>
+              <div class="s-field__editable">
+                <span class="s-value" style="color: var(--gray-500);">Unmei Portal v1.0.0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 10. Danger Zone -->
+        <div class="s-card s-card--danger" style="border: 1px solid var(--red-light); background: var(--red-soft);" data-keywords="delete account danger terminate">
+          <h3 class="s-card__title" style="color: var(--red);">Danger Zone</h3>
+          <p class="s-card__desc" style="color: var(--red-dark);">Irreversible account actions.</p>
+          <div class="s-field-list">
+            <div class="s-field">
+              <span class="s-field__label" style="color: var(--gray-900);">Delete Account</span>
+              <div class="s-field__editable">
+                <button class="s-edit-btn" style="color: var(--red); border-color: var(--red);" onclick="showConfirm('Request Deletion', 'Are you sure you want to request account deletion? This action cannot be undone.', function(){ showToast('Deletion request sent to admin.'); })">Request</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- 11. Sign Out -->
+        <div class="s-card" data-keywords="sign out logout exit session end">
+          <h3 class="s-card__title">Sign Out</h3>
+          <p class="s-card__desc">End your current session and return to the login page.</p>
+          <div class="s-field-list">
+            <div class="s-field">
+              <span class="s-field__label">Session</span>
+              <div class="s-field__editable">
+                <span class="s-value">Currently signed in</span>
+                <button class="s-edit-btn" style="color: var(--red); border-color: var(--red);" onclick="logout()">Sign Out</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end settings-grid -->
+
+      <!-- Toast notification -->
+      <div class="settings-toast" id="settingsToast"></div>
+
+      <!-- Footer hint -->
+      <div class="settings-footer"><a href="profile.html">Need detailed edits? Open My Profile</a></div>
+
+    </main>
+  </div>
+
+  <script>
+    const database = firebase.database();
+    const studentUid = localStorage.getItem('studentUid');
+    const studentRef = studentUid ? database.ref('students/' + studentUid) : null;
+    const editableFieldMap = {
+      fullNameInput: 'profile/fullName',
+      kanaInput: 'profile/kana',
+      guardianInput: 'profile/guardianContact',
+      emailInput: 'profile/email',
+      cadenceInput: 'settings/practiceCadence'
+    };
+
+    function formatTimeAgo(timestamp) {
+      const value = Number(timestamp || 0);
+      if (!value) return 'No updates yet';
+      const diff = Date.now() - value;
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+      if (minutes < 1) return 'Updated just now';
+      if (minutes < 60) return 'Updated ' + minutes + ' min ago';
+      if (hours < 24) return 'Updated ' + hours + ' hr ago';
+      return 'Updated ' + days + ' day' + (days === 1 ? '' : 's') + ' ago';
+    }
+
+    function applyHeroStats(profile, settings) {
+      const linkedCount = [
+        profile && profile.email,
+        profile && profile.mobileNumber,
+        profile && profile.socialMediaLink
+      ].filter((value) => String(value || '').trim() !== '').length;
+
+      const profilesLinkedEl = document.getElementById('profilesLinked');
+      const profilesLinkedNoteEl = document.getElementById('profilesLinkedNote');
+      if (profilesLinkedEl) profilesLinkedEl.textContent = String(linkedCount || 1);
+      if (profilesLinkedNoteEl) {
+        profilesLinkedNoteEl.textContent = linkedCount > 1
+          ? 'Email, mobile, and socials linked'
+          : 'Primary profile linked';
+      }
+
+      const lastUpdatedValue = Math.max(
+        Number((profile && profile.updatedAt) || 0),
+        Number((settings && settings.updatedAt) || 0)
+      );
+      const lastUpdatedEl = document.getElementById('lastUpdated');
+      const lastUpdatedNoteEl = document.getElementById('lastUpdatedNote');
+
+      if (lastUpdatedValue > 0) {
+        if (lastUpdatedEl) {
+          lastUpdatedEl.textContent = new Date(lastUpdatedValue).toLocaleDateString('en-PH', {
+            month: 'short',
+            day: 'numeric'
+          });
+        }
+        if (lastUpdatedNoteEl) {
+          lastUpdatedNoteEl.textContent = formatTimeAgo(lastUpdatedValue);
+        }
+      } else {
+        if (lastUpdatedEl) lastUpdatedEl.textContent = '--';
+        if (lastUpdatedNoteEl) lastUpdatedNoteEl.textContent = 'No updates yet';
+      }
+    }
+
+    function persistStudentPatch(patch, errorMessage) {
+      if (!studentRef) {
+        showAlert('Session Missing', 'Your student session has expired. Please sign in again.', 'warning');
+        return Promise.resolve(false);
+      }
+
+      return studentRef.update(patch)
+        .then(() => true)
+        .catch(() => {
+          showAlert('Save Failed', errorMessage || 'Unable to save changes right now. Please try again.', 'danger');
+          return false;
+        });
+    }
+
+    function setDisplayName(name) {
+      const displayName = name || 'Student';
+      document.getElementById('sidebarUserName').textContent = displayName;
+      document.getElementById('headerUserName').textContent = displayName;
+      const initials = getInitials(displayName);
+      document.getElementById('sidebarAvatarText').textContent = initials;
+      document.getElementById('headerAvatarText').textContent = initials;
+      document.getElementById('primaryPayer').textContent = displayName;
+    }
+
+    function showInitialAvatars() {
+      document.getElementById('headerAvatarImg').style.display = 'none';
+      document.getElementById('sidebarAvatarImg').style.display = 'none';
+      document.getElementById('headerAvatarText').style.display = 'inline-flex';
+      document.getElementById('sidebarAvatarText').style.display = 'inline-flex';
+    }
+
+    function updateLanguageBadge(value) {
+      const badge = document.getElementById('langBadge');
+      if (!badge) return;
+      badge.textContent = value.includes('English') && value.includes('Japanese') ? 'Dual'
+        : value.includes('Japanese') ? 'JP' : 'EN';
+    }
+
+    function updateHonorificBadge(value) {
+      const badge = document.getElementById('honorificBadge');
+      if (!badge) return;
+      badge.textContent = value || 'Polite';
+    }
+
+    // ---- Inline edit toggle ----
+    function toggleEdit(inputId, btn) {
+      const input = document.getElementById(inputId);
+      const isReadonly = input.hasAttribute('readonly');
+      if (isReadonly) {
+        input.removeAttribute('readonly');
+        input.focus();
+        input.select();
+        btn.textContent = 'Save';
+        btn.classList.add('s-edit-btn--saving');
+      } else {
+        const value = input.value.trim();
+        input.value = value;
+        input.setAttribute('readonly', true);
+        btn.textContent = btn.classList.contains('s-edit-btn--teal') ? 'Editable' : 'Edit';
+        btn.classList.remove('s-edit-btn--saving');
+
+        const mappedPath = editableFieldMap[inputId];
+        if (!mappedPath) {
+          showToast('Saved: ' + value.substring(0, 30));
+          return;
+        }
+
+        const patch = {};
+        patch[mappedPath] = value;
+        if (mappedPath.startsWith('profile/')) {
+          patch['profile/updatedAt'] = Date.now();
+        } else if (mappedPath.startsWith('settings/')) {
+          patch['settings/updatedAt'] = Date.now();
+        }
+
+        persistStudentPatch(patch, 'Could not save this field. Please try again.').then((saved) => {
+          if (!saved) return;
+
+          if (inputId === 'fullNameInput') {
+            setDisplayName(value || 'Student');
+          }
+          if (inputId === 'emailInput') {
+            document.getElementById('receiptEmail').value = value;
+          }
+          showToast('Saved: ' + value.substring(0, 30));
+        });
+      }
+    }
+
+    // Allow Enter key to save
+    document.querySelectorAll('.s-input').forEach(input => {
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          const btn = input.parentElement.querySelector('.s-edit-btn');
+          if (btn) btn.click();
+        }
+      });
+    });
+
+    // ---- Toggle switches ----
+    function onToggle(checkbox, label) {
+      const state = checkbox.checked ? 'enabled' : 'disabled';
+      showToast(label + ' ' + state);
+
+      const map = {
+        'Email digest': 'emailNotifications',
+        'SMS alerts': 'smsNotifications',
+        'LINE mini-app': 'lineNotifications',
+        'Cultural prompts': 'culturalPrompts'
+      };
+      const key = map[label];
+      if (!key) return;
+
+      const patch = {};
+      patch['settings/' + key] = checkbox.checked;
+      patch['settings/updatedAt'] = Date.now();
+      persistStudentPatch(patch, 'Unable to update notification preference.');
+    }
+
+    // ---- Learning chips ----
+    function toggleChip(chip) {
+      chip.classList.toggle('s-chip--active');
+      const activeNodes = [...document.querySelectorAll('#learningChips .s-chip--active')];
+      const active = activeNodes
+        .map(c => c.textContent).join(', ');
+      showToast('Focus areas: ' + (active || 'none'));
+
+      const patch = {
+        'settings/learningFocus': activeNodes.map(c => c.textContent),
+        'settings/updatedAt': Date.now()
+      };
+      persistStudentPatch(patch, 'Unable to save learning preferences.');
+    }
+
+    // ---- Devices ----
+    // Populate current device info from navigator
+    (function() {
+      var ua = navigator.userAgent;
+      var browserName = 'Browser';
+      if (ua.indexOf('Chrome') > -1 && ua.indexOf('Edg') === -1) browserName = 'Chrome';
+      else if (ua.indexOf('Safari') > -1 && ua.indexOf('Chrome') === -1) browserName = 'Safari';
+      else if (ua.indexOf('Firefox') > -1) browserName = 'Firefox';
+      else if (ua.indexOf('Edg') > -1) browserName = 'Edge';
+      var platform = navigator.platform || 'Unknown device';
+      var deviceEl = document.getElementById('currentDeviceName');
+      var detailEl = document.getElementById('currentDeviceDetail');
+      if (deviceEl) deviceEl.textContent = platform + ' - ' + browserName;
+      if (detailEl) detailEl.textContent = 'This device - Active session';
+    })();
+
+    // ---- Select changes ----
+    function onSelectChange(label, value) {
+      showToast(label + ' set to: ' + value);
+      if (label === 'Honorific level') {
+        updateHonorificBadge(value);
+      }
+
+      const pathMap = {
+        'Honorific level': 'settings/honorificLevel'
+      };
+      const dbPath = pathMap[label];
+      if (!dbPath) return;
+
+      const patch = {};
+      patch[dbPath] = value;
+      patch['settings/updatedAt'] = Date.now();
+      persistStudentPatch(patch, 'Unable to save setting selection.');
+    }
+
+    // ---- Copy receipt email ----
+    function copyReceiptEmail() {
+      const val = document.getElementById('receiptEmail').value;
+      navigator.clipboard.writeText(val).then(() => {
+        showToast('Copied: ' + val);
+      }).catch(() => {
+        showToast('Email copied to clipboard');
+      });
+    }
+
+    // ---- Search / filter ----
+    function searchSettings() {
+      const q = document.getElementById('settingSearch').value.toLowerCase();
+      document.querySelectorAll('.s-card').forEach(card => {
+        const keywords = card.dataset.keywords || '';
+        const text = card.textContent.toLowerCase();
+        card.style.display = (text.includes(q) || keywords.includes(q)) ? '' : 'none';
+      });
+    }
+
+    // ---- Dropdown Functions ----
+    function toggleDropdown(id) {
+      const dropdown = document.getElementById(id);
+      const isActive = dropdown.classList.contains('active');
+      document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('active'));
+      document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--active'));
+      if (!isActive) {
+        dropdown.classList.add('active');
+        document.getElementById(id === 'notifDropdown' ? 'notifBtn' : 'msgBtn').classList.add('icon-btn--active');
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.icon-btn') && !e.target.closest('.header-dropdown')) {
+        document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('active'));
+        document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--active'));
+      }
+    });
+
+    function getTimeAgo(timestamp) {
+      const now = Date.now();
+      const diff = now - Number(timestamp || 0);
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+      if (minutes < 1) return 'Just now';
+      if (minutes < 60) return minutes + ' minutes ago';
+      if (hours < 24) return hours + ' hours ago';
+      return days + ' days ago';
+    }
+
+    function loadNotifications() {
+      if (!studentUid) return;
+
+      const notifList = document.getElementById('notifList');
+      const notifEmpty = document.getElementById('notifEmpty');
+      const notifBadge = document.getElementById('notifBadge');
+      if (!notifList) return;
+
+      database.ref('notifications').orderByChild('recipientUid').equalTo(studentUid).limitToLast(10).once('value').then((snapshot) => {
+        if (!snapshot.exists()) {
+          if (notifEmpty) notifEmpty.style.display = 'block';
+          if (notifBadge) notifBadge.style.display = 'none';
+          return;
+        }
+
+        const notifications = [];
+        snapshot.forEach((child) => {
+          const n = child.val() || {};
+          n.id = child.key;
+          notifications.push(n);
+        });
+        notifications.reverse();
+
+        let unreadCount = 0;
+        let html = '';
+        notifications.forEach((n) => {
+          const unreadClass = n.read ? '' : 'dropdown-item--unread';
+          if (!n.read) unreadCount++;
+          const timeAgo = getTimeAgo(n.createdAt);
+          html += '<div class="dropdown-item ' + unreadClass + '" onclick="markNotifRead(\'' + n.id + '\', this)"><div class="dropdown-item__body"><div class="dropdown-item__title">' + (n.title || 'Notification') + '</div><div class="dropdown-item__text">' + (n.message || '') + '</div><div class="dropdown-item__time">' + timeAgo + '</div></div></div>';
+        });
+
+        notifList.innerHTML = html;
+        if (notifEmpty) notifEmpty.style.display = 'none';
+        if (notifBadge) {
+          if (unreadCount > 0) {
+            notifBadge.textContent = unreadCount;
+            notifBadge.style.display = 'block';
+          } else {
+            notifBadge.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    function markNotifRead(notifId, el) {
+      database.ref('notifications/' + notifId).update({ read: true }).then(() => {
+        if (el) el.classList.remove('dropdown-item--unread');
+        const unreadCount = document.querySelectorAll('#notifList .dropdown-item--unread').length;
+        const notifBadge = document.getElementById('notifBadge');
+        if (notifBadge) {
+          if (unreadCount > 0) {
+            notifBadge.textContent = unreadCount;
+            notifBadge.style.display = 'block';
+          } else {
+            notifBadge.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    function markAllRead() {
+      if (!studentUid) return;
+
+      database.ref('notifications').orderByChild('recipientUid').equalTo(studentUid).once('value').then((snapshot) => {
+        const updates = {};
+        snapshot.forEach((child) => {
+          updates[child.key + '/read'] = true;
+        });
+        if (Object.keys(updates).length === 0) return null;
+        return database.ref('notifications').update(updates);
+      }).then(() => {
+        loadNotifications();
+      });
+    }
+
+    function viewAllMessages() { showAlert('Messages', 'No messages yet', 'info'); }
+    function openMessage(user) { showAlert('Messages', 'No messages yet', 'info'); }
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+      if (!studentRef) return;
+      loadNotifications();
+      const honorificSelect = document.getElementById('honorificSelect');
+      const emailDigestToggle = document.getElementById('emailDigestToggle');
+      const smsAlertsToggle = document.getElementById('smsAlertsToggle');
+      const lineMiniAppToggle = document.getElementById('lineMiniAppToggle');
+
+      studentRef.on('value', (snapshot) => {
+        const studentData = snapshot.val();
+        if (!studentData) return;
+
+        const profile = studentData.profile || {};
+        const enrollment = studentData.enrollment || {};
+        const settings = studentData.settings || {};
+
+        applyHeroStats(profile, settings);
+
+        setDisplayName(profile.fullName || 'Student');
+        document.getElementById('fullNameInput').value = profile.fullName || '';
+        document.getElementById('kanaInput').value = profile.kana || '';
+        document.getElementById('guardianInput').value = profile.guardianContact || '';
+
+        const profileEmail = profile.email || localStorage.getItem('studentEmail') || '';
+        document.getElementById('emailInput').value = profileEmail;
+        document.getElementById('receiptEmail').value = profileEmail;
+
+        document.getElementById('cadenceInput').value = settings.practiceCadence || 'MWF - 45 minutes daily target';
+
+        if (profile.avatarUrl) {
+          applyAvatar(profile.avatarUrl);
+        } else {
+          showInitialAvatars();
+        }
+
+        const enrolledCourseEl = document.getElementById('enrolledCourse');
+        if (enrolledCourseEl) {
+          enrolledCourseEl.textContent = enrollment.course || '--';
+        }
+
+        if (enrollment.courseId) {
+          const isBundle = enrollment.courseId.startsWith('bundle_');
+          document.getElementById('installmentMode').textContent = isBundle ? 'Bundle Payment Plan' : 'Standard Installment';
+        } else {
+          document.getElementById('installmentMode').textContent = '--';
+        }
+
+        if (settings.honorificLevel) {
+          honorificSelect.value = settings.honorificLevel;
+        }
+        updateHonorificBadge(honorificSelect.value);
+
+        if (settings.emailNotifications !== undefined) {
+          emailDigestToggle.checked = !!settings.emailNotifications;
+        }
+        if (settings.smsNotifications !== undefined) {
+          smsAlertsToggle.checked = !!settings.smsNotifications;
+        }
+        if (settings.lineNotifications !== undefined) {
+          lineMiniAppToggle.checked = !!settings.lineNotifications;
+        }
+
+        if (Array.isArray(settings.learningFocus)) {
+          document.querySelectorAll('#learningChips .s-chip').forEach((chip) => {
+            chip.classList.toggle('s-chip--active', settings.learningFocus.includes(chip.textContent));
+          });
+        }
+      }, () => {
+        showAlert('Sync Issue', 'Unable to load latest profile data from database.', 'warning');
+      });
+    });
+
+    function getInitials(name) {
+      const tokens = (name || '').trim().split(/\s+/).filter(Boolean);
+      return tokens.map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'ST';
+    }
+
+    function applyAvatar(avatarData) {
+      if (!avatarData) {
+        showInitialAvatars();
+        return;
+      }
+      document.getElementById('headerAvatarImg').src = avatarData;
+      document.getElementById('headerAvatarImg').style.display = 'block';
+      document.getElementById('headerAvatarText').style.display = 'none';
+      document.getElementById('sidebarAvatarImg').src = avatarData;
+      document.getElementById('sidebarAvatarImg').style.display = 'block';
+      document.getElementById('sidebarAvatarText').style.display = 'none';
+    }
+
+    window.addEventListener('beforeunload', function() {
+      if (studentRef) {
+        studentRef.off('value');
+      }
+    });
+
+    // ---- Toast ----
+    let toastTimer;
+    function showToast(msg) {
+      const toast = document.getElementById('studentToast');
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('settings-toast--show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('settings-toast--show'), 2800);
+    }
+
+    function showConfirm(t,m,cb){var o=document.getElementById('confirmOverlay');o.querySelector('.confirm-title').textContent=t;o.querySelector('.confirm-message').textContent=m;o.classList.add('active');o.querySelector('.confirm-btn--cancel').onclick=function(){o.classList.remove('active');};o.querySelector('.confirm-btn--confirm').onclick=function(){o.classList.remove('active');cb();};}
+
+    // =====================
+    //   LOGOUT
+    // =====================
+    function logout() {
+      showConfirm('Sign Out','Are you sure you want to sign out?',function(){
+        showToast('Signing out');
+        setTimeout(function(){window.__unmeiClearStudentSession();window.location.href='login.html';},1200);
+      });
+    }
+
+    function showAlert(title, message, type) {
+      const existing = document.querySelector('.custom-alert');
+      if (existing) existing.remove();
+      const alertEl = document.createElement('div');
+      alertEl.className = 'custom-alert custom-alert--' + type;
+      let iconSvg;
+      if (type === 'danger' || type === 'warning') {
+        iconSvg = '<iconify-icon icon="mdi:information-outline"></iconify-icon>';
+      } else if (type === 'success') {
+        iconSvg = '<iconify-icon icon="mdi:check-circle-outline"></iconify-icon>';
+      } else {
+        iconSvg = '<iconify-icon icon="mdi:information-outline"></iconify-icon>';
+      }
+      alertEl.innerHTML = '<div class="custom-alert__icon">' + iconSvg + '</div><div class="custom-alert__body"><strong class="custom-alert__title">' + title + '</strong><p class="custom-alert__message">' + message + '</p></div><button class="custom-alert__close" onclick="this.parentElement.remove()"><iconify-icon icon="mdi:close"></iconify-icon></button>';
+      document.body.appendChild(alertEl);
+      setTimeout(() => alertEl.classList.add('custom-alert--show'), 10);
+      setTimeout(() => { alertEl.classList.remove('custom-alert--show'); setTimeout(() => alertEl.remove(), 300); }, 5000);
+    }
+  </script>
+  <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><div class="confirm-icon confirm-icon--warning"><iconify-icon icon="mdi:alert-outline"></iconify-icon></div><div class="confirm-title"></div><div class="confirm-message"></div><div class="confirm-actions"><button class="confirm-btn confirm-btn--cancel">Cancel</button><button class="confirm-btn confirm-btn--confirm">Confirm</button></div></div></div>
+  <div class="settings-toast" id="studentToast"></div>
+<script>
+function toggleMobileSidebar(){var s=document.querySelector('.sidebar'),b=document.getElementById('sidebarBackdrop');if(s.classList.contains('sidebar--mobile-open')){closeMobileSidebar();}else{s.classList.add('sidebar--mobile-open');b.classList.add('active');document.body.style.overflow='hidden';}}
+function closeMobileSidebar(){var s=document.querySelector('.sidebar');var b=document.getElementById('sidebarBackdrop');s.classList.remove('sidebar--mobile-open');b.classList.remove('active');document.body.style.overflow='';}
+window.addEventListener('resize',function(){if(window.innerWidth>700)closeMobileSidebar();});
+</script>
+<script src="student-header-sync.js"></script>
+<script src="assets/global-search.js"></script>
+</body>
+</html>
+
+
+
+
+

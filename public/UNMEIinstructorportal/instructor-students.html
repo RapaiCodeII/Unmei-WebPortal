@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Students – UNMEI Instructor Portal</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="instructorportal.css" />
+  <script src="assets/iconify-icon.min.js"></script>
+  <script src="assets/unmei-icons.js"></script>
+</head>
+<body>
+  <script src="session-guard.js"></script>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="brand-logo">
+        <img src="assets/logo.png" alt="UNMEI" style="width:40px;height:40px;object-fit:contain;">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UNMEI</span>
+        <span class="brand-portal">INSTRUCTOR PORTAL</span>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <p class="nav-section-label">OVERVIEW</p>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="instructor-dashboard.html" class="nav-link">
+            <iconify-icon icon="mdi:view-dashboard"></iconify-icon>
+            Dashboard
+          </a>
+        </li>
+        <li class="nav-item nav-item--active">
+          <a href="instructor-students.html" class="nav-link">
+            <iconify-icon icon="mdi:account-multiple-outline"></iconify-icon>
+            My Students
+            <span class="nav-badge" id="studentBadge">0</span>
+          </a>
+        </li>
+      </ul>
+
+      <p class="nav-section-label" style="margin-top:20px;">ACADEMIC</p>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="instructor-ratings.html" class="nav-link">
+            <iconify-icon icon="mdi:star-outline"></iconify-icon>
+            Ratings and Feedback
+          </a>
+        </li>
+      </ul>
+
+      <p class="nav-section-label" style="margin-top:20px;">PORTAL SETTINGS</p>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="instructor-settings.html" class="nav-link">
+            <iconify-icon icon="mdi:cog-outline"></iconify-icon>
+            Settings
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="javascript:void(0)" onclick="if(window.instructorSignOut){window.instructorSignOut();}else{location.href='instructor-settings.html';}" class="nav-link">
+            <iconify-icon icon="mdi:logout"></iconify-icon>
+            Sign Out
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar__user">
+      <div class="user-avatar user-avatar--dark" id="sidebarAvatar">IN</div>
+      <div class="user-meta">
+        <span class="user-name" id="sidebarUserName">Instructor</span>
+        <span class="user-role">Instructor</span>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <!-- MAIN -->
+  <div class="main-wrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="sidebar-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
+      <div class="topbar__left">
+        <h2 class="topbar__title">My Students</h2>
+        <nav class="breadcrumb">
+          <a href="instructor-dashboard.html" class="breadcrumb__link">Home</a>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current">My Students</span>
+        </nav>
+      </div>
+      <div class="topbar__center"></div>
+      <div class="topbar__right">
+        <div class="avatar-btn" onclick="toggleAvatarMenu(event)">
+          <div class="user-avatar" id="headerAvatar">IN</div>
+          <div class="avatar-btn__meta">
+            <span class="avatar-btn__name" id="headerUserName">Instructor</span>
+            <span class="avatar-btn__role">Instructor</span>
+          </div>
+          <iconify-icon icon="mdi:chevron-down" class="avatar-btn__caret"></iconify-icon>
+          <div class="avatar-menu" id="avatarMenu">
+            <div class="avatar-menu__header">
+              <div class="user-avatar" id="menuAvatar">IN</div>
+              <div>
+                <div class="avatar-menu__name" id="menuName">Instructor</div>
+                <div class="avatar-menu__email" id="menuEmail"></div>
+              </div>
+            </div>
+            <a class="avatar-menu__item" href="instructor-settings.html#profile">
+              <iconify-icon icon="mdi:account-circle-outline"></iconify-icon>
+              View Profile
+            </a>
+            <a class="avatar-menu__item" href="instructor-settings.html">
+              <iconify-icon icon="mdi:cog-outline"></iconify-icon>
+              Settings
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content">
+
+      <!-- Filter bar -->
+      <section class="roster-toolbar">
+        <div class="student-search-wrap" style="flex:1;max-width:340px;">
+          <div class="search-bar" style="max-width:none;">
+            <iconify-icon icon="mdi:magnify"></iconify-icon>
+            <input type="text" id="studentSearch" placeholder="Search by name, email, or course" oninput="handleFilter()" />
+          </div>
+        </div>
+        <div class="roster-filters">
+          <button class="filter-chip filter-chip--active" data-course="all" onclick="setCourseFilter('all', this)">All Courses</button>
+          <span id="courseFilterChips"></span>
+        </div>
+      </section>
+
+      <!-- Roster table -->
+      <section class="students-table-wrap">
+        <table class="students-table">
+          <thead>
+            <tr>
+              <th>STUDENT</th>
+              <th>COURSE</th>
+              <th>PROGRESS</th>
+              <th>AVG SCORE</th>
+              <th>ATTENDANCE</th>
+              <th>LAST ACTIVE</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="studentsTbody">
+            <tr><td colspan="7" class="roster-loading">Loading students...</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="instructor-header-sync.js?v=20260907"></script>
+  <script>
+    const database = firebase.database();
+    const instructorId = sessionStorage.getItem('instructorId') || '';
+    const instructorEmail = sessionStorage.getItem('instructorEmail') || '';
+
+    let allStudents = [];
+    let myCourses = [];
+    let activeCourseFilter = 'all';
+
+    const AVATAR_PALETTE = ['#C0392B', '#2563EB', '#16A34A', '#F59E0B', '#8B5CF6', '#EC4899', '#C0392B', '#0d9488'];
+
+    // ---------- avatar menu ----------
+    function toggleAvatarMenu(event) {
+      event.stopPropagation();
+      document.getElementById('avatarMenu').classList.toggle('active');
+    }
+    document.addEventListener('click', function (e) {
+      const menu = document.getElementById('avatarMenu');
+      if (menu && !e.target.closest('.avatar-btn')) menu.classList.remove('active');
+    });
+    function applyMenuIdentity(name) {
+      const display = String(name || 'Instructor');
+      const parts = display.trim().split(/\s+/).filter(Boolean);
+      const ini = parts.length >= 2
+        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+        : (display.slice(0, 2) || 'IN').toUpperCase();
+      ['headerAvatar', 'menuAvatar'].forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = ini;
+      });
+      const nameEl = document.getElementById('menuName');
+      if (nameEl) nameEl.textContent = display;
+      const emailEl = document.getElementById('menuEmail');
+      if (emailEl) emailEl.textContent = instructorEmail;
+    }
+    database.ref('professors/' + instructorId).once('value').then(function (snapshot) {
+      applyMenuIdentity((snapshot.val() || {}).fullName || sessionStorage.getItem('instructorDisplayName'));
+    });
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('toast--show');
+      setTimeout(function () { toast.classList.remove('toast--show'); }, 2600);
+    }
+
+    function normalizeCourseId(value) {
+      return String(value || '').trim().toLowerCase().replace(/\s+/g, '_');
+    }
+
+    // ---------- data load ----------
+    Promise.all([
+      database.ref('courses').once('value'),
+      database.ref('students').once('value'),
+      database.ref('professors/' + instructorId).once('value')
+    ]).then(function (results) {
+      const coursesSnap = results[0];
+      const studentsSnap = results[1];
+      const instructorSnap = results[2];
+
+      const instructorData = instructorSnap.val() || {};
+      const courseLookup = {};
+
+      if (coursesSnap.exists()) {
+        coursesSnap.forEach(function (child) {
+          const course = child.val() || {};
+          const id = normalizeCourseId(child.key);
+          const ids = [];
+          if (Array.isArray(course.instructorIds)) {
+            course.instructorIds.forEach(function (v) { if (v) ids.push(String(v)); });
+          } else if (course.instructorIds && typeof course.instructorIds === 'object') {
+            Object.values(course.instructorIds).forEach(function (v) { if (v) ids.push(String(v)); });
+          }
+          if (course.instructorId) ids.push(String(course.instructorId));
+          courseLookup[id] = {
+            id: id,
+            name: String(course.name || course.title || child.key),
+            assigned: ids.indexOf(instructorId) !== -1
+          };
+        });
+      }
+
+      const assignedRaw = instructorData.coursesAssigned;
+      const assignedExtra = [];
+      if (Array.isArray(assignedRaw)) {
+        assignedRaw.forEach(function (v) { if (v) assignedExtra.push(normalizeCourseId(v)); });
+      } else if (assignedRaw && typeof assignedRaw === 'object') {
+        Object.values(assignedRaw).forEach(function (v) { if (v) assignedExtra.push(normalizeCourseId(v)); });
+      }
+      assignedExtra.forEach(function (id) {
+        if (courseLookup[id]) courseLookup[id].assigned = true;
+      });
+
+      myCourses = Object.values(courseLookup).filter(function (c) { return c.assigned; });
+      const myCourseIds = myCourses.map(function (c) { return c.id; });
+
+      if (studentsSnap.exists()) {
+        let idx = 0;
+        studentsSnap.forEach(function (child) {
+          const data = child.val() || {};
+          const profile = data.profile || {};
+          const enrollment = data.enrollment || {};
+          const courseId = normalizeCourseId(enrollment.courseId || '');
+          if (myCourseIds.indexOf(courseId) === -1) return;
+          const name = profile.fullName || data.fullName || data.name || 'Unknown';
+          // Prefer the latest live progress record when a legacy direct score
+          // or attendance field is absent.
+          const historyRows = Object.values(data.progressHistory || {})
+            .filter(function (row) { return row && typeof row === 'object'; })
+            .sort(function (a, b) { return Number(a.timestamp || 0) - Number(b.timestamp || 0); });
+          const latestProgress = historyRows.length ? historyRows[historyRows.length - 1] : {};
+          const lvScores = Object.assign({}, latestProgress);
+          Object.keys(data.scores || {}).forEach(function (key) {
+            const value = Number(data.scores[key]);
+            if (key === 'updatedAt' || !Number.isFinite(value) || value > 0) lvScores[key] = data.scores[key];
+          });
+          const appData = data.appSyncData || {};
+          const attended = Number(data.attendance || data.attendanceRate || 0);
+          const sk = ['reading', 'writing', 'listening', 'speaking', 'grammar', 'vocabulary'];
+          const vals = sk.map(function (k) { return Number(lvScores[k] || 0); });
+          const hasAny = vals.some(function (v) { return v > 0; });
+          const avgScore = hasAny ? Math.round(vals.reduce(function (a, b) { return a + b; }, 0) / vals.length) : 0;
+          const totalModules = Number(appData.totalModules || 0);
+          const modulesCompleted = Array.isArray(appData.modulesCompleted)
+            ? appData.modulesCompleted.length
+            : Number(appData.modulesCompleted || 0);
+          const historyProgress = Number(latestProgress.overallAccuracy || 0);
+          const courseProgress = totalModules > 0
+            ? Math.round((modulesCompleted / totalModules) * 100)
+            : (historyProgress > 0 ? Math.round(historyProgress) : 0);
+          allStudents.push({
+            uid: child.key,
+            name: name,
+            email: String(profile.email || data.email || ''),
+            avatarUrl: profile.avatarUrl || data.avatarUrl || '',
+            color: AVATAR_PALETTE[idx % AVATAR_PALETTE.length],
+            courseId: courseId,
+            courseName: (courseLookup[courseId] && courseLookup[courseId].name) || enrollment.course || 'N/A',
+            courseProgress: courseProgress,
+            averageScore: avgScore,
+            attendanceRate: attended,
+            lastActivityAt: Number(appData.lastSyncTimestamp || latestProgress.timestamp || enrollment.enrolledAt || 0)
+          });
+          idx++;
+        });
+      }
+
+      renderFilterChips();
+      applyFilters();
+
+      const badge = document.getElementById('studentBadge');
+      if (badge) badge.textContent = allStudents.length;
+    }).catch(function () {
+      showToast('Unable to load student roster.');
+      document.getElementById('studentsTbody').innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--gray-400);">Unable to load students</td></tr>';
+    });
+
+    // ---------- filters ----------
+    function renderFilterChips() {
+      const wrap = document.getElementById('courseFilterChips');
+      wrap.innerHTML = myCourses.map(function (course) {
+        return '<button class="filter-chip" data-course="' + escapeHtml(course.id) + '" onclick="setCourseFilter(\'' + escapeHtml(course.id) + '\', this)">' + escapeHtml(course.name) + '</button>';
+      }).join('');
+    }
+
+    function setCourseFilter(courseId, chipEl) {
+      activeCourseFilter = courseId;
+      document.querySelectorAll('.filter-chip').forEach(function (chip) {
+        chip.classList.toggle('filter-chip--active', chip === chipEl);
+      });
+      applyFilters();
+    }
+
+    function handleFilter() {
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const query = (document.getElementById('studentSearch').value || '').trim().toLowerCase();
+      const filtered = allStudents.filter(function (s) {
+        if (activeCourseFilter !== 'all' && s.courseId !== activeCourseFilter) return false;
+        if (!query) return true;
+        return s.name.toLowerCase().indexOf(query) !== -1
+          || s.email.toLowerCase().indexOf(query) !== -1
+          || s.courseName.toLowerCase().indexOf(query) !== -1;
+      });
+      renderRoster(filtered);
+    }
+
+    // ---------- render ----------
+    function initialsOf(name) {
+      const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+      if (!parts.length) return '??';
+      return parts.map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+    }
+
+    function progressTone(value) {
+      if (value >= 75) return 'var(--green)';
+      if (value >= 40) return 'var(--blue)';
+      if (value > 0) return 'var(--yellow)';
+      return 'var(--gray-300)';
+    }
+
+    function renderRoster(list) {
+      const tbody = document.getElementById('studentsTbody');
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--gray-400);">No students found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = list.map(function (s) {
+        const avatar = s.avatarUrl
+          ? '<img src="' + escapeHtml(s.avatarUrl) + '" alt="" class="student-avatar" style="object-fit:cover;">'
+          : '<div class="student-avatar" style="background:' + s.color + ';">' + escapeHtml(initialsOf(s.name)) + '</div>';
+        const progress = Math.round(s.courseProgress);
+        return (
+          '<tr>' +
+            '<td><div class="student-cell">' + avatar + '<div><p class="student-name">' + escapeHtml(s.name) + '</p><p class="student-email">' + escapeHtml(s.email) + '</p></div></div></td>' +
+            '<td>' + escapeHtml(s.courseName) + '</td>' +
+            '<td>' +
+              '<div class="progress-cell">' +
+                '<div class="progress-track"><div class="progress-fill" style="width:' + progress + '%;background:' + progressTone(progress) + ';"></div></div>' +
+                '<span class="progress-label">' + progress + '%</span>' +
+              '</div>' +
+            '</td>' +
+            '<td>' + (s.averageScore ? Math.round(s.averageScore) + '%' : 'Not available') + '</td>' +
+            '<td>' + (s.attendanceRate ? Math.round(s.attendanceRate) + '%' : 'Not available') + '</td>' +
+            '<td style="font-size:0.72rem;color:var(--gray-500);">' + timeAgo(s.lastActivityAt) + '</td>' +
+            '<td><button class="tbl-action-btn" onclick="viewStudent(\'' + escapeHtml(s.uid) + '\')">View</button></td>' +
+          '</tr>'
+        );
+      }).join('');
+    }
+
+    function viewStudent(uid) {
+      window.location.href = 'instructor-student-view.html?id=' + encodeURIComponent(uid);
+    }
+  </script>
+<script src="assets/global-search.js"></script>
+</body>
+</html>

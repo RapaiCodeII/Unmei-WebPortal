@@ -1,0 +1,11 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Open UNMEI Portal (localhost:5002)",
+            "url": "http://localhost:5002/"
+        }
+    ]
+}

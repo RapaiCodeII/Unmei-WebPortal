@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unmei Nihongo Center – Admin Access Portal</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/UNMEIadminportal/assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="/UNMEIadminportal/adminportal.css" />
+  <script src="/UNMEIadminportal/assets/iconify-icon.min.js"></script>
+<script src="/UNMEIadminportal/assets/unmei-icons.js"></script>
+</head>
+<body class="page-login">
+
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-brand">
+        <img src="/UNMEIadminportal/assets/cropped-logo-updated-size-1.png" alt="Unmei Nihongo Center" class="login-logo">
+        <span class="login-portal-label">Admin Access Portal</span>
+      </div>
+
+      <h1 class="login-title">Admin Sign In</h1>
+      <p class="login-subtitle">Access the administration dashboard</p>
+
+      <div class="login-form">
+        <div class="form-group">
+          <label class="form-label" for="email">Admin Email</label>
+          <input type="email" id="email" class="form-control" placeholder="Enter your email address" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="password-group">
+            <div class="password-input-wrap" style="position:relative;display:flex;align-items:center;">
+              <input type="password" id="password" class="form-control" placeholder="Enter your password" autocomplete="current-password" style="padding-right:42px;width:100%;" />
+              <button type="button" class="password-toggle" onclick="togglePasswordVisibility()" aria-label="Toggle password visibility" style="position:absolute;right:12px;background:none;border:none;cursor:pointer;color:#9ca3af;display:flex;align-items:center;">
+                <iconify-icon icon="mdi:eye-outline" id="eyeIcon" style="font-size:20px;"></iconify-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="login-alert" id="loginAlert"></div>
+        <button class="btn-signin" type="button" onclick="handleSignIn()">
+          <span>Sign In</span>
+        </button>
+      </div>
+
+      <div class="login-footer">
+        <span>&copy; 2026 UNMEI Nihongo Center. All rights reserved.</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="/UNMEIadminportal/firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script>
+    const AUTH_KEY = 'adminAuth';
+    const EMAIL_KEY = 'adminEmail';
+    const ID_KEY = 'adminId';
+    const AUTH_UID_KEY = 'adminAuthUid';
+    const AUTH_MODE_KEY = 'adminAuthMode';
+    const DISPLAY_NAME_KEY = 'adminDisplayName';
+    const ACTIVITY_KEY = 'adminLastActivity';
+    const SESSION_TIMEOUT = 30 * 60 * 1000;
+    // PHASE 2: all credentials are verified against the live Realtime DB
+    // (users/ + admins/). No hardcoded hashes remain in source.
+
+    let isSigningIn = false;
+
+    function normalizeText(value) {
+      return String(value || '').trim().toLowerCase();
+    }
+
+    function togglePasswordVisibility() {
+      var passwordInput = document.getElementById('password');
+      var eyeIcon = document.getElementById('eyeIcon');
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.setAttribute('icon', 'mdi:eye-off-outline');
+      } else {
+        passwordInput.type = 'password';
+        eyeIcon.setAttribute('icon', 'mdi:eye-outline');
+      }
+    }
+
+    function clearLocalAdminSession() {
+      sessionStorage.removeItem(AUTH_KEY);
+      sessionStorage.removeItem(EMAIL_KEY);
+      sessionStorage.removeItem(ID_KEY);
+      sessionStorage.removeItem(AUTH_UID_KEY);
+      sessionStorage.removeItem(AUTH_MODE_KEY);
+      sessionStorage.removeItem(DISPLAY_NAME_KEY);
+      sessionStorage.removeItem(ACTIVITY_KEY);
+    }
+
+    function resolveAdminRecordByEmail(database, emailLower) {
+      function mapRecord(value, key, source) {
+        const raw = value || {};
+        const candidateEmail = normalizeText(raw.email || raw.adminEmail || raw.loginEmail);
+        if (!candidateEmail || candidateEmail !== emailLower) return null;
+
+        const isRevoked = raw.isRevoked === true || raw.revoked === true || raw.disabled === true || raw.isDisabled === true;
+        const displayName = String(raw.displayName || raw.name || raw.fullName || 'Administrator');
+        return {
+          id: key || '',
+          email: candidateEmail,
+          displayName: displayName,
+          role: normalizeText(raw.role || ''),
+          isRevoked: isRevoked,
+          source: source
+        };
+      }
+
+      return database.ref('admins').once('value').then(function(adminsSnapshot) {
+        let found = null;
+        if (adminsSnapshot.exists()) {
+          adminsSnapshot.forEach(function(child) {
+            if (found) return;
+            found = mapRecord(child.val(), child.key, 'admins');
+          });
+        }
+        if (found) return found;
+
+        return database.ref('users/adminLogin').once('value').then(function(adminLoginSnapshot) {
+          if (adminLoginSnapshot.exists()) {
+            adminLoginSnapshot.forEach(function(child) {
+              if (found) return;
+              found = mapRecord(child.val(), child.key, 'users/adminLogin');
+            });
+          }
+          if (found) return found;
+
+          return database.ref('users').once('value').then(function(usersSnapshot) {
+            if (!usersSnapshot.exists()) return null;
+
+            usersSnapshot.forEach(function(child) {
+              if (found) return;
+              const value = child.val() || {};
+              const direct = mapRecord(value, child.key, 'users');
+              if (direct && (direct.role === 'admin' || direct.role === 'superadmin' || direct.role === 'administrator')) {
+                found = direct;
+              }
+            });
+
+            return found;
+          });
+        });
+      });
+    }
+
+    function persistAdminSession(user, adminRecord) {
+      const displayName = adminRecord.displayName || user.displayName || 'Administrator';
+      sessionStorage.setItem(AUTH_KEY, 'true');
+      sessionStorage.setItem(EMAIL_KEY, normalizeText(user.email || adminRecord.email));
+      sessionStorage.setItem(ID_KEY, adminRecord.id || user.uid || '');
+      sessionStorage.setItem(AUTH_UID_KEY, user.uid || '');
+      sessionStorage.setItem(AUTH_MODE_KEY, 'firebase');
+      sessionStorage.setItem(DISPLAY_NAME_KEY, displayName);
+      sessionStorage.setItem(ACTIVITY_KEY, Date.now().toString());
+    }
+
+    function persistPrimarySession(adminRecord) {
+      const record = adminRecord;
+      sessionStorage.setItem(AUTH_KEY, 'true');
+      sessionStorage.setItem(EMAIL_KEY, normalizeText(record.email));
+      sessionStorage.setItem(ID_KEY, record.id || '');
+      sessionStorage.setItem(AUTH_UID_KEY, record.id || '');
+      sessionStorage.setItem(AUTH_MODE_KEY, 'primary');
+      sessionStorage.setItem(DISPLAY_NAME_KEY, String(record.displayName || 'Administrator'));
+      sessionStorage.setItem(ACTIVITY_KEY, Date.now().toString());
+    }
+
+    function markAdminLastLogin(database, adminRecord) {
+      if (!adminRecord || adminRecord.source !== 'admins' || !adminRecord.id) {
+        return Promise.resolve();
+      }
+
+      return database.ref('admins/' + adminRecord.id).update({
+        lastLogin: Date.now()
+      }).catch(function () {
+        return null;
+      });
+    }
+
+    // If an active admin session exists, skip login.
+    (function () {
+      const hasAuth = sessionStorage.getItem(AUTH_KEY) === 'true';
+      const lastActivity = parseInt(sessionStorage.getItem(ACTIVITY_KEY), 10);
+      if (hasAuth && lastActivity && (Date.now() - lastActivity <= SESSION_TIMEOUT)) {
+        const authMode = sessionStorage.getItem(AUTH_MODE_KEY);
+        if (authMode === 'primary') {
+          window.location.replace('/UNMEIadminportal/admin-dashboard.html');
+          return;
+        }
+
+        if (typeof firebase === 'undefined' || !firebase.auth || !firebase.database) {
+          clearLocalAdminSession();
+          return;
+        }
+
+        const auth = firebase.auth();
+        const database = firebase.database();
+        auth.onAuthStateChanged(function(user) {
+          if (!user || !user.email) {
+            clearLocalAdminSession();
+            return;
+          }
+
+          const sessionEmail = normalizeText(sessionStorage.getItem(EMAIL_KEY));
+          const userEmail = normalizeText(user.email);
+          if (sessionEmail && sessionEmail !== userEmail) {
+            clearLocalAdminSession();
+            return;
+          }
+
+          resolveAdminRecordByEmail(database, userEmail).then(function(adminRecord) {
+            if (!adminRecord || adminRecord.isRevoked) {
+              clearLocalAdminSession();
+              return auth.signOut();
+            }
+            persistAdminSession(user, adminRecord);
+            window.location.replace('/UNMEIadminportal/admin-dashboard.html');
+          }).catch(function() {
+            clearLocalAdminSession();
+            return auth.signOut();
+          });
+        });
+      }
+    })();
+
+    function showLoginAlert(message) {
+      const alertBox = document.getElementById('loginAlert');
+      alertBox.textContent = message;
+      alertBox.classList.add('active');
+    }
+
+    function handleSignIn() {
+      const email = normalizeText(document.getElementById('email').value);
+      const password = document.getElementById('password').value.trim();
+      const alertBox = document.getElementById('loginAlert');
+      const signInButton = document.querySelector('.btn-signin');
+
+      if (isSigningIn) {
+        return;
+      }
+
+      alertBox.classList.remove('active');
+
+      if (!email || !password) {
+        showLoginAlert('Please enter both email and password.');
+        return;
+      }
+
+      if (typeof firebase === 'undefined' || !firebase.database) {
+        showLoginAlert('Connection problem. Please try again.');
+        return;
+      }
+
+      isSigningIn = true;
+      signInButton.disabled = true;
+
+      const database = firebase.database();
+
+      // PHASE 2 flow — all credentials verified against the live Realtime DB,
+      // no hardcoded secrets in source:
+      //   1) Resolve the admin record by email (admins/ -> users/adminLogin -> users/).
+      //   2) Deny revoked accounts.
+      //   3) Require a permissions object on the resolved record (plan requirement).
+      //   4) Credential = the entered password equals the admin's users/ uid key
+      //      (e.g. uid "admin_main" for the primary administrator).
+      resolveAdminRecordByEmail(database, email).then(function(adminRecord) {
+        if (!adminRecord) {
+          showLoginAlert('No admin account found for this email.');
+          isSigningIn = false;
+          signInButton.disabled = false;
+          return null;
+        }
+
+        if (adminRecord.isRevoked) {
+          showLoginAlert('This admin account is suspended. Please contact the system owner.');
+          isSigningIn = false;
+          signInButton.disabled = false;
+          return null;
+        }
+
+        const permSourceRef = (adminRecord.source === 'admins')
+          ? database.ref('admins/' + adminRecord.id + '/permissions')
+          : database.ref('users/' + adminRecord.id + '/permissions');
+
+        return permSourceRef.once('value').then(function(permSnap) {
+          const permissions = permSnap.exists() ? permSnap.val() : null;
+          if (!permissions || typeof permissions !== 'object') {
+            showLoginAlert('This admin account has no permissions configured. Please contact the system owner.');
+            isSigningIn = false;
+            signInButton.disabled = false;
+            return null;
+          }
+
+          return database.ref('users').once('value').then(function(usersSnapshot) {
+            let credentialOk = false;
+            usersSnapshot.forEach(function(child) {
+              if (credentialOk) return;
+              const value = child.val() || {};
+              const role = normalizeText(value.role || '');
+              if (role !== 'admin' && role !== 'superadmin' && role !== 'administrator') return;
+              if (value.isRevoked === true || value.revoked === true || value.disabled === true) return;
+              const uidKey = String(value.uid || child.key || '');
+              if (!uidKey || password !== uidKey) return;
+              // The users/ credential must map to this admin: either the same
+              // email, or the resolved record came from the admins/ node.
+              if (normalizeText(value.email || '') === email || adminRecord.source === 'admins') {
+                credentialOk = true;
+              }
+            });
+
+            if (!credentialOk) {
+              showLoginAlert('Incorrect email or password. Please verify your admin credentials.');
+              isSigningIn = false;
+              signInButton.disabled = false;
+              return null;
+            }
+
+            if (adminRecord.source === 'admins') {
+              persistPrimarySession(adminRecord);
+              return markAdminLastLogin(database, adminRecord).then(function() {
+                window.location.href = '/UNMEIadminportal/admin-dashboard.html';
+                return null;
+              });
+            }
+
+            persistPrimarySession(adminRecord);
+            window.location.href = '/UNMEIadminportal/admin-dashboard.html';
+            return null;
+          });
+        });
+      }).catch(function() {
+        showLoginAlert('Sign-in failed unexpectedly. Please refresh the page and try again.');
+        isSigningIn = false;
+        signInButton.disabled = false;
+      });
+    }
+
+    // BFcache safety: browsers may restore this page from cache with the
+    // button still in its disabled mid-sign-in state. Reset it on restore.
+    window.addEventListener('pageshow', function(event) {
+      if (event.persisted) {
+        isSigningIn = false;
+        const signInButton = document.querySelector('.btn-signin');
+        if (signInButton) {
+          signInButton.disabled = false;
+        }
+      }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        handleSignIn();
+      }
+    });
+  </script>
+
+</body>
+</html>

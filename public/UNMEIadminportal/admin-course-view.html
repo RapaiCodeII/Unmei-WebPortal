@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unmei - Course Overview</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="adminportal.css" />
+  <script src="assets/d3.v7.min.js"></script>
+  <script src="assets/unmei-charts.js"></script>
+  <script src="assets/iconify-icon.min.js"></script>
+  <script src="assets/unmei-icons.js"></script>
+  <style>
+    .sv-hero { position: relative; background: linear-gradient(135deg, #1f2328 0%, #2c3138 55%, #3a2e2c 100%); border-radius: 20px; padding: 30px 34px; display: flex; align-items: center; justify-content: space-between; gap: 20px; box-shadow: 0 14px 34px -14px rgba(0,0,0,0.28); overflow: hidden; }
+    .sv-hero__left { display: flex; align-items: center; gap: 22px; min-width: 0; }
+    .sv-badge--xl { width: 66px; height: 66px; min-width: 66px; border-radius: 18px; font-size: 1.15rem; font-weight: 800; color: #fff; background:#C0392B; display: flex; align-items: center; justify-content: center; }
+    .sv-hero__title { font-size: 1.55rem; font-weight: 800; color: #fff; margin-bottom: 8px; }
+    .sv-hero__meta { display: flex; flex-wrap: wrap; gap: 10px; }
+    .sv-tag { display: inline-flex; align-items: center; gap: 7px; background: rgba(255,255,255,0.08); padding: 7px 13px; border-radius: 99px; font-size: 0.76rem; font-weight: 600; color: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.1); }
+    .sv-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 24px 0; }
+    .sv-stat { background: #fff; border-radius: 16px; border: 1px solid var(--gray-200); padding: 18px 20px; display: flex; align-items: center; gap: 14px; }
+    .sv-stat__value { font-size: 1.25rem; font-weight: 800; color: var(--gray-900); }
+    .sv-stat__label { font-size: 0.72rem; font-weight: 600; color: var(--gray-500); }
+    .sv-panel { background: #fff; border-radius: 20px; border: 1px solid var(--gray-200); overflow: hidden; margin-bottom: 24px; }
+    .sv-panel__header { padding: 20px 28px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: space-between; }
+    .roster-table { width: 100%; border-collapse: collapse; }
+    .roster-table th { padding: 14px 28px; font-size: 0.7rem; text-transform: uppercase; color: var(--gray-400); text-align: left; background: var(--gray-50); border-bottom: 1px solid var(--gray-100); }
+    .roster-table td { padding: 15px 28px; border-bottom: 1px solid var(--gray-100); font-size: 0.84rem; }
+  </style>
+</head>
+<body>
+  <script src="session-guard.js"></script>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="brand-logo">
+        <img src="assets/logo.png" alt="UNMEI" style="width:40px;height:40px;object-fit:contain;">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UNMEI</span>
+        <span class="brand-portal">ADMIN PORTAL</span>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <p class="nav-section-label">OVERVIEW</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-dashboard.html" class="nav-link"><iconify-icon icon="mdi:view-dashboard"></iconify-icon>Dashboard</a></li>
+        <li class="nav-item"><a href="admin-students.html" class="nav-link"><iconify-icon icon="mdi:account-outline"></iconify-icon>Students<span class="nav-badge" id="studentBadge">0</span></a></li>
+        <li class="nav-item"><a href="admin-enrollments.html" class="nav-link"><iconify-icon icon="mdi:card-text-outline"></iconify-icon>Recent Enrollments</a></li>
+        <li class="nav-item"><a href="admin-payments.html" class="nav-link"><iconify-icon icon="mdi:credit-card-outline"></iconify-icon>Payments</a></li>
+      </ul>
+
+      <p class="nav-section-label" style="margin-top:20px;">COURSES</p>
+      <ul class="nav-list">
+        <li class="nav-item nav-item--active"><a href="admin-courses.html" class="nav-link"><iconify-icon icon="mdi:card-text-outline"></iconify-icon>Course List</a></li>
+        <li class="nav-item"><a href="admin-build-course.html" class="nav-link"><iconify-icon icon="mdi:plus-circle-outline"></iconify-icon>Build New Course</a></li>
+      </ul>
+
+      <p class="nav-section-label" style="margin-top:20px;">QUICK ACTIONS</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-add-student.html" class="nav-link"><iconify-icon icon="mdi:account-plus-outline"></iconify-icon>Add Student</a></li>
+        <li class="nav-item"><a href="admin-new-enrollment.html" class="nav-link"><iconify-icon icon="mdi:plus-circle-outline"></iconify-icon>New Enrollment</a></li>
+        <li class="nav-item"><a href="admin-post-notice.html" class="nav-link"><iconify-icon icon="mdi:bell-outline"></iconify-icon>Post Notice</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">SYSTEM</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-portal-settings.html" class="nav-link"><iconify-icon icon="mdi:cog-outline"></iconify-icon>Portal Settings</a></li>
+        <li class="nav-item"><a href="javascript:void(0)" onclick="if(window.__adminSignOut){window.__adminSignOut();}else{location.href='admin-portal-settings.html';}" class="nav-link"><iconify-icon icon="mdi:logout"></iconify-icon>Sign Out</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar__user">
+      <div class="user-avatar user-avatar--dark">AD</div>
+      <div class="user-meta">
+        <span class="user-name">Admin</span>
+        <span class="user-role">Administrator</span>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <!-- MAIN -->
+  <div class="main-wrapper">
+    <header class="topbar">
+      <button class="sidebar-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
+      <div class="topbar__left">
+        <h2 class="topbar__title" id="pageTitle">Course Details</h2>
+        <nav class="breadcrumb">
+          <a href="admin-dashboard.html" class="breadcrumb__link">Home</a>
+          <span class="breadcrumb__sep">/</span>
+          <a href="admin-courses.html" class="breadcrumb__link">Courses</a>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current" id="crumbCourseName">Course Overview</span>
+        </nav>
+      </div>
+      <div class="topbar__right">
+        <div class="topbar__user">
+          <div class="user-avatar user-avatar--red">AD</div>
+          <div class="user-meta">
+            <span class="user-name">Admin</span>
+            <span class="user-role">Administrator</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <!-- Course Hero -->
+      <div class="sv-hero" id="courseHero">
+        <div class="sv-hero__left">
+          <div class="sv-badge--xl" id="courseBadgeCode">UNC</div>
+          <div>
+            <h1 class="sv-hero__title" id="courseTitle">Loading course...</h1>
+            <div class="sv-hero__meta">
+              <span class="sv-tag"><iconify-icon icon="mdi:clock-outline"></iconify-icon> <span id="courseDuration">--</span></span>
+              <span class="sv-tag"><iconify-icon icon="mdi:account-tie"></iconify-icon> <span id="courseInstructor">--</span></span>
+              <span class="sv-tag"><iconify-icon icon="mdi:cash-multiple"></iconify-icon> <span id="coursePrice">--</span></span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <button class="sv-btn--glass" onclick="window.location.href='admin-courses.html'">&larr; Back to Courses</button>
+        </div>
+      </div>
+
+      <!-- Stats strip -->
+      <div class="sv-stats">
+        <div class="sv-stat">
+          <div style="background:#fee2e2;color:#C0392B;padding:10px;border-radius:10px;"><iconify-icon icon="mdi:account-group" style="font-size:24px;"></iconify-icon></div>
+          <div>
+            <div class="sv-stat__value" id="statEnrolled">0</div>
+            <div class="sv-stat__label">Enrolled Students</div>
+          </div>
+        </div>
+        <div class="sv-stat">
+          <div style="background:#dbeafe;color:#2563EB;padding:10px;border-radius:10px;"><iconify-icon icon="mdi:chart-line" style="font-size:24px;"></iconify-icon></div>
+          <div>
+            <div class="sv-stat__value" id="statAvgProgress">0%</div>
+            <div class="sv-stat__label">Average Progress</div>
+          </div>
+        </div>
+        <div class="sv-stat">
+          <div style="background:#dcfce7;color:#16A34A;padding:10px;border-radius:10px;"><iconify-icon icon="mdi:cash" style="font-size:24px;"></iconify-icon></div>
+          <div>
+            <div class="sv-stat__value" id="statRevenue">₱0</div>
+            <div class="sv-stat__label">Tuition Fee Rate</div>
+          </div>
+        </div>
+        <div class="sv-stat">
+          <div style="background:#f3e8ff;color:#8B5CF6;padding:10px;border-radius:10px;"><iconify-icon icon="mdi:star" style="font-size:24px;"></iconify-icon></div>
+          <div>
+            <div class="sv-stat__value" id="statRating">4.8 / 5.0</div>
+            <div class="sv-stat__label">Instructor Rating</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Instructor Card -->
+      <div class="sv-panel" style="padding:24px;" id="instructorCard">
+        <h3 style="margin:0 0 12px 0;font-size:1.1rem;color:#111827;display:flex;align-items:center;gap:8px;">
+          <iconify-icon icon="mdi:account-tie" style="color:#C0392B;"></iconify-icon> Assigned Course Instructor
+        </h3>
+        <div id="instDetails" style="color:#4b5563;font-size:0.9rem;line-height:1.6;">Loading instructor info...</div>
+      </div>
+
+      <!-- Enrolled Roster Table -->
+      <div class="sv-panel">
+        <div class="sv-panel__header">
+          <div style="font-size:1.05rem;font-weight:800;color:#111827;display:flex;align-items:center;gap:8px;">
+            <iconify-icon icon="mdi:account-multiple" style="color:#C0392B;"></iconify-icon> Enrolled Student Roster
+          </div>
+          <span id="rosterCount" style="font-size:0.85rem;color:#6b7280;font-weight:600;">0 Students</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="roster-table">
+            <thead>
+              <tr>
+                <th>STUDENT</th>
+                <th>SCHEDULE</th>
+                <th>PROGRESS</th>
+                <th>STATUS</th>
+              </tr>
+            </thead>
+            <tbody id="rosterTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="adm-toast" id="admToast"></div>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script>
+  const database = firebase.database();
+  const urlParams = new URLSearchParams(window.location.search);
+  const courseId = urlParams.get('id') || 'jlpt_n5';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    database.ref('students').once('value').then((snapshot) => {
+      var count = snapshot.exists() ? snapshot.numChildren() : 0;
+      var badge = document.getElementById('studentBadge');
+      if (badge) badge.textContent = count;
+    });
+
+    loadCourseData();
+  });
+
+  function loadCourseData() {
+    Promise.allSettled([
+      database.ref('courses/' + courseId).once('value'),
+      database.ref('professors').once('value'),
+      database.ref('sections').once('value'),
+      database.ref('students').once('value')
+    ]).then((results) => {
+      const labels = ['courses', 'instructors', 'sections', 'students'];
+      const failed = [];
+      const snaps = results.map((r, i) => {
+        if (r.status === 'fulfilled') return r.value;
+        failed.push(labels[i]);
+        console.error('[admin-course-view] Failed to load "' + labels[i] + '":', r.reason);
+        return null;
+      });
+      if (failed.length) showToast('Some course data could not be loaded (failed: ' + failed.join(', ') + '). See console.');
+      if (!snaps[0]) {
+        document.getElementById('courseTitle').textContent = 'Unable to load course';
+        document.getElementById('instDetails').textContent = 'Course record could not be loaded. See console for details.';
+        return;
+      }
+
+      const esc = (v) => String(v == null ? '' : v)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      const c = snaps[0].val() || { name: 'Course ' + courseId };
+      const instructors = snaps[1] ? (snaps[1].val() || {}) : {};
+      const sections = snaps[2] ? (snaps[2].val() || {}) : {};
+      const students = snaps[3] ? (snaps[3].val() || {}) : {};
+
+      // Resolve ALL instructors assigned to this course (instructorIds first,
+      // legacy single instructorId as fallback).
+      let instIds = [];
+      if (Array.isArray(c.instructorIds)) {
+        c.instructorIds.forEach((v) => { if (v && instIds.indexOf(String(v)) === -1) instIds.push(String(v)); });
+      } else if (c.instructorIds && typeof c.instructorIds === 'object') {
+        Object.values(c.instructorIds).forEach((v) => { if (v && instIds.indexOf(String(v)) === -1) instIds.push(String(v)); });
+      }
+      if (c.instructorId && instIds.indexOf(String(c.instructorId)) === -1) instIds.push(String(c.instructorId));
+      const assignedInstructors = instIds.map((id) => Object.assign({ _id: id }, instructors[id] || {}));
+      Object.values(sections).forEach((section) => {
+        if (String(section.courseId || '') !== courseId || !section.instructor) return;
+        const sectionName = String(section.instructor).trim().toLowerCase();
+        if (!assignedInstructors.some((i) => String(i.fullName || '').trim().toLowerCase() === sectionName)) {
+          const match = Object.keys(instructors).find((id) =>
+            String((instructors[id] || {}).fullName || '').trim().toLowerCase() === sectionName
+          );
+          if (match) assignedInstructors.push(Object.assign({ _id: match }, instructors[match]));
+        }
+      });
+
+      document.getElementById('courseTitle').textContent = c.name || courseId;
+      document.getElementById('crumbCourseName').textContent = c.name || courseId;
+      document.getElementById('courseBadgeCode').textContent = (c.name || '').slice(0, 3).toUpperCase() || 'UNC';
+      document.getElementById('courseDuration').textContent = c.duration || '--';
+      document.getElementById('courseInstructor').textContent =
+        assignedInstructors.map((i) => i.fullName).filter(Boolean).join(', ') ||
+        (assignedInstructors.length ? 'Assigned (record pending)' : 'No instructor assigned');
+      document.getElementById('coursePrice').textContent = '₱' + Number(c.price || 0).toLocaleString();
+      document.getElementById('statRevenue').textContent = '₱' + Number(c.price || 0).toLocaleString();
+
+      // Instructor card: real credentials only; explicit empty states otherwise.
+      if (!assignedInstructors.length) {
+        document.getElementById('instDetails').innerHTML = '<em>No instructor is currently assigned to this course.</em>';
+        document.getElementById('statRating').textContent = '--';
+      } else {
+        const rated = assignedInstructors.filter((i) => typeof i.averageRating === 'number');
+        if (rated.length) {
+          const avg = rated.reduce((s, i) => s + i.averageRating, 0) / rated.length;
+          const totRatings = rated.reduce((s, i) => s + Number(i.totalRatings || 0), 0);
+          document.getElementById('statRating').textContent = avg.toFixed(1) + ' / 5.0' + (totRatings ? ' (' + totRatings + ')' : '');
+        } else {
+          document.getElementById('statRating').textContent = 'No ratings yet';
+        }
+        renderInstructorCards(assignedInstructors, esc);
+      }
+
+      // Enrolled roster — real progress only; no fabricated percentages.
+      const enrolled = [];
+      let totalProgress = 0;
+      let progressCount = 0;
+      Object.entries(students).forEach(([uid, s]) => {
+        if (!s || s.isDeleted) return;
+        const e = s.enrollment || {};
+        const cMatch = (e.courseId === courseId) || (e.course && e.course.toLowerCase().includes(courseId.toLowerCase()));
+        if (!cMatch) return;
+        const appData = s.appSyncData || {};
+        const totalModules = Number(appData.totalModules || 0);
+        const modulesCompleted = Array.isArray(appData.modulesCompleted)
+          ? appData.modulesCompleted.length
+          : Number(appData.modulesCompleted || 0);
+        const hasProgress = totalModules > 0;
+        const prog = hasProgress ? Math.round((modulesCompleted / totalModules) * 100) : null;
+        if (hasProgress) { totalProgress += prog; progressCount++; }
+        enrolled.push({
+          uid: uid,
+          name: (s.profile && s.profile.fullName) || s.name || 'Student',
+          email: (s.profile && s.profile.email) || s.email || '',
+          scheduleRaw: [e.scheduleDays, e.scheduleTimeSlot].filter(Boolean).join(' · '),
+          status: e.status || 'Active',
+          progress: prog
+        });
+      });
+
+      document.getElementById('statEnrolled').textContent = enrolled.length;
+      document.getElementById('rosterCount').textContent = enrolled.length + ' Students';
+      document.getElementById('statAvgProgress').textContent =
+        progressCount ? Math.round(totalProgress / progressCount) + '%' : '--';
+
+      const tbody = document.getElementById('rosterTbody');
+      const statusBadgeStyle = (status) => {
+        const map = {
+          active: 'background:#dcfce7;color:#166534;',
+          completed: 'background:#dbeafe;color:#1e40af;',
+          pending: 'background:#fef3c7;color:#92400e;',
+          assessment_required: 'background:#fee2e2;color:#991b1b;',
+          inactive: 'background:#f3f4f6;color:#4b5563;'
+        };
+        return map[String(status).toLowerCase()] || map.pending;
+      };
+
+      if (!enrolled.length) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:#9ca3af;">No students currently enrolled in this course track.</td></tr>';
+      } else {
+        tbody.innerHTML = enrolled.map((st) => `
+          <tr>
+            <td>
+              <a href="admin-students.html?student=${encodeURIComponent(st.uid)}" style="color:#C0392B;font-weight:700;text-decoration:none;"
+                 onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${esc(st.name)}</a><br/>
+              <span style="color:#6b7280;font-size:0.75rem;">${esc(st.email)}</span><br/>
+              <span style="color:#9ca3af;font-size:0.7rem;">View performance &rarr;</span>
+            </td>
+            <td>${st.scheduleRaw ? esc(st.scheduleRaw) : '<span style="color:#9ca3af;">Not scheduled</span>'}</td>
+            <td>
+              ${st.progress === null
+                ? '<span style="color:#9ca3af;font-size:0.8rem;">No progress recorded</span>'
+                : `<div style="display:flex;align-items:center;gap:8px;">
+                    <div style="flex:1;background:#e5e7eb;height:6px;border-radius:4px;overflow:hidden;max-width:100px;">
+                      <div style="background:#C0392B;height:100%;width:${st.progress}%;"></div>
+                    </div>
+                    <span style="font-size:0.75rem;font-weight:700;">${st.progress}%</span>
+                  </div>`}
+            </td>
+            <td><span style="${statusBadgeStyle(st.status)}padding:3px 8px;border-radius:4px;font-size:0.75rem;font-weight:700;">${esc(st.status)}</span></td>
+          </tr>
+        `).join('');
+      }
+    }).catch((err) => {
+      console.error('[admin-course-view] render failure:', err);
+      showToast('A rendering error occurred while loading the course. See console.');
+    });
+  }
+
+  function renderInstructorCards(assignedInstructors, esc) {
+    document.getElementById('instDetails').innerHTML = assignedInstructors.map((inst) => {
+      const creds = inst.credentials || {};
+      const certList = Array.isArray(creds.certifications) ? creds.certifications.filter(Boolean) : [];
+      const lines = [];
+      lines.push('<strong>' + esc(inst.fullName || inst._id) + '</strong>' +
+        (inst.specialization ? ' <em>(' + esc(inst.specialization) + ')</em>' : ''));
+      if (inst.bio) lines.push('<em>' + esc(inst.bio) + '</em>');
+      const bits = [];
+      if (creds.education) bits.push('<strong>Education:</strong> ' + esc(creds.education));
+      if (certList.length) bits.push('<strong>Certifications:</strong> ' + certList.map(esc).join(', '));
+      if (typeof creds.yearsExperience === 'number') bits.push('<strong>Experience:</strong> ' + creds.yearsExperience + ' years');
+      if (Array.isArray(creds.languagesSpoken) && creds.languagesSpoken.length) bits.push('<strong>Languages:</strong> ' + creds.languagesSpoken.map(esc).join(', '));
+      if (typeof inst.averageRating === 'number') {
+        bits.push('<strong>Rating:</strong> <iconify-icon icon="mdi:star" style="color:#F59E0B;vertical-align:-2px;"></iconify-icon> ' + inst.averageRating.toFixed(1) + '/5.0');
+      }
+      if (bits.length) lines.push('<div style="margin-top:8px;font-size:0.85rem;color:#374151;">• ' + bits.join('<br/>• ') + '</div>');
+      return lines.join('<br/>');
+    }).join('<hr style="border:none;border-top:1px solid #e5e7eb;margin:12px 0;"/>');
+  }
+
+  function showToast(msg) {
+    var t = document.getElementById('admToast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('adm-toast--show');
+    clearTimeout(showToast._timer);
+    showToast._timer = setTimeout(() => t.classList.remove('adm-toast--show'), 3200);
+  }
+  </script>
+<script src="assets/global-search.js"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "rules": {
+    "activityCalendar": { ".read": true, ".write": true },
+    "admins": { ".read": true, ".write": true },
+    "announcements": { ".read": true, ".write": true },
+    "answer_keys": { ".read": true, ".write": true },
+    "app_download": { ".read": true, ".write": true },
+    "assessments": { ".read": true, ".write": true },
+    "class_setups": { ".read": true, ".write": true },
+    "classes": { ".read": true, ".write": true },
+    "config": { ".read": true, ".write": true },
+    "contact_leads": { ".read": true, ".write": true },
+    "courses": { ".read": true, ".write": true },
+    "data_constraints": { ".read": true, ".write": true },
+    "enrollment_rules": { ".read": true, ".write": true },
+    "enrollments": { ".read": true, ".write": true },
+    "grades": { ".read": true, ".write": true },
+    "kanji": { ".read": true, ".write": true },
+    "logs": { ".read": true, ".write": true },
+    "messages": { ".read": true, ".write": true },
+    "notifications": { ".read": true, ".write": true },
+    "payments": { ".read": true, ".write": true },
+    "portal_config": { ".read": true, ".write": true },
+    "professorRatings": { ".read": true, ".write": true },
+    "professors": { ".read": true, ".write": true },
+    "schedules": { ".read": true, ".write": true },
+    "sections": { ".read": true, ".write": true },
+    "settings": { ".read": true, ".write": true },
+    "students": { ".read": true, ".write": true },
+    "users": { ".read": true, ".write": true },
+    "validation_rules": { ".read": true, ".write": true }
+  }
+}

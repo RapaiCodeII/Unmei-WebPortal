@@ -1,0 +1,14 @@
+{
+  "servers": {
+    "firebase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "firebase-tools@latest",
+        "mcp",
+        "--dir",
+        "C:\\Users\\John Raphael\\OneDrive\\Documents\\Unmei WebPortal"
+      ]
+    }
+  }
+}

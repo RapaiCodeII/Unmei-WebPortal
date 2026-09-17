@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Instructor Dashboard – UNMEI Instructor Portal</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="instructorportal.css" />
+  <script src="assets/iconify-icon.min.js"></script>
+  <script src="assets/unmei-icons.js"></script>
+</head>
+<body>
+  <script src="session-guard.js"></script>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="brand-logo">
+        <img src="assets/logo.png" alt="UNMEI" style="width:40px;height:40px;object-fit:contain;">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UNMEI</span>
+        <span class="brand-portal">INSTRUCTOR PORTAL</span>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <p class="nav-section-label">OVERVIEW</p>
+      <ul class="nav-list">
+        <li class="nav-item nav-item--active">
+          <a href="instructor-dashboard.html" class="nav-link">
+            <iconify-icon icon="mdi:view-dashboard"></iconify-icon>
+            Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="instructor-students.html" class="nav-link">
+            <iconify-icon icon="mdi:account-multiple-outline"></iconify-icon>
+            My Students
+            <span class="nav-badge" id="studentBadge">0</span>
+          </a>
+        </li>
+      </ul>
+
+      <p class="nav-section-label" style="margin-top:20px;">ACADEMIC</p>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="instructor-ratings.html" class="nav-link">
+            <iconify-icon icon="mdi:star-outline"></iconify-icon>
+            Ratings and Feedback
+          </a>
+        </li>
+      </ul>
+
+      <p class="nav-section-label" style="margin-top:20px;">PORTAL SETTINGS</p>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="instructor-settings.html" class="nav-link">
+            <iconify-icon icon="mdi:cog-outline"></iconify-icon>
+            Settings
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="javascript:void(0)" onclick="if(window.instructorSignOut){window.instructorSignOut();}else{location.href='instructor-settings.html';}" class="nav-link">
+            <iconify-icon icon="mdi:logout"></iconify-icon>
+            Sign Out
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar__user">
+      <div class="user-avatar user-avatar--dark" id="sidebarAvatar">IN</div>
+      <div class="user-meta">
+        <span class="user-name" id="sidebarUserName">Instructor</span>
+        <span class="user-role">Instructor</span>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <!-- MAIN -->
+  <div class="main-wrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="sidebar-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
+      <div class="topbar__left">
+        <h2 class="topbar__title">Instructor Dashboard</h2>
+        <nav class="breadcrumb">
+          <a href="instructor-dashboard.html" class="breadcrumb__link">Home</a>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current">Dashboard</span>
+        </nav>
+      </div>
+      <div class="topbar__center"></div>
+      <div class="topbar__right">
+        <div class="avatar-btn" onclick="toggleAvatarMenu(event)">
+          <div class="user-avatar" id="headerAvatar">IN</div>
+          <div class="avatar-btn__meta">
+            <span class="avatar-btn__name" id="headerUserName">Instructor</span>
+            <span class="avatar-btn__role">Instructor</span>
+          </div>
+          <iconify-icon icon="mdi:chevron-down" class="avatar-btn__caret"></iconify-icon>
+          <div class="avatar-menu" id="avatarMenu">
+            <div class="avatar-menu__header">
+              <div class="user-avatar" id="menuAvatar">IN</div>
+              <div>
+                <div class="avatar-menu__name" id="menuName">Instructor</div>
+                <div class="avatar-menu__email" id="menuEmail"></div>
+              </div>
+            </div>
+            <a class="avatar-menu__item" href="instructor-settings.html#profile">
+              <iconify-icon icon="mdi:account-circle-outline"></iconify-icon>
+              View Profile
+            </a>
+            <a class="avatar-menu__item" href="instructor-settings.html">
+              <iconify-icon icon="mdi:cog-outline"></iconify-icon>
+              Settings
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content">
+
+      <!-- Stat cards -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--red"><iconify-icon icon="mdi:school-outline"></iconify-icon></div>
+          <div class="stat-card__body">
+            <span class="stat-card__label">ASSIGNED COURSES</span>
+            <span class="stat-card__value" id="statCourses">0</span>
+            <span class="stat-card__meta" id="statCoursesMeta">Loading...</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--blue"><iconify-icon icon="mdi:account-multiple-outline"></iconify-icon></div>
+          <div class="stat-card__body">
+            <span class="stat-card__label">MY STUDENTS</span>
+            <span class="stat-card__value" id="statStudents">0</span>
+            <span class="stat-card__meta" id="statStudentsMeta">Loading...</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--yellow"><iconify-icon icon="mdi:star-outline"></iconify-icon></div>
+          <div class="stat-card__body">
+            <span class="stat-card__label">AVERAGE RATING</span>
+            <span class="stat-card__value" id="statRating">Not available</span>
+            <span class="stat-card__meta" id="statRatingMeta">No ratings yet</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--green"><iconify-icon icon="mdi:message-star-outline"></iconify-icon></div>
+          <div class="stat-card__body">
+            <span class="stat-card__label">FEEDBACK RECEIVED</span>
+            <span class="stat-card__value" id="statFeedback">0</span>
+            <span class="stat-card__meta">Student evaluations</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Courses + recent activity -->
+      <section class="two-col">
+        <div class="panel">
+          <div class="panel__header">
+            <h3 class="panel__title"><iconify-icon icon="mdi:school-outline"></iconify-icon> My Assigned Courses</h3>
+            <a href="instructor-students.html" class="panel__link">View students</a>
+          </div>
+          <div class="panel__body" id="coursesList">
+            <p class="panel-loading">Loading courses...</p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__header">
+            <h3 class="panel__title"><iconify-icon icon="mdi:history"></iconify-icon> Recent Student Activity</h3>
+          </div>
+          <div class="panel__body" id="activityList">
+            <p class="panel-loading">Loading activity...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Feedback breakdown -->
+      <section class="panel">
+        <div class="panel__header">
+          <h3 class="panel__title"><iconify-icon icon="mdi:chart-bar"></iconify-icon> Feedback Breakdown by Category</h3>
+          <span class="panel__meta" id="feedbackMeta"></span>
+        </div>
+        <div class="panel__body" id="feedbackChartContainer">
+          <p class="panel-loading">Loading feedback data...</p>
+        </div>
+      </section>
+
+      <!-- Performance analytics row -->
+      <section class="two-col">
+        <div class="panel">
+          <div class="panel__header">
+            <h3 class="panel__title"><iconify-icon icon="mdi:trending-up"></iconify-icon> Class Performance Trend</h3>
+            <span class="panel__meta" id="trendMeta"></span>
+          </div>
+          <div class="panel__body" id="perfTrendContainer">
+            <p class="panel-loading">Loading performance data...</p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__header">
+            <h3 class="panel__title"><iconify-icon icon="mdi:chart-bar"></iconify-icon> Student Score Distribution</h3>
+            <span class="panel__meta" id="distMeta"></span>
+          </div>
+          <div class="panel__body" id="scoreDistContainer">
+            <p class="panel-loading">Loading score data...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Rating summary radar -->
+      <section class="panel">
+        <div class="panel__header">
+          <h3 class="panel__title"><iconify-icon icon="mdi:radar"></iconify-icon> Rating Summary</h3>
+          <span class="panel__meta" id="radarMeta"></span>
+        </div>
+        <div class="panel__body" id="ratingRadarContainer" style="display:flex;justify-content:center;">
+          <p class="panel-loading">Loading ratings...</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="instructor-header-sync.js?v=20260907"></script>
+  <script src="assets/d3.v7.min.js"></script>
+  <script src="assets/unmei-charts.js"></script>
+  <script>
+    const database = firebase.database();
+    const instructorId = sessionStorage.getItem('instructorId') || '';
+    const instructorEmail = sessionStorage.getItem('instructorEmail') || '';
+
+    // ---------- avatar menu ----------
+    function toggleAvatarMenu(event) {
+      event.stopPropagation();
+      const menu = document.getElementById('avatarMenu');
+      menu.classList.toggle('active');
+    }
+    document.addEventListener('click', function (e) {
+      const menu = document.getElementById('avatarMenu');
+      if (menu && !e.target.closest('.avatar-btn')) menu.classList.remove('active');
+    });
+
+    function applyMenuIdentity(name) {
+      const display = String(name || 'Instructor');
+      const initials = display.trim().split(/\s+/).filter(Boolean);
+      const ini = initials.length >= 2
+        ? (initials[0][0] + initials[initials.length - 1][0]).toUpperCase()
+        : (display.slice(0, 2) || 'IN').toUpperCase();
+      ['headerAvatar', 'menuAvatar'].forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = ini;
+      });
+      const nameEl = document.getElementById('menuName');
+      if (nameEl) nameEl.textContent = display;
+      const emailEl = document.getElementById('menuEmail');
+      if (emailEl) emailEl.textContent = instructorEmail;
+    }
+
+    database.ref('professors/' + instructorId).on('value', function (snapshot) {
+      const data = snapshot.val() || {};
+      applyMenuIdentity(data.fullName || sessionStorage.getItem('instructorDisplayName'));
+    });
+
+    window.addEventListener('beforeunload', function () {
+      database.ref('professors/' + instructorId).off('value');
+    });
+
+    // ---------- helpers ----------
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('toast--show');
+      setTimeout(function () { toast.classList.remove('toast--show'); }, 2600);
+    }
+
+    function normalizeCourseId(value) {
+      return String(value || '').trim().toLowerCase().replace(/\s+/g, '_');
+    }
+
+    function ratingAverage(ratings, key) {
+      const values = ratings.map(function (r) {
+        const scores = (r && r.ratings) || {};
+        return Number(scores[key] || r[key] || 0);
+      }).filter(function (v) { return v > 0; });
+      if (!values.length) return 0;
+      return values.reduce(function (a, b) { return a + b; }, 0) / values.length;
+    }
+
+    const RATING_CATEGORIES = [
+      { key: 'teachingEffectiveness', label: 'Teaching' },
+      { key: 'communicationSkills', label: 'Communication' },
+      { key: 'subjectMastery', label: 'Subject' },
+      { key: 'classroomManagement', label: 'Classroom' },
+      { key: 'professionalism', label: 'Professional' },
+      { key: 'supportiveness', label: 'Support' },
+      { key: 'punctuality', label: 'Punctuality' },
+      { key: 'overallSatisfaction', label: 'Overall' }
+    ];
+
+    // ---------- data load ----------
+    let myCourses = [];
+    let myStudents = [];
+    let myRatings = [];
+
+    Promise.all([
+      database.ref('courses').once('value'),
+      database.ref('students').once('value'),
+      database.ref('professorRatings').once('value'),
+      database.ref('professors/' + instructorId).once('value'),
+      database.ref('grades').once('value')
+    ]).then(function (results) {
+      const coursesSnap = results[0];
+      const studentsSnap = results[1];
+      const ratingsSnap = results[2];
+      const instructorSnap = results[3];
+      const gradesSnap = results[4] || { exists: function () { return false; }, forEach: function () {} };
+
+      // grades / grades/{courseId}/{studentUid} -> { average, history }
+      const gradeByUid = {};
+      if (gradesSnap.exists()) {
+        gradesSnap.forEach(function (courseChild) {
+          courseChild.forEach(function (uidChild) {
+            const g = uidChild.val() || {};
+            gradeByUid[uidChild.key] = { courseId: courseChild.key, average: g.average, history: g.history || {} };
+          });
+        });
+      }
+
+      const instructorData = instructorSnap.val() || {};
+      applyMenuIdentity(instructorData.fullName || sessionStorage.getItem('instructorDisplayName'));
+
+      // Courses assigned to this instructor
+      const courseLookup = {};
+      if (coursesSnap.exists()) {
+        coursesSnap.forEach(function (child) {
+          const course = child.val() || {};
+          const id = normalizeCourseId(child.key);
+          const ids = [];
+          if (Array.isArray(course.instructorIds)) {
+            course.instructorIds.forEach(function (v) { if (v) ids.push(String(v)); });
+          } else if (course.instructorIds && typeof course.instructorIds === 'object') {
+            Object.values(course.instructorIds).forEach(function (v) { if (v) ids.push(String(v)); });
+          }
+          if (course.instructorId) ids.push(String(course.instructorId));
+          courseLookup[id] = {
+            id: id,
+            name: String(course.name || course.title || child.key),
+            level: String(course.level || ''),
+            schedule: String(course.schedule || course.classSchedule || ''),
+            assigned: ids.indexOf(instructorId) !== -1,
+            studentCount: 0
+          };
+        });
+      }
+
+      // Assigned set also honors instructors/{id}/coursesAssigned
+      const assignedExtra = [];
+      const assignedRaw = instructorData.coursesAssigned;
+      if (Array.isArray(assignedRaw)) {
+        assignedRaw.forEach(function (v) { if (v) assignedExtra.push(normalizeCourseId(v)); });
+      } else if (assignedRaw && typeof assignedRaw === 'object') {
+        Object.values(assignedRaw).forEach(function (v) { if (v) assignedExtra.push(normalizeCourseId(v)); });
+      }
+      assignedExtra.forEach(function (id) {
+        if (courseLookup[id]) courseLookup[id].assigned = true;
+      });
+
+      myCourses = Object.values(courseLookup).filter(function (c) { return c.assigned; });
+      const myCourseIds = myCourses.map(function (c) { return c.id; });
+
+      // Students enrolled in the instructor's courses
+      if (studentsSnap.exists()) {
+        studentsSnap.forEach(function (child) {
+          const data = child.val() || {};
+          const profile = data.profile || {};
+          const enrollment = data.enrollment || {};
+          const courseId = normalizeCourseId(enrollment.courseId || '');
+          if (myCourseIds.indexOf(courseId) === -1) return;
+          const name = profile.fullName || data.fullName || data.name || 'Unknown';
+          // Prefer the latest live progress record when a legacy direct score
+          // or attendance field is absent.
+          const historyRows = Object.values(data.progressHistory || {})
+            .filter(function (row) { return row && typeof row === 'object'; })
+            .sort(function (a, b) { return Number(a.timestamp || 0) - Number(b.timestamp || 0); });
+          const latestProgress = historyRows.length ? historyRows[historyRows.length - 1] : {};
+          const lvScores = Object.assign({}, latestProgress);
+          Object.keys(data.scores || {}).forEach(function (key) {
+            const value = Number(data.scores[key]);
+            if (key === 'updatedAt' || !Number.isFinite(value) || value > 0) lvScores[key] = data.scores[key];
+          });
+          const appData = data.appSyncData || {};
+          const attended = Number(data.attendance || data.attendanceRate || 0);
+          const scoreKeys = ['reading', 'writing', 'listening', 'speaking', 'grammar', 'vocabulary'];
+          const vals = scoreKeys.map(function (k) { return Number(lvScores[k] || 0); });
+          const hasAny = vals.some(function (v) { return v > 0; });
+          const avgScore = hasAny ? Math.round(vals.reduce(function (a, b) { return a + b; }, 0) / vals.length) : 0;
+          const modulesCompleted = Array.isArray(appData.modulesCompleted)
+            ? appData.modulesCompleted.length
+            : Number(appData.modulesCompleted || 0);
+          const totalModules = Number(appData.totalModules || 0);
+          const historyProgress = Number(latestProgress.overallAccuracy || 0);
+          const courseProgress = totalModules > 0
+            ? Math.round((modulesCompleted / totalModules) * 100)
+            : (historyProgress > 0 ? Math.round(historyProgress) : 0);
+          const gradeObj = gradeByUid[child.key] || {};
+          myStudents.push({
+            uid: child.key,
+            name: name,
+            email: String(profile.email || data.email || ''),
+            courseId: courseId,
+            courseName: (courseLookup[courseId] && courseLookup[courseId].name) || enrollment.course || 'N/A',
+            courseProgress: courseProgress,
+            averageScore: avgScore,
+            attendanceRate: attended,
+            lastActivityAt: Number(appData.lastSyncTimestamp || latestProgress.timestamp || enrollment.enrolledAt || 0),
+            streakDays: Number(appData.streakDays || 0),
+            weekly: normalizeWeekly(gradeObj.history || {})
+          });
+        });
+      }
+
+      myCourses.forEach(function (course) {
+        course.studentCount = myStudents.filter(function (s) { return s.courseId === course.id; }).length;
+      });
+
+      // Ratings submitted for this instructor
+      if (ratingsSnap.exists()) {
+        ratingsSnap.forEach(function (child) {
+          const rating = child.val() || {};
+          if (String(rating.instructorId || '') === instructorId) myRatings.push(rating);
+        });
+      }
+
+      renderStats(instructorData);
+      renderCourses();
+      renderActivity();
+      renderFeedbackChart();
+      renderPerfTrend();
+      renderScoreDistribution();
+      renderRatingRadar();
+    }).catch(function () {
+      showToast('Unable to load dashboard data.');
+      document.getElementById('coursesList').innerHTML = '<p class="panel-empty">Unable to load courses.</p>';
+      document.getElementById('activityList').innerHTML = '<p class="panel-empty">Unable to load activity.</p>';
+    });
+
+    // ---------- render ----------
+    function renderStats(instructorData) {
+      document.getElementById('statCourses').textContent = myCourses.length;
+      document.getElementById('statCoursesMeta').textContent = myCourses.length
+        ? myCourses.map(function (c) { return c.name; }).join(', ').slice(0, 60)
+        : 'No courses assigned';
+
+      document.getElementById('statStudents').textContent = myStudents.length;
+      const activeCount = myStudents.filter(function (s) { return s.courseProgress > 0; }).length;
+      document.getElementById('statStudentsMeta').textContent = activeCount + ' actively progressing';
+      const badge = document.getElementById('studentBadge');
+      if (badge) badge.textContent = myStudents.length;
+
+      // Prefer live aggregation from instructorRatings; fall back to stored rollup.
+      let avg = 0;
+      let total = myRatings.length;
+      if (total > 0) {
+        const sums = RATING_CATEGORIES.reduce(function (acc, cat) {
+          return acc + ratingAverage(myRatings, cat.key);
+        }, 0);
+        avg = sums / RATING_CATEGORIES.length;
+      } else {
+        avg = Number(instructorData.averageRating || 0);
+        total = Number(instructorData.totalRatings || 0);
+      }
+
+      document.getElementById('statRating').textContent = avg ? avg.toFixed(1) : 'Not available';
+      document.getElementById('statRatingMeta').textContent = total
+        ? 'From ' + total + ' evaluation' + (total === 1 ? '' : 's')
+        : (avg ? 'Set by administrator' : 'No ratings yet');
+      document.getElementById('statFeedback').textContent = total;
+    }
+
+    function renderCourses() {
+      const container = document.getElementById('coursesList');
+      if (!myCourses.length) {
+        container.innerHTML = '<div class="table-empty"><iconify-icon icon="mdi:school-outline" style="font-size:40px;opacity:0.4;"></iconify-icon><p>No courses assigned yet</p></div>';
+        return;
+      }
+      container.innerHTML = myCourses.map(function (course) {
+        const levelBadge = course.level ? '<span class="enroll-badge enroll-badge--pending">' + escapeHtml(course.level) + '</span>' : '';
+        const schedule = course.schedule ? '<p class="course-meta"><iconify-icon icon="mdi:clock-outline"></iconify-icon> ' + escapeHtml(course.schedule) + '</p>' : '';
+        return (
+          '<div class="course-row">' +
+            '<div class="course-row__body">' +
+              '<div class="course-row__head"><span class="course-row__name">' + escapeHtml(course.name) + '</span>' + levelBadge + '</div>' +
+              schedule +
+            '</div>' +
+            '<div class="course-row__count"><span class="course-row__count-num">' + course.studentCount + '</span><span class="course-row__count-label">students</span></div>' +
+          '</div>'
+        );
+      }).join('');
+    }
+
+    function renderActivity() {
+      const container = document.getElementById('activityList');
+      const recent = myStudents
+        .filter(function (s) { return s.lastActivityAt > 0; })
+        .sort(function (a, b) { return b.lastActivityAt - a.lastActivityAt; })
+        .slice(0, 6);
+
+      if (!recent.length) {
+        container.innerHTML = '<div class="table-empty"><iconify-icon icon="mdi:history" style="font-size:40px;opacity:0.4;"></iconify-icon><p>No student activity recorded yet</p></div>';
+        return;
+      }
+
+      const palette = ['#C0392B', '#2563EB', '#16A34A', '#F59E0B', '#8B5CF6', '#EC4899'];
+      container.innerHTML = recent.map(function (s, i) {
+        const initials = s.name.trim().split(/\s+/).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase() || '??';
+        return (
+          '<div class="activity-row">' +
+            '<div class="student-avatar" style="background:' + palette[i % palette.length] + ';">' + escapeHtml(initials) + '</div>' +
+            '<div class="activity-row__body">' +
+              '<p class="student-name">' + escapeHtml(s.name) + '</p>' +
+              '<p class="student-email">' + escapeHtml(s.courseName) + '</p>' +
+            '</div>' +
+            '<div class="activity-row__meta">' +
+              '<span class="activity-row__progress">' + Math.round(s.courseProgress) + '% progress</span>' +
+              '<span class="activity-row__time">' + timeAgo(s.lastActivityAt) + '</span>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join('');
+    }
+
+    function renderFeedbackChart() {
+      const container = document.getElementById('feedbackChartContainer');
+      const meta = document.getElementById('feedbackMeta');
+      if (!myRatings.length) {
+        meta.textContent = '';
+        container.innerHTML = '<div class="table-empty"><iconify-icon icon="mdi:star-outline" style="font-size:40px;opacity:0.4;"></iconify-icon><p>No feedback received yet. Category averages will appear here once students submit evaluations.</p></div>';
+        return;
+      }
+
+      meta.textContent = myRatings.length + ' evaluation' + (myRatings.length === 1 ? '' : 's') + ' · scale 1 to 5';
+      container.innerHTML = '<div id="feedbackChart"></div>';
+      UnmeiCharts.groupedBar('feedbackChart', {
+        labels: RATING_CATEGORIES.map(function (c) { return c.label; }),
+        series: [{
+          name: 'Average score',
+          values: RATING_CATEGORIES.map(function (c) { return Math.round(ratingAverage(myRatings, c.key) * 10) / 10; }),
+          color: '#C0392B'
+        }],
+        format: function (v) { return Number(v).toFixed(1); },
+        yMax: 5,
+        legend: false,
+        height: 240
+      });
+    }
+
+    // ---------- performance analytics ----------
+    function normalizeWeekly(raw) {
+      let list = [];
+      if (Array.isArray(raw)) {
+        list = raw;
+      } else if (raw && typeof raw === 'object') {
+        list = Object.keys(raw)
+          .sort(function (a, b) { return Number(a) - Number(b); })
+          .map(function (k) { return raw[k]; });
+      }
+      return list.map(function (entry) {
+        if (typeof entry === 'number') return entry;
+        if (entry && typeof entry === 'object') {
+          let v = entry.score !== undefined ? entry.score : (entry.value !== undefined ? entry.value : entry.average);
+          if (v === undefined) {
+            const parts = [entry.reading, entry.writing, entry.listening, entry.speaking].filter(function (x) { return typeof x === 'number'; });
+            v = parts.length ? Math.round(parts.reduce(function (a, b) { return a + b; }, 0) / parts.length) : 0;
+          }
+          const n = Number(v || 0);
+          return Number.isNaN(n) ? null : n;
+        }
+        const n = Number(entry);
+        return Number.isNaN(n) ? null : n;
+      }).filter(function (v) { return v !== null && v >= 0; });
+    }
+
+    function renderPerfTrend() {
+      const container = document.getElementById('perfTrendContainer');
+      const meta = document.getElementById('trendMeta');
+      if (!container) return;
+      const withWeekly = myStudents.filter(function (s) { return s.weekly && s.weekly.length > 0; });
+      if (!withWeekly.length) {
+        meta.textContent = '';
+        container.innerHTML = '<div class="table-empty"><iconify-icon icon="mdi:trending-up" style="font-size:40px;opacity:0.4;"></iconify-icon><p>No weekly progress recorded yet for your students.</p></div>';
+        return;
+      }
+      const weekCount = withWeekly.reduce(function (m, s) { return Math.max(m, s.weekly.length); }, 0);
+      const labels = [];
+      const values = [];
+      for (let w = 0; w < weekCount; w++) {
+        let sum = 0;
+        let n = 0;
+        withWeekly.forEach(function (s) {
+          if (w < s.weekly.length && s.weekly[w] > 0) { sum += s.weekly[w]; n++; }
+        });
+        labels.push('Week ' + (w + 1));
+        values.push(n ? Math.round((sum / n) * 10) / 10 : 0);
+      }
+      meta.textContent = 'Class average per week \u00B7 ' + withWeekly.length + ' student' + (withWeekly.length === 1 ? '' : 's');
+      container.innerHTML = '<div id="perfTrendChart"></div>';
+      UnmeiCharts.multiLine('perfTrendChart', {
+        labels: labels,
+        series: [{ name: 'Class average', data: values, color: '#C0392B', fill: true }],
+        yMax: 100,
+        height: 240,
+        legend: false
+      });
+    }
+
+    function renderScoreDistribution() {
+      const container = document.getElementById('scoreDistContainer');
+      const meta = document.getElementById('distMeta');
+      if (!container) return;
+      if (!myStudents.length) {
+        meta.textContent = '';
+        container.innerHTML = '<div class="table-empty"><iconify-icon icon="mdi:chart-bar" style="font-size:40px;opacity:0.4;"></iconify-icon><p>No students assigned yet.</p></div>';
+        return;
+      }
+      const ranges = [
+        { label: '90-100', min: 90, max: 101 },
+        { label: '80-89', min: 80, max: 90 },
+        { label: '70-79', min: 70, max: 80 },
+        { label: '60-69', min: 60, max: 70 },
+        { label: 'Below 60', min: -1, max: 60 }
+      ];
+      const buckets = ranges.map(function (r) {
+        return {
+          label: r.label,
+          count: myStudents.filter(function (s) { return s.averageScore >= r.min && s.averageScore < r.max; }).length
+        };
+      });
+      meta.textContent = myStudents.length + ' student' + (myStudents.length === 1 ? '' : 's') + ' \u00B7 by average score';
+      container.innerHTML = '<div id="scoreDistChart"></div>';
+      UnmeiCharts.groupedBar('scoreDistChart', {
+        labels: buckets.map(function (b) { return b.label; }),
+        series: [{ name: 'Students', values: buckets.map(function (b) { return b.count; }), color: '#2563EB' }],
+        legend: false,
+        height: 240
+      });
+    }
+
+    function renderRatingRadar() {
+      const container = document.getElementById('ratingRadarContainer');
+      const meta = document.getElementById('radarMeta');
+      if (!container) return;
+      if (!myRatings.length) {
+        meta.textContent = '';
+        container.innerHTML = '<div class="table-empty"><iconify-icon icon="mdi:radar" style="font-size:40px;opacity:0.4;"></iconify-icon><p>No evaluations received yet. Your rating profile will appear here once students submit feedback.</p></div>';
+        return;
+      }
+      const shortNames = {
+        teachingEffectiveness: 'Teaching',
+        communicationSkills: 'Comms',
+        subjectMastery: 'Mastery',
+        classroomManagement: 'Class Mgmt',
+        professionalism: 'Conduct',
+        supportiveness: 'Support',
+        punctuality: 'Punctual',
+        overallSatisfaction: 'Overall'
+      };
+      const axes = RATING_CATEGORIES.map(function (c) {
+        return { label: shortNames[c.key] || c.label, value: Math.round(ratingAverage(myRatings, c.key) * 10) / 10 };
+      });
+      meta.textContent = myRatings.length + ' evaluation' + (myRatings.length === 1 ? '' : 's') + ' \u00B7 scale 1 to 5';
+      container.innerHTML = '<div id="ratingRadar"></div>';
+      UnmeiCharts.radarChart('ratingRadar', { axes: axes, color: '#C0392B', size: 280 });
+    }
+  </script>
+<script src="assets/global-search.js"></script>
+</body>
+</html>

@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unmei – Recent Enrollments</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/cropped-fav-32x32.png" />
+  <link rel="stylesheet" href="adminportal.css" />
+  <script src="assets/iconify-icon.min.js"></script>
+<script src="assets/unmei-icons.js"></script>
+</head>
+<body>
+  <script src="session-guard.js"></script>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="brand-logo">
+        <img src="assets/logo.png" alt="UNMEI" style="width:40px;height:40px;object-fit:contain;">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UNMEI</span>
+        <span class="brand-portal">ADMIN PORTAL</span>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <p class="nav-section-label">OVERVIEW</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-dashboard.html" class="nav-link">
+          <iconify-icon icon="mdi:view-dashboard"></iconify-icon>
+          Dashboard</a></li>
+        <li class="nav-item"><a href="admin-students.html" class="nav-link">
+          <iconify-icon icon="mdi:account-outline"></iconify-icon>
+          Students<span class="nav-badge" id="studentBadge">0</span></a></li>
+        <li class="nav-item nav-item--active"><a href="admin-enrollments.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+          Recent Enrollments</a></li>
+        <li class="nav-item"><a href="admin-payments.html" class="nav-link">
+          <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>Payments</a></li>
+      </ul>
+
+      <p class="nav-section-label" style="margin-top:20px;">COURSES</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-courses.html" class="nav-link">
+          <iconify-icon icon="mdi:card-text-outline"></iconify-icon>
+          Course List</a></li>
+        <li class="nav-item"><a href="admin-build-course.html" class="nav-link">
+          <iconify-icon icon="mdi:plus-circle-outline"></iconify-icon>
+          Build New Course</a></li>
+      </ul>
+
+      <p class="nav-section-label" style="margin-top:20px;">QUICK ACTIONS</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-add-student.html" class="nav-link">
+          <iconify-icon icon="mdi:account-plus-outline"></iconify-icon>
+          Add Student</a></li>
+        <li class="nav-item"><a href="admin-new-enrollment.html" class="nav-link">
+          <iconify-icon icon="mdi:plus-circle-outline"></iconify-icon>
+          New Enrollment</a></li>
+        <li class="nav-item"><a href="admin-post-notice.html" class="nav-link">
+          <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+          Post Notice</a></li>
+      </ul>
+      <p class="nav-section-label" style="margin-top:20px;">SYSTEM</p>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="admin-portal-settings.html" class="nav-link">
+          <iconify-icon icon="mdi:cog-outline"></iconify-icon>
+          Portal Settings</a></li>
+        <li class="nav-item"><a href="javascript:void(0)" onclick="if(window.__adminSignOut){window.__adminSignOut();}else{location.href='admin-portal-settings.html';}" class="nav-link">
+          <iconify-icon icon="mdi:logout"></iconify-icon>
+          Sign Out</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar__user">
+      <div class="user-avatar user-avatar--dark">AD</div>
+      <div class="user-meta">
+        <span class="user-name">Admin</span>
+        <span class="user-role">Administrator</span>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <!-- MAIN -->
+  <div class="main-wrapper">
+    <header class="topbar">
+      <button class="sidebar-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
+        <div class="topbar__left">
+        <h2 class="topbar__title">Recent Enrollments</h2>
+        <nav class="breadcrumb">
+          <a href="admin-dashboard.html" class="breadcrumb__link">Home</a>
+          <span class="breadcrumb__sep">/</span>
+          <a href="admin-dashboard.html" class="breadcrumb__link">Dashboard</a>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current">Enrollments</span>
+        </nav>
+      </div>
+      <div class="topbar__center">
+      </div>
+      <div class="topbar__right">
+        <!-- Notification Bell -->
+        <div style="position: relative;">
+          <button class="icon-btn" id="notifBtn" onclick="toggleDropdown('notifDropdown')">
+            <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+            <span class="dropdown-badge" id="notifBadge" style="display: none;">0</span>
+          </button>
+          <div class="header-dropdown" id="notifDropdown">
+            <div class="header-dropdown__header">
+              <span class="header-dropdown__title">Notifications</span>
+              <span class="header-dropdown__link" onclick="markAllRead()">Mark all read</span>
+            </div>
+            <div class="header-dropdown__list" id="notifList">
+              <div class="header-dropdown__empty" id="notifEmpty">
+                <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+                <p>No notifications</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div style="position: relative;">
+          <button class="icon-btn" id="msgBtn" onclick="toggleDropdown('msgDropdown')">
+            <iconify-icon icon="mdi:email-outline"></iconify-icon>
+            <span class="dropdown-badge" id="msgBadge" style="display: none;">0</span>
+          </button>
+          <div class="header-dropdown" id="msgDropdown">
+            <div class="header-dropdown__header">
+              <span class="header-dropdown__title">Messages</span>
+              <span class="header-dropdown__link" onclick="viewAllMessages()">View all</span>
+            </div>
+            <div class="header-dropdown__list" id="msgList">
+              <div class="header-dropdown__empty" id="msgEmpty">
+                <iconify-icon icon="mdi:email-outline"></iconify-icon>
+                <p>No messages</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="topbar__user">
+          <div class="user-avatar user-avatar--red">AD</div>
+          <div class="user-meta">
+            <span class="user-name">Admin</span>
+            <span class="user-role">Administrator</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- Toolbar -->
+      <div class="enroll-toolbar">
+        <div class="enroll-search">
+          <iconify-icon icon="mdi:magnify"></iconify-icon>
+          <input type="text" id="inlineSearch" placeholder="Search" oninput="applyFilters()" />
+        </div>
+        <div class="enroll-dropdowns">
+          <select class="enroll-select" id="courseFilter" onchange="applyFilters()">
+            <option value="">All Courses</option>
+            <option>JLPT N5</option>
+            <option>JLPT N4</option>
+            <option>JLPT N3</option>
+            <option>JLPT N2</option>
+            <option>Bundle N5–N3</option>
+          </select>
+          <select class="enroll-select" id="statusFilter" onchange="applyFilters()">
+            <option value="">All Statuses</option>
+            <option>Active</option>
+            <option>Pending</option>
+            <option>Processing</option>
+            <option>Inactive</option>
+          </select>
+        </div>
+        <button class="btn-new-enroll" onclick="openModal('addEnrollModal')">+ New Enrollment</button>
+      </div>
+
+      <!-- Table -->
+      <div class="enroll-table-card">
+        <table class="enroll-table">
+          <thead>
+            <tr>
+              <th>REF ID</th>
+              <th>STUDENT</th>
+        <th>COURSE REQUESTED</th>
+        <th>DATE</th>
+        <th>CONTACT</th>
+        <th>STATUS</th>
+              <th>REVIEWER</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="enrollTbody"></tbody>
+        </table>
+        <div class="table-empty" id="tableEmpty" style="display:none;">
+          <iconify-icon icon="mdi:information-outline"></iconify-icon>
+          <p>No enrollments found.</p>
+        </div>
+        <div class="enroll-pagination">
+          <span class="enroll-count" id="enrollCount">Loading...</span>
+          <div class="pagination-btns">
+            <button class="page-btn" id="prevBtn" onclick="changePage(-1)" disabled>Previous</button>
+            <button class="page-btn page-btn--active" id="nextBtn" onclick="changePage(1)">Next</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ======== MANAGE MODAL ======== -->
+  <div class="modal-overlay" id="manageModal" onclick="closeOnBg(event,'manageModal')">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="manageTitle">Manage Enrollment</h3>
+        <button class="modal-close" onclick="closeModal('manageModal')"><iconify-icon icon="mdi:close"></iconify-icon></button>
+      </div>
+      <div class="modal-body" id="manageBody"></div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn--ghost" onclick="closeModal('manageModal')">Close</button>
+        <button class="modal-btn modal-btn--danger" id="manageDeleteBtn">Revoke Enrollment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== ADD ENROLLMENT ========
+       Canonical writer is admin-new-enrollment.html (4-step wizard with courseId,
+       canonical schedules, zeroed performance, onboardingComplete invariants).
+       The legacy inline modal here wrote non-canonical records (no courseId,
+       hardcoded "Section A/B" names) and was removed in PHASE 12. -->
+  <div class="modal-overlay" id="addEnrollModal" onclick="closeOnBg(event,'addEnrollModal')">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>New Enrollment</h3>
+        <button class="modal-close" onclick="closeModal('addEnrollModal')"><iconify-icon icon="mdi:close"></iconify-icon></button>
+      </div>
+      <div class="modal-body">
+        <p style="color:#4b5563;font-size:0.9rem;line-height:1.6;">
+          Enrollments are created through the guided wizard to guarantee complete,
+          schema-conformant records (course assignment, class schedule, pre-test
+          eligibility, payment plan, and initial progress state).
+        </p>
+        <a href="admin-new-enrollment.html" style="display:inline-block;margin-top:10px;color:#C0392B;font-weight:600;text-decoration:none;">Open New Enrollment Wizard &rarr;</a>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn--ghost" onclick="closeModal('addEnrollModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="adm-toast" id="admToast"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script>
+  const database = firebase.database();
+  const COLORS = ['#C0392B','#22c55e','#3b82f6','#f97316','#8b5cf6','#0d9488','#e11d48'];
+  const COURSE_NAME_FALLBACK = {
+    jlpt_n5: 'JLPT N5 (Beginner)',
+    jlpt_n4: 'JLPT N4 (Elementary)',
+    jlpt_n3: 'JLPT N3 (Intermediate)',
+    jlpt_n2: 'JLPT N2 (Advanced)',
+    bundle_n5_n4: 'Bundle N5-N4',
+    bundle_n5_n3: 'Bundle N5-N3'
+  };
+
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function normalizeCourseId(value) {
+    return String(value || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[\s-]+/g, '_')
+      .replace(/[^a-z0-9_]/g, '');
+  }
+
+  function resolveCourseLabel(courseId, rawCourse, courseLookup) {
+    const direct = String(rawCourse || '').trim();
+    if (direct) return direct;
+    const normalizedId = normalizeCourseId(courseId);
+    if (!normalizedId) return '';
+    return courseLookup[normalizedId] || COURSE_NAME_FALLBACK[normalizedId] || '';
+  }
+
+  function sanitizeAvatarColor(colorValue, fallbackColor) {
+    const value = String(colorValue || '').trim();
+    return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(value) ? value : fallbackColor;
+  }
+
+  function getInitials(name) {
+    return (name || '').trim().split(/\s+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase() || '??';
+  }
+
+  function avatarMarkup(entry, className, inlineStyle) {
+    const avatarUrl = String(entry.avatarUrl || '').trim();
+    const sizeStyle = inlineStyle ? inlineStyle : '';
+    if (avatarUrl) {
+      return `<div class="${className}" style="background:#f5f5f5;overflow:hidden;${sizeStyle}"><img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(entry.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"></div>`;
+    }
+    return `<div class="${className}" style="background:${escapeHtml(entry.color)};${sizeStyle}">${escapeHtml(entry.initials)}</div>`;
+  }
+
+  function buildStudentLookup(studentSnapshot) {
+    const byUid = {};
+    const byEmail = {};
+    const byName = {};
+    let idx = 0;
+
+    if (!studentSnapshot.exists()) {
+      return { byUid, byEmail, byName };
+    }
+
+    studentSnapshot.forEach((child) => {
+      const data = child.val() || {};
+      const profile = data.profile || {};
+      const name = String(profile.fullName || data.fullName || data.name || '').trim();
+      const email = String(profile.email || data.email || '').trim().toLowerCase();
+      const fallbackColor = COLORS[idx % COLORS.length];
+      const entry = {
+        uid: child.key,
+        name: name,
+        email: email,
+        avatarUrl: profile.avatarUrl || data.avatarUrl || '',
+        initials: String(profile.avatarInitials || getInitials(name)).toUpperCase(),
+        color: sanitizeAvatarColor(profile.avatarColor || data.avatarColor, fallbackColor)
+      };
+      idx++;
+
+      byUid[child.key] = entry;
+      if (email) byEmail[email] = entry;
+      if (name) byName[name.toLowerCase()] = entry;
+    });
+
+    return { byUid, byEmail, byName };
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    database.ref('students').once('value').then((snapshot) => {
+      var count = snapshot.exists() ? snapshot.numChildren() : 0;
+      var badge = document.getElementById('studentBadge');
+      if (badge) badge.textContent = count;
+    });
+    loadEnrollments();
+  });
+
+  let enrollments = [];
+  const PAGE_SIZE = 4;
+  let currentPage = 1;
+  let filteredList = [];
+
+  function totalPages() {
+    return Math.max(1, Math.ceil(filteredList.length / PAGE_SIZE));
+  }
+
+  function loadEnrollments() {
+    Promise.all([
+      database.ref('enrollments').once('value'),
+      database.ref('students').once('value'),
+      database.ref('courses').once('value')
+    ]).then(([snapshot, studentSnapshot, coursesSnapshot]) => {
+      enrollments = [];
+      const studentLookup = buildStudentLookup(studentSnapshot);
+      const courseLookup = {};
+      if (coursesSnapshot.exists()) {
+        coursesSnapshot.forEach((child) => {
+          const courseData = child.val() || {};
+          const normalizedId = normalizeCourseId(child.key || courseData.courseId || '');
+          const courseName = String(courseData.name || courseData.course || '').trim();
+          if (normalizedId && courseName) {
+            courseLookup[normalizedId] = courseName;
+          }
+        });
+      }
+
+      if (snapshot.exists()) {
+        let idx = 0;
+        snapshot.forEach((child) => {
+          const data = child.val() || {};
+          const entryEmail = String(data.email || data.studentEmail || '').trim().toLowerCase();
+          const entryName = String(data.fullName || data.studentName || data.name || '').trim();
+          const candidateUid = String(data.studentUid || data.uid || data.studentId || data.enrollmentId || '').trim();
+          let studentMatch = null;
+          if (candidateUid) {
+            studentMatch = studentLookup.byUid[candidateUid] || null;
+          }
+          if (!studentMatch && String(child.key || '').charAt(0) !== '-') {
+            studentMatch = studentLookup.byUid[child.key] || null;
+          }
+          if (!studentMatch && entryEmail) {
+            studentMatch = studentLookup.byEmail[entryEmail] || null;
+          }
+          if (!studentMatch && entryName) {
+            studentMatch = studentLookup.byName[entryName.toLowerCase()] || null;
+          }
+
+          const name = entryName || (studentMatch ? studentMatch.name : '') || 'Unknown';
+          const initials = studentMatch ? studentMatch.initials : String(data.avatarInitials || getInitials(name)).toUpperCase();
+          const fallbackColor = COLORS[idx % COLORS.length];
+          const color = studentMatch ? studentMatch.color : sanitizeAvatarColor(data.avatarColor, fallbackColor);
+          const avatarUrl = studentMatch ? studentMatch.avatarUrl : (data.avatarUrl || '');
+          const createdAt = data.createdAt || data.enrolledAt || data.updatedAt || 0;
+          const dateStr = createdAt ? new Date(createdAt).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}) : 'N/A';
+          const status = data.status === 'pending' ? 'Pending' : (data.status === 'active' ? 'Active' : (data.status === 'processing' ? 'Processing' : 'Inactive'));
+          const resolvedCourse = resolveCourseLabel(data.courseId, data.course, courseLookup) || 'N/A';
+          enrollments.push({
+            id: child.key,
+            ref: 'ENR-' + child.key.substring(0, 5).toUpperCase(),
+            initials: initials,
+            color: color,
+            avatarUrl: avatarUrl,
+            name: name,
+            email: entryEmail || (studentMatch ? studentMatch.email : ''),
+            course: resolvedCourse,
+            date: dateStr,
+            status: status,
+            wantCall: String(data.wantCall || 'No').toLowerCase() === 'yes' ? 'Yes' : 'No',
+            mobile: String(data.mobileNumber || '').trim(),
+            reviewer: data.assessmentPassed ? 'System Auto' : (data.status === 'pending' ? '-' : 'Admin')
+          });
+          idx++;
+        });
+      }
+      filteredList = [...enrollments];
+      renderPage();
+    });
+  }
+
+  function statusBadge(s) {
+    const cls = { Active:'eb--active', Pending:'eb--pending', Processing:'eb--processing', Inactive:'eb--inactive' };
+    return `<span class="enroll-badge ${cls[s]||''}">${s}</span>`;
+  }
+
+  function contactBadge(e) {
+    if (e.wantCall === 'Yes') {
+      return `<span class="enroll-badge eb--pending" style="display:inline-flex;align-items:center;gap:4px;"><iconify-icon icon="mdi:phone" style="font-size:13px;"></iconify-icon>Call Requested</span>`;
+    }
+    return `<span style="color:var(--gray-400,#9CA3AF);font-size:0.78rem;">No</span>`;
+  }
+
+  function renderPage() {
+    const tbody = document.getElementById('enrollTbody');
+    const empty = document.getElementById('tableEmpty');
+    const total = filteredList.length;
+    const pageCount = totalPages();
+
+    if (currentPage > pageCount) currentPage = pageCount;
+    if (currentPage < 1) currentPage = 1;
+
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const page = filteredList.slice(start, start + PAGE_SIZE);
+
+    if (!total) {
+      tbody.innerHTML = '';
+      empty.style.display = 'flex';
+      updatePagination();
+      return;
+    }
+
+    if (!page.length) {
+      currentPage = 1;
+      return renderPage();
+    }
+
+    empty.style.display = 'none';
+
+    tbody.innerHTML = page.map(e => `
+      <tr>
+        <td class="ref-id">${e.ref}</td>
+        <td>
+          <div class="stu-cell-enroll">
+            ${avatarMarkup(e, 'stu-avatar-sm')}
+            <div><p class="stu-name-e">${escapeHtml(e.name)}</p><p class="stu-email-e">${escapeHtml(e.email)}</p></div>
+          </div>
+        </td>
+        <td>${escapeHtml(e.course)}</td>
+        <td>${escapeHtml(e.date)}</td>
+        <td>${contactBadge(e)}</td>
+        <td>${statusBadge(e.status)}</td>
+        <td class="reviewer-cell">${escapeHtml(e.reviewer)}</td>
+        <td><button class="manage-btn" onclick="manageEnrollment('${e.id}')">Manage</button></td>
+      </tr>`).join('');
+
+    updatePagination();
+  }
+
+  function updatePagination() {
+    const total = filteredList.length;
+    const pageCount = totalPages();
+    const clampedPage = Math.min(Math.max(currentPage, 1), pageCount);
+    const start = total ? ((clampedPage - 1) * PAGE_SIZE + 1) : 0;
+    const end = total ? Math.min(clampedPage * PAGE_SIZE, total) : 0;
+
+    document.getElementById('enrollCount').textContent = total
+      ? `Showing ${start} to ${end} of ${total} entries`
+      : 'No entries found';
+    document.getElementById('prevBtn').disabled = total === 0 || clampedPage <= 1;
+    document.getElementById('nextBtn').disabled = total === 0 || clampedPage >= pageCount;
+  }
+
+  function changePage(dir) {
+    const nextPage = currentPage + dir;
+    const pageCount = totalPages();
+    if (nextPage < 1 || nextPage > pageCount) {
+      return;
+    }
+    currentPage = nextPage;
+    renderPage();
+  }
+
+  function applyFilters() {
+    const q       = (document.getElementById('inlineSearch').value).toLowerCase();
+    const course  = document.getElementById('courseFilter').value;
+    const status  = document.getElementById('statusFilter').value;
+
+    filteredList = enrollments.filter(e => {
+      const matchQ      = !q      || e.name.toLowerCase().includes(q) || e.course.toLowerCase().includes(q) || e.ref.toLowerCase().includes(q);
+      const matchCourse = !course || e.course.includes(course);
+      const matchStatus = !status || e.status === status;
+      return matchQ && matchCourse && matchStatus;
+    });
+    currentPage = 1;
+    renderPage();
+  }
+
+  function manageEnrollment(id) {
+    const e = enrollments.find(x => x.id === id);
+    if (!e) return;
+    document.getElementById('manageTitle').textContent = 'Enrollment – ' + e.ref;
+    document.getElementById('manageBody').innerHTML = `
+      <div class="view-profile">
+        ${avatarMarkup(e, 'stu-avatar-sm', 'width:50px;height:50px;font-size:1rem;')}
+        <div>
+          <p class="stu-name-e" style="font-size:0.9rem;font-weight:700;">${escapeHtml(e.name)}</p>
+          <p class="stu-email-e">${escapeHtml(e.email)}</p>
+          <div style="margin-top:6px;">${statusBadge(e.status)}</div>
+        </div>
+      </div>
+      <div class="view-grid" style="margin-top:8px;">
+        <div class="view-row"><span class="view-label">Ref ID</span><span class="view-val" style="color:var(--red)">${escapeHtml(e.ref)}</span></div>
+        <div class="view-row"><span class="view-label">Course</span><span class="view-val">${escapeHtml(e.course)}</span></div>
+        <div class="view-row"><span class="view-label">Date</span><span class="view-val">${escapeHtml(e.date)}</span></div>
+        <div class="view-row"><span class="view-label">Contact Preference</span><span class="view-val">${e.wantCall === 'Yes' ? '<strong style="color:var(--red)">Call Requested</strong>' + (e.mobile ? ' — ' + escapeHtml(e.mobile) : '') : 'No call requested'}</span></div>
+        <div class="view-row"><span class="view-label">Reviewer</span><span class="view-val">${escapeHtml(e.reviewer)}</span></div>
+        <div class="view-row">
+          <span class="view-label">Change Status</span>
+          <select class="mf-input" style="max-width:160px;" onchange="updateStatus('${e.id}', this.value)">
+            ${['Active','Pending','Processing','Inactive'].map(s=>`<option ${s===e.status?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </div>
+      </div>`;
+    document.getElementById('manageDeleteBtn').onclick = () => { revokeEnrollment(id); };
+    openModal('manageModal');
+  }
+
+  function updateStatus(id, val) {
+    const e = enrollments.find(x => x.id === id);
+    if (e) {
+      const dbStatus = val.toLowerCase();
+      database.ref('enrollments/' + id + '/status').set(dbStatus).then(() => {
+        e.status = val;
+        database.ref('students').orderByChild('profile/email').equalTo(e.email).once('value').then(snap => {
+          if (snap.exists()) {
+            snap.forEach(child => {
+              database.ref('notifications').push({
+                recipientUid: child.key,
+                title: 'Enrollment Status Updated',
+                message: 'Your enrollment for ' + e.course + ' has been updated to ' + val + ' by an Administrator.',
+                type: 'enrollment',
+                read: false,
+                createdAt: Date.now()
+              });
+            });
+          }
+        });
+        applyFilters();
+        showToast('Status updated to ' + val);
+      });
+    }
+  }
+
+  function revokeEnrollment(id) {
+    const e = enrollments.find(x => x.id === id);
+    if (!e) return;
+    showConfirm('Revoke Enrollment','Revoke enrollment for ' + e.name + '? This will also suspend their portal access.',function(){
+      // Find the student UID by matching email in students node
+      database.ref('students').orderByChild('profile/email').equalTo(e.email).once('value').then((snap) => {
+        const updates = {};
+        // Mark enrollment as revoked
+        updates['enrollments/' + id + '/status'] = 'revoked';
+        updates['enrollments/' + id + '/revokedAt'] = Date.now();
+        
+        if (snap.exists()) {
+          snap.forEach((child) => {
+            const studentUid = child.key;
+            // Mark student as revoked so session-guard blocks access
+            updates['students/' + studentUid + '/isRevoked'] = true;
+            updates['students/' + studentUid + '/revokedAt'] = Date.now();
+            updates['students/' + studentUid + '/enrollment/status'] = 'revoked';
+            
+            // Push Notification
+            const notifRef = database.ref('notifications').push();
+            updates['notifications/' + notifRef.key] = {
+              recipientUid: studentUid,
+              title: 'Enrollment Revoked',
+              message: 'Your enrollment and portal access have been revoked by an Administrator.',
+              type: 'info',
+              read: false,
+              createdAt: Date.now()
+            };
+          });
+        }
+        
+        return database.ref().update(updates);
+      }).then(() => {
+        loadEnrollments();
+        closeModal('manageModal');
+        showToast('Enrollment ' + e.ref + ' revoked — student access suspended');
+      }).catch(() => {
+        showToast('Error revoking enrollment. Please try again.');
+      });
+    });
+  }
+
+  // addEnrollment() removed in PHASE 12: it wrote non-canonical enrollment
+  // records (no courseId/schedule/invariants). Canonical writer is the
+  // admin-new-enrollment.html wizard; "+ New Enrollment" opens that wizard.
+
+
+  function openModal(id) { document.getElementById(id).classList.add('active'); document.body.style.overflow='hidden'; }
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); document.body.style.overflow=''; }
+  function closeOnBg(e,id) { if(e.target.id===id) closeModal(id); }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('admToast');
+    t.textContent = msg; t.classList.add('adm-toast--show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>t.classList.remove('adm-toast--show'), 2800);
+  }
+
+  function toggleDropdown(id) {
+    const dropdown = document.getElementById(id);
+    const isActive = dropdown.classList.contains('active');
+    document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('active'));
+    document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--active'));
+    if (!isActive) {
+      dropdown.classList.add('active');
+      document.getElementById(id === 'notifDropdown' ? 'notifBtn' : 'msgBtn').classList.add('icon-btn--active');
+    }
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.icon-btn') && !e.target.closest('.header-dropdown')) {
+      document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('active'));
+      document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('icon-btn--active'));
+    }
+  });
+
+  function markAllRead() {
+    document.querySelectorAll('.dropdown-item--unread').forEach(item => item.classList.remove('dropdown-item--unread'));
+    document.getElementById('notifBadge').style.display = 'none';
+    showToast('All notifications marked as read');
+  }
+
+  function viewNotif(el) {
+    el.classList.remove('dropdown-item--unread');
+    const unreadCount = document.querySelectorAll('.dropdown-item--unread').length;
+    const badge = document.getElementById('notifBadge');
+    if (unreadCount === 0) { badge.style.display = 'none'; } else { badge.textContent = unreadCount; }
+  }
+
+  function viewAllMessages() { showToast('No messages'); }
+  function openMessage(user) { showToast('Open message from ' + user); }
+
+  function showConfirm(t,m,cb){var o=document.getElementById('confirmOverlay');o.querySelector('.confirm-title').textContent=t;o.querySelector('.confirm-message').textContent=m;o.classList.add('active');o.querySelector('.confirm-btn--cancel').onclick=function(){o.classList.remove('active');};o.querySelector('.confirm-btn--confirm').onclick=function(){o.classList.remove('active');cb();};}
+  </script>
+  <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><div class="confirm-icon confirm-icon--warning"><iconify-icon icon="mdi:alert-outline"></iconify-icon></div><div class="confirm-title"></div><div class="confirm-message"></div><div class="confirm-actions"><button class="confirm-btn confirm-btn--cancel">Cancel</button><button class="confirm-btn confirm-btn--confirm">Confirm</button></div></div></div>
+<script>
+function toggleMobileSidebar(){var s=document.querySelector('.sidebar'),b=document.getElementById('sidebarBackdrop');if(s.classList.contains('sidebar--mobile-open')){closeMobileSidebar();}else{s.classList.add('sidebar--mobile-open');b.classList.add('active');document.body.style.overflow='hidden';}}
+function closeMobileSidebar(){var s=document.querySelector('.sidebar');var b=document.getElementById('sidebarBackdrop');s.classList.remove('sidebar--mobile-open');b.classList.remove('active');document.body.style.overflow='';}
+window.addEventListener('resize',function(){if(window.innerWidth>700)closeMobileSidebar();});
+</script>
+<script src="admin-header-sync.js"></script>
+<script src="assets/global-search.js"></script>
+</body>
+</html>
+
+
