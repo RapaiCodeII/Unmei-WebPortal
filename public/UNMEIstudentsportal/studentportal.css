@@ -166,12 +166,8 @@ body.page-login .page-wrapper { display: none; }
 .nav-link--logout:hover { background: rgba(255,0,0,0.1); color: #ff6b6b; }
 .nav-link--logout:hover svg { color: #ff6b6b; }
 .nav-item--active .nav-link { background: var(--red); color: #fff; }
-.nav-item--active .nav-link:hover,
-.nav-item--active .nav-link:focus-visible {
-  background: var(--red);
-  color: #fff;
-  padding-left: 10px;
-}
+.nav-item--active > .nav-link:hover,
+.nav-item--active > .nav-link:focus-visible { background: var(--red); color: #fff; }
 .nav-item--active .nav-link svg { opacity: 1; }
 .nav-badge { margin-left: auto; background: var(--red); color: #fff; font-size: 0.62rem; font-weight: 700; border-radius: 20px; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; padding: 0 5px; opacity: 1; transition: opacity 0.3s ease; }
 .nav-item--active .nav-badge { background: rgba(255,255,255,0.3); }
@@ -2414,8 +2410,6 @@ h1, h2, h3, .card-title { letter-spacing: -0.01em; }
 .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(17, 24, 39, 0.10); }
 .announcement-item:hover { transform: translateX(3px); }
 .btn:hover, .btn--primary:hover { transform: translateY(-1px); }
-.sidebar .nav-link:hover { color: var(--red); padding-left: 10px; }
-.sidebar .nav-item--active .nav-link:hover { color: #fff; }
 
 /* ---------- 6. Backdrop blur on modal overlays ---------- */
 .modal-overlay, .confirm-overlay, .checkout-overlay, .processing-overlay,

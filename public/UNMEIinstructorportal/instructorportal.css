@@ -113,7 +113,7 @@ body.page-login .page-wrapper { display: none; }
 @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes modalSlideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-.sidebar { width: var(--sidebar-w); min-height: 100vh; background: rgba(24,45,73,0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; flex-shrink: 0; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; box-sizing: border-box; transition: width 0.3s cubic-bezier(0.22,1,0.36,1); }
+.sidebar { width: var(--sidebar-w); min-height: 100vh; background: rgba(20,20,20,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; flex-shrink: 0; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; box-sizing: border-box; transition: width 0.3s cubic-bezier(0.22,1,0.36,1); }
 .sidebar--collapsed { width: 72px; }
 .sidebar--collapsed .brand-text { opacity: 0; max-width: 0; overflow: hidden; white-space: nowrap; transition: opacity 0.2s ease, max-width 0.3s ease; }
 .sidebar--collapsed .nav-section-label { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; margin-bottom: 0; overflow: hidden; transition: opacity 0.2s ease, max-height 0.3s ease, padding 0.3s ease, margin 0.3s ease; }
